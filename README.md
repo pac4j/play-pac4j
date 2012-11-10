@@ -71,7 +71,7 @@ The callback OAuth url must be also defined in the <i>routes</i> file as well as
 GET   /protected/index.html   controllers.Application.protectedIndex()
 GET   /play-oauth             com.github.leleuj.play.oauth.client.OAuthController.callback()
 GET   /logout                 com.github.leleuj.play.oauth.client.OAuthController.logoutAndRedirect()</code></pre>
-Regarding the profile, you can have one dedicated profile for Facebook or a common profile valid for all providers :
+As a user profile, you can have a specific profile for Facebook or a common profile for all providers :
 <pre><code>// user profile
 UserProfile userProfile = profile();
 // facebook profile
@@ -84,7 +84,7 @@ String accessToken = oauthProfile.getAccessToken();
 // or
 String accesstoken = facebookProfile.getAccessToken();</code></pre>
 
-A demo with Facebook and Twitter providers is available with <a href="https://github.com/leleuj/play-oauth-client-demo">play-oauth-client-demo</a>.
+A demo with Facebook and Twitter providers is available at <a href="https://github.com/leleuj/play-oauth-client-demo">play-oauth-client-demo</a>.
 
 <h2>Versions</h2>
 
