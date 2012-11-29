@@ -1,6 +1,6 @@
 <h2>What is Play OAuth client ?</h2>
 
-<b>play-oauth-client</b> is a <u>Java and Scala</u> OAuth client for Play framework 2.0 to :
+<b>play-oauth-client</b> is a <i>Java and Scala</i> OAuth client for Play framework 2.0 to :
 <ol>
 <li>delegate authentication and permissions to an OAuth provider (i.e. the user is redirected to the OAuth provider to log in)</li>
 <li>(in the application) retrieve the profile of the authorized user after successfull authentication and permissions acceptation (at the OAuth provider).</li>
@@ -45,7 +45,7 @@ and the <a href="https://github.com/leleuj/scribe-up">scribe-up</a> library.
 
 <h2>How to use it ?</h2>
 
-First, the dependency on <i>play-oauth-client</i> must be defined in the Build.scala file :
+First, the dependency on <b>play-oauth-client</b> must be defined in the <i>Build.scala</i> file :
 <pre><code>    val appDependencies = Seq(
       "com.github.leleuj.play.oauth.client" % "play-oauth-client" % "1.0.0-SNAPSHOT"
     )</code></pre>
