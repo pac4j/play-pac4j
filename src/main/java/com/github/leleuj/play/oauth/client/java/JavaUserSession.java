@@ -13,38 +13,36 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package com.github.leleuj.play.oauth.client;
+package com.github.leleuj.play.oauth.client.java;
 
 import org.scribe.model.Token;
 import org.scribe.up.session.UserSession;
 
 import play.mvc.Http.Session;
 
+import com.github.leleuj.play.oauth.client.OAuthConstants;
+
 /**
- * This implementation uses the Play session for the user session and handles only objects of type String or Token as the Play session only
- * stores String and thus requires a mapping from Object to String.
+ * This class is the Java Session wrapper for Play. It handles only String or Token objects as the Play session only stores String and thus
+ * requires a mapping from Object to String.
  * 
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public final class PlayUserSession implements UserSession {
-    
-    private static final String SECRET = "$secret";
-    
-    private static final String TOKEN = "$token";
+public final class JavaUserSession implements UserSession {
     
     private final Session session;
     
-    public PlayUserSession(final Session session) {
+    public JavaUserSession(final Session session) {
         this.session = session;
     }
     
     public Object getAttribute(final String key) {
-        Object object = this.session.get(key);
+        final Object object = this.session.get(key);
         if (object != null) return object;
         
-        String secret = this.session.get(key + SECRET);
-        String token = this.session.get(key + TOKEN);
+        final String secret = this.session.get(key + OAuthConstants.SECRET_SUFFIX_SESSION_PARAMETER);
+        final String token = this.session.get(key + OAuthConstants.TOKEN_SUFFIX_SESSION_PARAMETER);
         if (secret != null || token != null) return new Token(token, secret);
         
         return null;
@@ -54,11 +52,11 @@ public final class PlayUserSession implements UserSession {
         if (value instanceof String) {
             this.session.put(key, (String) value);
         } else if (value instanceof Token) {
-            Token scribeToken = (Token) value;
-            String secret = scribeToken.getSecret();
-            this.session.put(key + SECRET, secret);
-            String token = scribeToken.getToken();
-            this.session.put(key + TOKEN, token);
+            final Token scribeToken = (Token) value;
+            final String secret = scribeToken.getSecret();
+            this.session.put(key + OAuthConstants.SECRET_SUFFIX_SESSION_PARAMETER, secret);
+            final String token = scribeToken.getToken();
+            this.session.put(key + OAuthConstants.TOKEN_SUFFIX_SESSION_PARAMETER, token);
         } else
             throw new IllegalArgumentException("String and Token only supported in Play session");
     }
