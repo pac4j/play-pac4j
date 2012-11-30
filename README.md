@@ -49,7 +49,7 @@ First, the dependency on <b>play-oauth-client</b> must be defined in the <i>Buil
 <pre><code>    val appDependencies = Seq(
       "com.github.leleuj.play.oauth.client" % "play-oauth-client" % "1.0.0-SNAPSHOT"
     )</code></pre>
-And the appropriate resolver :
+with the appropriate resolver :
 <pre><code>    val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
       resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
     )</code></pre>
@@ -82,9 +82,10 @@ The <i>/play-oauth</i> url is the callback url where the OAuth provider (Faceboo
 
 Then, you can get the OAuth profile of the (authenticated) user in a Java application by using the <i>profile()</i> method :
 <pre><code>public static Result index() {
-    // oauth profile (maybe null if not authenticated)
-    UserProfile userProfile = profile();
-    return ok(views.html.index.render(userProfile));
+  // oauth profile (maybe null if not authenticated)
+  final UserProfile userProfile = profile();
+  final String url = redirectUrl("TwitterProvider");
+  return ok(views.html.index.render(userProfile, url));
 }</code></pre>
 And protect the access of a specific url by using the <i>RequiresOAuthAuthentication</i> annotation :
 <pre><code>@RequiresOAuthAuthentication(providerType = "FacebookProvider")
@@ -129,7 +130,7 @@ String accessToken = oauthProfile.getAccessToken();
 // or
 String accesstoken = facebookProfile.getAccessToken();</code></pre>
 
-A demo with Facebook and Twitter providers is available at :
+Demos with Facebook and Twitter providers are available at :
 - <a href="https://github.com/leleuj/play-oauth-client-java-demo">play-oauth-client-java-demo</a> for Java applications
 - <a href="https://github.com/leleuj/play-oauth-client-scala-demo">play-oauth-client-scala-demo</a> for Scala applications.
 
