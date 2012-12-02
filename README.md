@@ -84,8 +84,7 @@ Then, you can get the OAuth profile of the (authenticated) user in a Java applic
 <pre><code>public static Result index() {
   // oauth profile (maybe null if not authenticated)
   final UserProfile userProfile = profile();
-  final String url = redirectUrl("TwitterProvider");
-  return ok(views.html.index.render(userProfile, url));
+  return ok(views.html.index.render(userProfile));
 }</code></pre>
 And protect the access of a specific url by using the <i>RequiresOAuthAuthentication</i> annotation :
 <pre><code>@RequiresOAuthAuthentication(providerType = "FacebookProvider")
@@ -98,8 +97,7 @@ public static Result protectedIndex() {
 Or you can get the OAuth profile of the (authenticated) user in a Scala application by using the <i>OAuthProfile</i> function :
 <pre><code>def index = OAuthProfile { profile =>
   Action { request =>
-    val (url, newSession) = redirectUrl(request, "TwitterProvider")
-    Ok(views.html.index(profile, url)).withSession(newSession)
+    Ok(views.html.index(profile))
   }
 }</code></pre>
 And protect the access of a specific url by using the <i>RequiresOAuthAuthentication</i> function :
@@ -110,6 +108,17 @@ And protect the access of a specific url by using the <i>RequiresOAuthAuthentica
 }</code></pre>
 
 After successfull OAuth authentication, the originally requested url is re-called.
+
+You can also explicitely compute a redirection url to an OAuth provider for authentication by using the <i>redirectUrl()</i> method for a Java application :
+<pre><code>public static Result index() {
+  final String url = redirectUrl("TwitterProvider");
+  return ok(views.html.index.render(url));
+}</code></pre>
+Or in a Scala application :
+<pre><code>def index = Action { request =>
+  val (url, newSession) = redirectUrl(request, "TwitterProvider")
+  Ok(views.html.index(url)).withSession(newSession)
+}</code></pre>
 
 The callback OAuth url must be also defined in the <i>routes</i> file as well as the logout :
 <pre><code>GET   /                       controllers.Application.index()
@@ -128,7 +137,7 @@ If you want to interact more with the OAuth provider, you can retrieve the acces
 <pre><code>OAuthProfile oauthProfile = (OAuthProfile) userProfile;
 String accessToken = oauthProfile.getAccessToken();
 // or
-String accesstoken = facebookProfile.getAccessToken();</code></pre>
+String accessToken = facebookProfile.getAccessToken();</code></pre>
 
 Demos with Facebook and Twitter providers are available at :
 - <a href="https://github.com/leleuj/play-oauth-client-java-demo">play-oauth-client-java-demo</a> for Java applications

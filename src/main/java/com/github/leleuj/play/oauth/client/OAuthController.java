@@ -21,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.scribe.up.credential.OAuthCredential;
 import org.scribe.up.profile.UserProfile;
 import org.scribe.up.provider.OAuthProvider;
+import org.scribe.up.provider.ProvidersDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,12 +50,16 @@ public final class OAuthController extends Controller {
      * @return the redirection to the saved request
      */
     public static Result callback() {
+        // providers definition
+        ProvidersDefinition providersDefinition = OAuthConfiguration.getProvidersDefinition();
+        // not initialized => redirect to error url
+        if (providersDefinition == null) return redirect(OAuthConfiguration.getDefaultErrorUrl());
         // parameters in url
         final Map<String, String[]> parameters = request().queryString();
         // get the provider from its type
-        final OAuthProvider provider = OAuthConfiguration.getProvidersDefinition().findProvider(parameters);
+        final OAuthProvider provider = providersDefinition.findProvider(parameters);
         logger.debug("provider : {}", provider);
-        // no provider, redirect to error url
+        // no provider => redirect to error url
         if (provider == null) return redirect(OAuthConfiguration.getDefaultErrorUrl());
         // get credential
         final OAuthCredential credential = provider.getCredential(new JavaUserSession(session()), parameters);

@@ -18,6 +18,7 @@ package com.github.leleuj.play.oauth.client;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.scribe.up.profile.ProfileHelper;
 import org.scribe.up.provider.OAuthProvider;
 import org.scribe.up.provider.ProvidersDefinition;
 import org.slf4j.Logger;
@@ -64,6 +65,8 @@ public final class OAuthConfiguration {
         providersDefinition.setProviders(newProviders);
         providersDefinition.setBaseUrl(baseUrl);
         providersDefinition.init();
+        // memory / CPU optimization
+        ProfileHelper.setKeepRawData(false);
     }
     
     public static String getDefaultErrorUrl() {
