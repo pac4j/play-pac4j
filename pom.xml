@@ -27,7 +27,7 @@
 	<artifactId>play-oauth-client</artifactId>
 	<packaging>jar</packaging>
 	<name>Play OAuth client</name>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<description>Java and Scala OAuth client for Play 2.0 framework with user profile retrieval using scribe-up</description>
 	<url>https://github.com/leleuj/play-oauth-client</url>
 
