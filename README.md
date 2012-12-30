@@ -47,11 +47,7 @@ and the <a href="https://github.com/leleuj/scribe-up">scribe-up</a> library.
 
 First, the dependency on <b>play-oauth-client</b> must be defined in the <i>Build.scala</i> file :
 <pre><code>    val appDependencies = Seq(
-      "com.github.leleuj.play.oauth.client" % "play-oauth-client" % "1.0.0-SNAPSHOT"
-    )</code></pre>
-with the appropriate resolver :
-<pre><code>    val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
-      resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
+      "com.github.leleuj.play.oauth.client" % "play-oauth-client" % "1.0.0"
     )</code></pre>
 
 To use the OAuth integration, your application must inherit from the OAuthJavaController class for a Java application :
@@ -145,6 +141,7 @@ Demos with Facebook and Twitter providers are available at :
 
 <h2>Versions</h2>
 
+The last release if the <b>1.0.0</b> version.
 The current version : <i>1.0.0-SNAPSHOT</i> is under development.
 
 <h2>Contact</h2>
