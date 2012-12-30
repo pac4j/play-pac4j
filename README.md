@@ -141,8 +141,11 @@ Demos with Facebook and Twitter providers are available at :
 
 <h2>Versions</h2>
 
-The last release if the <b>1.0.0</b> version.
-The current version : <i>1.0.0-SNAPSHOT</i> is under development.
+The last release is the <b>1.0.0</b> version.
+The current version : <i>1.0.1-SNAPSHOT</i> is under development. It's available with the appropriate resolver defined in the <i>Build.scala</i> file :
+<pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
+  resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
+)</code></pre>
 
 <h2>Contact</h2>
 
