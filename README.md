@@ -1,151 +1,200 @@
-<h2>What is Play OAuth client ?</h2>
+<h2>What is the play-pac4j library ?</h2>
 
-<b>play-oauth-client</b> is a <i>Java and Scala</i> OAuth client for Play framework 2.0 to :
+The <b>play-pac4j</b> library is a <i>Java and Scala</i> multi-protocols client for Play framework 2.x.
+
+It supports these 4 protocols on client side : 
 <ol>
-<li>delegate authentication and permissions to an OAuth provider (i.e. the user is redirected to the OAuth provider to log in)</li>
-<li>(in the application) retrieve the profile of the authorized user after successfull authentication and permissions acceptation (at the OAuth provider).</li>
+<li>OAuth (1.0 & 2.0)</li>
+<li>CAS (1.0, 2.0, SAML, logout & proxy)</li>
+<li>HTTP (form & basic auth authentications)</li>
+<li>OpenID.</li>
 </ol>
 
-It's available under the Apache 2 license and based on my <a href="https://github.com/leleuj/scribe-up">scribe-up</a> library (which deals with OAuth authentication and user profile retrieval).
+It's available under the Apache 2 license and based on my <a href="https://github.com/leleuj/pac4j">pac4j</a> library.
 
-<h2>OAuth providers supported</h2>
+
+<h2>Providers supported</h2>
 
 <table>
-<tr><td>Web site</td><td>Protocol</td><td>Provider</td><td>Profile</td></tr>
-<tr><td>sites using OAuth Wrapper for CAS server</td><td>OAuth 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/CasOAuthWrapperProvider.html">CasOAuthWrapperProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/casoauthwrapper/CasOAuthWrapperProfile.html">CasOAuthWrapperProfile</a></td></tr>
-<tr><td>DropBox</td><td>OAuth 1.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/DropBoxProvider.html">DropBoxProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/dropbox/DropBoxProfile.html">DropBoxProfile</a></td></tr>
-<tr><td>Facebook</td><td>OAuth 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/FacebookProvider.html">FacebookProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/facebook/FacebookProfile.html">FacebookProfile</a></td></tr>
-<tr><td>Github</td><td>OAuth 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/GitHubProvider.html">GitHubProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/github/GitHubProfile.html">GitHubProfile</a></td></tr>
-<tr><td>Google</td><td>OAuth 1.0 & 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/GoogleProvider.html">GoogleProvider</a> & <a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/Google2Provider.html">Google2Provider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/google/GoogleProfile.html">GoogleProfile</a> & <a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/google2/Google2Profile.html">Google2Profile</a></td></tr>
-<tr><td>LinkedIn</td><td>OAuth 1.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/LinkedInProvider.html">LinkedInProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/linkedin/LinkedInProfile.html">LinkedInProfile</a></td></tr>
-<tr><td>Twitter</td><td>OAuth 1.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/TwitterProvider.html">TwitterProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/twitter/TwitterProfile.html">TwitterProfile</a></td></tr>
-<tr><td>Windows Live</td><td>OAuth 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/WindowsLiveProvider.html">WindowsLiveProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/windowslive/WindowsLiveProfile.html">WindowsLiveProfile</a></td></tr>
-<tr><td>WordPress</td><td>OAuth 2.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/WordPressProvider.html">WordPressProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/wordpress/WordPressProfile.html">WordPressProfile</a></td></tr>
-<tr><td>Yahoo</td><td>OAuth 1.0</td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/provider/impl/YahooProvider.html">YahooProvider</a></td><td><a href="http://javadoc.leleuj.cloudbees.net/scribe-up/1.3.0-SNAPSHOT/org/scribe/up/profile/yahoo/YahooProfile.html">YahooProfile</a></td></tr>
+<tr><th>Provider</th><th>Protocol</th><th>Maven dependency</th><th>Client class</th><th>Profile class</th></tr>
+<tr><td>CAS server</td><td>CAS</td><td>pac4j-cas</td><td>CasClient & CasProxyReceptor</td><td>CasProfile</td></tr>
+<tr><td>CAS server using OAuth Wrapper</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>CasOAuthWrapperClient</td><td>CasOAuthWrapperProfile</td></tr>
+<tr><td>DropBox</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>DropBoxClient</td><td>DropBoxProfile</td></tr>
+<tr><td>Facebook</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FacebookClient</td><td>FacebookProfile</td></tr>
+<tr><td>GitHub</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>GitHubClient</td><td>GitHubProfile</td></tr>
+<tr><td>Google</td><td>OAuth 1.0 & 2.0</td><td>pac4j-oauth</td><td>GoogleProvider & Google2Provider</td><td>GoogleProfile & Google2Profile</td></tr>
+<tr><td>LinkedIn</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>LinkedInClient</td><td>LinkedInProfile</td></tr>
+<tr><td>Twitter</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>TwitterClient</td><td>TwitterProfile</td></tr>
+<tr><td>Windows Live</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>WindowsLiveClient</td><td>WindowsLiveProfile</td></tr>
+<tr><td>WordPress</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>WordPressClient</td><td>WordPressProfile</td></tr>
+<tr><td>Yahoo</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>YahooClient</td><td>YahooProfile</td></tr>
+<tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
+<tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
+<tr><td>MyOpenId</td><td>OpenID</td><td>pac4j-openid</td><td>MyOpenIdClient</td><td>MyOpenIdProfile</td></tr>
 </table>
 
-Follow the guide to <a href="https://github.com/leleuj/scribe-up/wiki/Extend-or-add-a-new-provider">extend or add a new provider</a>.
 
 <h2>Technical description</h2>
 
-This library has <b>just 9 classes</b> :
+This library has <b>just 11 classes</b> :
 <ol>
-<li>the <b>OAuthConfiguration</b> class gathers all the OAuth configuration</li>
-<li>the <b>OAuthConstants</b> class gathers all the OAuth constants</li>
-<li>the <b>OAuthController</b> class is to finish the OAuth authentication process and logout the user</li>
-<li>the <b>JavaUserSession</b> class is a Java wrapper for the user session</li>
-<li>the <b>OAuthJavaController</b> class is the Java controller to retrieve the user profile or the redirect url to start the OAuth authentication process</li>
-<li>the <b>RequiresOAuthAuthentication</b> annotation is to protect an action if the user is not "OAuth authenticated" and starts the OAuth authentication process if necessary</li>
-<li>the <b>RequiresOAuthAuthenticationAction</b> class is the action to check if the user is not "OAuth authenticated" and starts the OAuth authentication process if necessary</li>
-<li>the <b>OAuthScalaController</b> trait is the Scala controller to retrieve the user profile or the redirect url to start the OAuth authentication process</li>
-<li>the <b>ScalaUserSession</b> class is a Scala wrapper for the user session</li>
+<li>the <b>Config</b> class gathers all the configuration</li>
+<li>the <b>Constants</b> class gathers all the constants</li>
+<li>the <b>CallbackController</b> class is used to finish the authentication process and logout the user</li>
+<li>the <b>StorageHelper</b> class deals with storing/retrieving data from the cache</li>
+<li>the <b>JavaWebContext</b> class is a Java wrapper for the user request, response and session</li>
+<li>the <b>JavaController</b> class is the Java controller to retrieve the user profile or the redirection url to start the authentication process</li>
+<li>the <b>RequiresAuthentication</b> annotation is to protect an action if the user is not authenticated and starts the authentication process if necessary</li>
+<li>the <b>RequiresAuthenticationAction</b> class is the action to check if the user is not authenticated and starts the authentication process if necessary</li>
+<li>the <b>ScalaController</b> trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process</li>
+<li>the <b>ScalaWebContext</b> class is a Scala wrapper for the user request, response and session</li>
+<li>the <b>PlayLogoutHandler</b> class is dedicated to CAS support to handle CAS logout request.</li>
 </ol>
 
-and the <a href="https://github.com/leleuj/scribe-up">scribe-up</a> library.
+and is based on the <i>pac4j-*</i> libraries.
+
 
 <h2>How to use it ?</h2>
 
-First, the dependency on <b>play-oauth-client</b> must be defined in the <i>Build.scala</i> file :
-<pre><code>    val appDependencies = Seq(
-      "com.github.leleuj.play.oauth.client" % "play-oauth-client" % "1.0.0"
-    )</code></pre>
+<h3>Add the required dependencies</h3>
 
-To use the OAuth integration, your application must inherit from the OAuthJavaController class for a Java application :
-<pre><code>public class Application extends OAuthJavaController {</code></pre>
-or from the OAuthScalaController trait for a Scala application :
-<pre><code>object Application extends OAuthScalaController {</code></pre>
+First, the dependency on <b>play-pac4j</b> must be defined in the <i>Build.scala</i> file :
+<pre><code>val appDependencies = Seq(
+  "org.pac4j" % "play-pac4j" % "1.1.0-SNAPSHOT"
+)</code></pre>
 
-If you want to authenticate at Facebook, Twitter..., you have to define the providers in the static initializer of your application for your Java application :
-<pre><code>static {
-  final FacebookProvider facebookProvider = new FacebookProvider();
-  facebookProvider.setKey("my_fb_key");
-  facebookProvider.setSecret("my_fb_secret");
-  final TwitterProvider twitterProvider = new TwitterProvider();
-  twitterProvider.setKey("my_tw_key");
-  twitterProvider.setSecret("my_tw_secret");
-  OAuthConfiguration.init("http://localhost:9000/play-oauth", facebookProvider, twitterProvider);
+As it's a snapshot only available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype Snapshots repository</a>, the appropriate resolver must also be defined in the <i>Build.scala</i> file :
+<pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
+  resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
+)</code></pre>
+
+If you want to use a specific client support, you need to add the appropriate dependency :
+<ul>
+<li>for OAuth support, the <i>pac4j-oauth</i> dependency is required</li>
+<li>for CAS support, the <i>pac4j-cas</i> dependency is required</li>
+<li>for HTTP support, the <i>pac4j-http</i> dependency is required</li>
+<li>for OpenID support, the <i>pac4j-openid</i> dependency is required.</li>
+</ul>
+
+<h3>Define the supported clients</h3>
+
+To use client support, your application must inherit from the JavaController class for a Java application :
+<pre><code>public class Application extends JavaController {</code></pre>
+or from the ScalaController trait for a Scala application :
+<pre><code>object Application extends ScalaController {</code></pre>
+
+You must define all the clients you want to support in the <i>onStart</i> method of your Global class for your Java or Scala application : 
+<pre><code>public void onStart(final Application app) {
+  // OAuth
+  final FacebookClient facebookClient = new FacebookClient("fb_key", "fb_secret");
+  final TwitterClient twitterClient = new TwitterClient("tw_key", "tw_secret");  
+  // HTTP
+  final FormClient formClient = new FormClient("http://localhost:9000/theForm", new SimpleTestUsernamePasswordAuthenticator());
+  final BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
+  // CAS
+  final CasClient casClient = new CasClient();
+  // casClient.setLogoutHandler(new PlayLogoutHandler());
+  // casClient.setCasProtocol(CasProtocol.SAML);
+  // casClient.setGateway(true);
+  /*final CasProxyReceptor casProxyReceptor = new CasProxyReceptor();
+  casProxyReceptor.setCallbackUrl("http://localhost:9000/casProxyCallback");
+  casClient.setCasProxyReceptor(casProxyReceptor);*/
+  casClient.setCasLoginUrl("http://localhost:8080/cas/login");
+  // OpenID
+  final MyOpenIdClient myOpenIdClient = new MyOpenIdClient();
+        
+  final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient, myOpenIdClient); // , casProxyReceptor);
+  Config.setClients(clients);
 }</code></pre>
-or in the constructor for your Scala application :
-<pre><code>  private val facebookProvider = new FacebookProvider()
-  facebookProvider.setKey("my_fb_key")
-  facebookProvider.setSecret("my_fb_secret")
-  private val twitterProvider = new TwitterProvider()
-  twitterProvider.setKey("my_tw_key")
-  twitterProvider.setSecret("my_tw_secret")
-  OAuthConfiguration.init("http://localhost:9000/play-oauth", facebookProvider, twitterProvider)</code></pre>
-  
-The <i>/play-oauth</i> url is the callback url where the OAuth provider (Facebook, Twitter...) redirects the user after successfull authentication.
 
-Then, you can get the OAuth profile of the (authenticated) user in a Java application by using the <i>profile()</i> method :
+The <i>/callback</i> url is the callback url where the providers (Facebook, Twitter, CAS...) redirects the user after successfull authentication (with the appropriate credentials).
+
+<h3>Get user profiles and protect actions</h3>
+
+You can get the profile of the (authenticated) user in a Java application by using the <i>getUserProfile()</i> method :
 <pre><code>public static Result index() {
-  // oauth profile (maybe null if not authenticated)
-  final UserProfile userProfile = profile();
-  return ok(views.html.index.render(userProfile));
+  // profile (maybe null if not authenticated)
+  final CommonProfile profile = getUserProfile();
+  return ok(views.html.index.render(profile));
 }</code></pre>
-And protect the access of a specific url by using the <i>RequiresOAuthAuthentication</i> annotation :
-<pre><code>@RequiresOAuthAuthentication(providerType = "FacebookProvider")
+And protect the access of a specific url by using the <i>RequiresAuthentication</i> annotation :
+<pre><code>@RequiresAuthentication(clientName = "FacebookClient")
 public static Result protectedIndex() {
-  // oauth profile
-  final UserProfile userProfile = profile();
-  return ok(views.html.protectedIndex.render(userProfile));
+  // profile
+  final CommonProfile profile = getUserProfile();
+  return ok(views.html.protectedIndex.render(profile));
 }</code></pre>
 
-Or you can get the OAuth profile of the (authenticated) user in a Scala application by using the <i>OAuthProfile</i> function :
-<pre><code>def index = OAuthProfile { profile =>
-  Action { request =>
-    Ok(views.html.index(profile))
-  }
+Or you can get the profile of the (authenticated) user in a Scala application by using the <i>getUserProfile(request)</i> method :
+<pre><code>def index = Action { request =>
+  val profile = getUserProfile(request)
+  Ok(views.html.index(profile))
 }</code></pre>
-And protect the access of a specific url by using the <i>RequiresOAuthAuthentication</i> function :
-<pre><code>def protectedIndex = RequiresOAuthAuthentication("FacebookProvider") { profile =>
+And protect the access of a specific url by using the <i>RequiresAuthentication</i> function :
+<pre><code>def protectedIndex = RequiresAuthentication("FacebookClient") { profile =>
  Action { request =>
    Ok(views.html.protectedIndex(profile))
  }
 }</code></pre>
 
-After successfull OAuth authentication, the originally requested url is re-called.
+After successfull authentication, the originally requested url is restored.
 
-You can also explicitely compute a redirection url to an OAuth provider for authentication by using the <i>redirectUrl()</i> method for a Java application :
+<h3>Get redirection urls</h3>
+
+You can also explicitely compute a redirection url to a provider for authentication by using the <i>getRedirectionUrl</i> method for a Java application :
 <pre><code>public static Result index() {
-  final String url = redirectUrl("TwitterProvider");
+  final String url = getRedirectionUrl("TwitterClient", "/targetUrl");
   return ok(views.html.index.render(url));
 }</code></pre>
-Or in a Scala application :
+Or in a Scala application (always call the <i>getOrCreateSessionId(request)</i> method first) :
 <pre><code>def index = Action { request =>
-  val (url, newSession) = redirectUrl(request, "TwitterProvider")
+  val newSession = getOrCreateSessionId(request)
+  val url = getRedirectionUrl(request, newSession, "FacebookClient", "/targetUrl")
   Ok(views.html.index(url)).withSession(newSession)
 }</code></pre>
 
-The callback OAuth url must be also defined in the <i>routes</i> file as well as the logout :
+<h3>Define the callback url</h3>
+
+The callback url must be defined in the <i>routes</i> file as well as the logout :
 <pre><code>GET   /                       controllers.Application.index()
 GET   /protected/index.html   controllers.Application.protectedIndex()
-GET   /play-oauth             com.github.leleuj.play.oauth.client.OAuthController.callback()
-GET   /logout                 com.github.leleuj.play.oauth.client.OAuthController.logoutAndRedirect()</code></pre>
+GET   /callback               org.pac4j.play.CallbackController.callback()
+POST  /callback               org.pac4j.play.CallbackController.callback()
+GET   /logout                 org.pac4j.play.CallbackController.logoutAndRedirect()</code></pre>
 
-As a user profile, you can have a specific profile for Facebook or a common profile for all providers :
-<pre><code>// user profile
-UserProfile userProfile = profile();
-// facebook profile
-FacebookProfile facebookProfile = (FacebookProfile) userProfile;
-// common profile to all providers
-CommonProfile commonProfile = (CommonProfile) userProfile;</code></pre>
-If you want to interact more with the OAuth provider, you can retrieve the access token from the (OAuth) profile :
-<pre><code>OAuthProfile oauthProfile = (OAuthProfile) userProfile;
+<h3>Use the appropriate profile</h3>
+
+From the <i>CommonProfile</i>, you can retrieve the most common properties that all profiles share.
+But you can also cast the user profile to the appropriate profile according to the provider used for authentication.
+For example, after a Facebook authentication : 
+<pre><code>// facebook profile
+FacebookProfile facebookProfile = (FacebookProfile) commonProfile;</code></pre>
+Or for all the OAuth profiles, to get the access token :
+<pre><code>OAuthProfile oauthProfile = (OAuthProfile) commonProfile
 String accessToken = oauthProfile.getAccessToken();
 // or
 String accessToken = facebookProfile.getAccessToken();</code></pre>
 
-Demos with Facebook and Twitter providers are available at :
-- <a href="https://github.com/leleuj/play-oauth-client-java-demo">play-oauth-client-java-demo</a> for Java applications
-- <a href="https://github.com/leleuj/play-oauth-client-scala-demo">play-oauth-client-scala-demo</a> for Scala applications.
+<h3>Demos</h3>
+
+Demos with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers are available at :
+<ul>
+<li><a href="https://github.com/leleuj/play-pac4j-java-demo">play-pac4j-java-demo</a> for Java applications</li>
+<li><a href="https://github.com/leleuj/play-pac4j-scala-demo">play-pac4j-scala-demo</a> for Scala applications.</li>
+</ul>
+
 
 <h2>Versions</h2>
 
-The last release is the <b>1.0.0</b> version.
-The current version : <i>1.0.1-SNAPSHOT</i> is under development. It's available with the appropriate resolver defined in the <i>Build.scala</i> file :
-<pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
-  resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
-)</code></pre>
+The current version <b>1.1.0-SNAPSHOT</b> is under development. This is the first version of the <b>play-pac4j</b> project.
+
+The last released version is the <b>play-oauth-client 1.0.0</b> library (which only supports OAuth) :
+<pre><code>&lt;dependency&gt;
+    &lt;groupId&gt;com.github.leleuj.play.oauth.client&lt;/groupId&gt;
+    &lt;artifactId&gt;play-oauth-client&lt;/artifactId&gt;
+    &lt;version&gt;1.0.0&lt;/version&gt;
+&lt;/dependency&gt;</code></pre>
+
 
 <h2>Contact</h2>
 
