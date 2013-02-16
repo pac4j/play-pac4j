@@ -60,7 +60,7 @@ and is based on the <i>pac4j-*</i> libraries.
 
 First, the dependency on <b>play-pac4j-java</b> must be defined in the <i>Build.scala</i> file for a Java application :
 <pre><code>val appDependencies = Seq(
-  "org.pac4j" % "play-pac4j" % "1.1.0-SNAPSHOT"
+  "org.pac4j" % "play-pac4j-java" % "1.1.0-SNAPSHOT"
 )</code></pre>
 Or the <b>play-pac4j-scala_2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j-scala_2.10</b> dependency for a Scala application in Play framework 2.1.
 
