@@ -58,11 +58,11 @@ and is based on the <i>pac4j-*</i> libraries.
 
 <h3>Add the required dependencies</h3>
 
-First, the dependency on <b>play-pac4j-java</b> must be defined in the <i>Build.scala</i> file for a Java application :
+First, the dependency on <b>play-pac4j_java</b> must be defined in the <i>Build.scala</i> file for a Java application :
 <pre><code>val appDependencies = Seq(
-  "org.pac4j" % "play-pac4j-java" % "1.1.0-SNAPSHOT"
+  "org.pac4j" % "play-pac4j_java" % "1.1.0-SNAPSHOT"
 )</code></pre>
-Or the <b>play-pac4j-scala_2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j-scala_2.10</b> dependency for a Scala application in Play framework 2.1.
+Or the <b>play-pac4j_scala2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j_scala2.10</b> dependency for a Scala application in Play framework 2.1.
 
 As it's a snapshot only available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype Snapshots repository</a>, the appropriate resolver must also be defined in the <i>Build.scala</i> file :
 <pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
