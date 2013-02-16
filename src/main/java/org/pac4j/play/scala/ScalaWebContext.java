@@ -22,7 +22,8 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 
-import play.api.mvc.RequestHeader;
+import play.api.mvc.AnyContent;
+import play.api.mvc.Request;
 import play.api.mvc.Session;
 import scala.Option;
 import scala.collection.Seq;
@@ -35,11 +36,11 @@ import scala.collection.Seq;
  */
 public class ScalaWebContext implements WebContext {
     
-    private final RequestHeader request;
+    private final Request<AnyContent> request;
     
     private final Session session;
     
-    public ScalaWebContext(final RequestHeader request, final Session session) {
+    public ScalaWebContext(final Request<AnyContent> request, final Session session) {
         this.request = request;
         this.session = session;
     }
@@ -52,13 +53,23 @@ public class ScalaWebContext implements WebContext {
         throw new IllegalArgumentException("getRequestMethod not implemented");
     }
     
-    @SuppressWarnings("deprecation")
     public String getRequestParameter(final String name) {
+        String value = null;
         Option<Seq<String>> values = this.request.queryString().get(name);
         if (values.isDefined()) {
-            return values.get().first();
+            value = values.get().head();
         }
-        return null;
+        if (value == null) {
+            Option<scala.collection.immutable.Map<String, Seq<String>>> formParameters = this.request.body()
+                .asFormUrlEncoded();
+            if (formParameters.isDefined()) {
+                values = formParameters.get().get(name);
+                if (values.isDefined()) {
+                    value = values.get().head();
+                }
+            }
+        }
+        return value;
     }
     
     public Map<String, String[]> getRequestParameters() {

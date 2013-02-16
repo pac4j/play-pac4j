@@ -23,6 +23,7 @@ import org.pac4j.core.profile._
 import org.pac4j.core.util._
 import org.pac4j.play._
 import org.slf4j._
+import play.core.server.netty.RequestBodyHandler
 
 /**
  * This controller is the Scala controller to retrieve the user profile or the redirection url to start the authentication process.
@@ -94,7 +95,7 @@ trait ScalaController extends Controller {
    * @param forceDirectRedirection
    * @return the redirection url to the provider
    */
-  protected def getRedirectionUrl(request: RequestHeader, newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
+  protected def getRedirectionUrl(request: Request[AnyContent], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save
