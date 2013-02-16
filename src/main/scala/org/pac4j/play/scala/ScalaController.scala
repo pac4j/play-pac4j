@@ -102,7 +102,7 @@ trait ScalaController extends Controller {
     logger.debug("requestedUrlToSave : {}", requestedUrlToSave)
     StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
     // context
-    val scalaWebContext = new ScalaWebContext(newSession)
+    val scalaWebContext = new ScalaWebContext(request, newSession)
     // redirect to the provider for authentication
     val redirectionUrl = Config.getClients().findClient(clientName).asInstanceOf[BaseClient[Credentials, CommonProfile]].getRedirectionUrl(scalaWebContext, forceDirectRedirection)
     logger.debug("redirectionUrl to : {}", redirectionUrl)

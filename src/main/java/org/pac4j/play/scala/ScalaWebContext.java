@@ -22,8 +22,10 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 
+import play.api.mvc.RequestHeader;
 import play.api.mvc.Session;
 import scala.Option;
+import scala.collection.Seq;
 
 /**
  * This class is the Scala web context for Play. Most of the methods are not implemented.
@@ -33,9 +35,12 @@ import scala.Option;
  */
 public class ScalaWebContext implements WebContext {
     
+    private final RequestHeader request;
+    
     private final Session session;
     
-    public ScalaWebContext(final Session session) {
+    public ScalaWebContext(final RequestHeader request, final Session session) {
+        this.request = request;
         this.session = session;
     }
     
@@ -47,8 +52,13 @@ public class ScalaWebContext implements WebContext {
         throw new IllegalArgumentException("getRequestMethod not implemented");
     }
     
+    @SuppressWarnings("deprecation")
     public String getRequestParameter(final String name) {
-        throw new IllegalArgumentException("getRequestParameter not implemented");
+        Option<Seq<String>> values = this.request.queryString().get(name);
+        if (values.isDefined()) {
+            return values.get().first();
+        }
+        return null;
     }
     
     public Map<String, String[]> getRequestParameters() {
