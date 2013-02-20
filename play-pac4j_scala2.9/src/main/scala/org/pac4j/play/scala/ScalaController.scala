@@ -61,7 +61,7 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[AnyContent]) = Action { request =>
+  protected def RequiresAuthentication[A](p: BodyParser[A])(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[A]) = Action(p) { request =>
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId : {}", sessionId)
@@ -85,6 +85,9 @@ trait ScalaController extends Controller {
     }
   }
 
+  protected def RequiresAuthentication(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[AnyContent]): Action[AnyContent] =
+    RequiresAuthentication(parse.anyContent)(clientName, targetUrl)(action)
+
   /**
    * Returns the redirection url to the provider for authentication.
    *
@@ -95,7 +98,7 @@ trait ScalaController extends Controller {
    * @param forceDirectRedirection
    * @return the redirection url to the provider
    */
-  protected def getRedirectionUrl(request: Request[AnyContent], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
+  protected def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save
@@ -103,7 +106,7 @@ trait ScalaController extends Controller {
     logger.debug("requestedUrlToSave : {}", requestedUrlToSave)
     StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
     // context
-    val scalaWebContext = new ScalaWebContext(request, newSession)
+    val scalaWebContext = new ScalaWebContext(request.asInstanceOf[Request[AnyContent]], newSession)
     // redirect to the provider for authentication
     val redirectionUrl = Config.getClients().findClient(clientName).asInstanceOf[BaseClient[Credentials, CommonProfile]].getRedirectionUrl(scalaWebContext, forceDirectRedirection)
     logger.debug("redirectionUrl to : {}", redirectionUrl)
