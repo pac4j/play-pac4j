@@ -22,7 +22,7 @@ It's available under the Apache 2 license and based on my <a href="https://githu
 <tr><td>DropBox</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>DropBoxClient</td><td>DropBoxProfile</td></tr>
 <tr><td>Facebook</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FacebookClient</td><td>FacebookProfile</td></tr>
 <tr><td>GitHub</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>GitHubClient</td><td>GitHubProfile</td></tr>
-<tr><td>Google</td><td>OAuth 1.0 & 2.0</td><td>pac4j-oauth</td><td>GoogleProvider & Google2Provider</td><td>GoogleProfile & Google2Profile</td></tr>
+<tr><td>Google</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>Google2Client</td><td>Google2Profile</td></tr>
 <tr><td>LinkedIn</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>LinkedInClient</td><td>LinkedInProfile</td></tr>
 <tr><td>Twitter</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>TwitterClient</td><td>TwitterProfile</td></tr>
 <tr><td>Windows Live</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>WindowsLiveClient</td><td>WindowsLiveProfile</td></tr>
@@ -52,6 +52,8 @@ This library has <b>just 11 classes</b> :
 </ol>
 
 and is based on the <i>pac4j-*</i> libraries.
+
+Learn more by browsing the <a href="http://www.pac4j.org/apidocs/play-pac4j/index.html">play-pac4j Javadoc</a> and the <a href="http://www.pac4j.org/apidocs/pac4j/index.html">pac4j Javadoc</a>.
 
 
 <h2>How to use it ?</h2>
