@@ -24,6 +24,7 @@ import org.pac4j.core.util._
 import org.pac4j.play._
 import org.slf4j._
 import play.core.server.netty.RequestBodyHandler
+import org.pac4j.core.exception.TechnicalException
 
 /**
  * This controller is the Scala controller to retrieve the user profile or the redirection url to start the authentication process.
@@ -104,8 +105,13 @@ trait ScalaController extends Controller {
     StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
     // context
     val scalaWebContext = new ScalaWebContext(request, newSession)
+    // clients
+    val clients = Config.getClients()
+    if (clients == null) {
+      throw new TechnicalException("No client defined. Use Config.setClients(clients)")
+    }
     // redirect to the provider for authentication
-    val redirectionUrl = Config.getClients().findClient(clientName).asInstanceOf[BaseClient[Credentials, CommonProfile]].getRedirectionUrl(scalaWebContext, forceDirectRedirection)
+    val redirectionUrl = clients.findClient(clientName).asInstanceOf[BaseClient[Credentials, CommonProfile]].getRedirectionUrl(scalaWebContext, forceDirectRedirection)
     logger.debug("redirectionUrl to : {}", redirectionUrl)
     redirectionUrl
   }

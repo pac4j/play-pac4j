@@ -16,6 +16,7 @@
 package org.pac4j.play.java;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pac4j.core.client.Clients;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
@@ -65,9 +66,16 @@ public class JavaController extends CallbackController {
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, request().uri());
         logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
         StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
+        // clients
+        Clients clients = Config.getClients();
+        // no clients -> misconfiguration ?
+        if (clients == null) {
+            throw new TechnicalException("No client defined. Use Config.setClients(clients)");
+        }
         // redirect to the provider for authentication
-        final String redirectionUrl = Config.getClients().findClient(clientName)
-            .getRedirectionUrl(new JavaWebContext(request(), response(), session()));
+        final String redirectionUrl = clients.findClient(clientName).getRedirectionUrl(new JavaWebContext(request(),
+                                                                                                          response(),
+                                                                                                          session()));
         logger.debug("redirectionUrl : {}", redirectionUrl);
         return redirectionUrl;
     }
