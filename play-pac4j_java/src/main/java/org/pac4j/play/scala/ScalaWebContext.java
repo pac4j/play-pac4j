@@ -15,7 +15,6 @@
  */
 package org.pac4j.play.scala;
 
-import java.io.IOException;
 import java.util.Map;
 
 import org.pac4j.core.context.WebContext;
@@ -91,7 +90,7 @@ public class ScalaWebContext implements WebContext {
         }
     }
     
-    public void writeResponseContent(final String content) throws IOException {
+    public void writeResponseContent(final String content) {
         throw new IllegalArgumentException("writeResponseContent not implemented");
     }
     
