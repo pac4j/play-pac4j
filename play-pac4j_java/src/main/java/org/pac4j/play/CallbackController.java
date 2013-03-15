@@ -50,12 +50,11 @@ public class CallbackController extends Controller {
      * the authenticated user is retrieved and the originally requested url (or the specific saved url) is restored.
      * 
      * @return the redirection to the saved request
-     * @throws TechnicalException
      */
     @SuppressWarnings({
         "rawtypes", "unchecked"
     })
-    public static Result callback() throws TechnicalException {
+    public static Result callback() {
         // clients group from config
         final Clients clientsGroup = Config.getClients();
         
@@ -93,7 +92,7 @@ public class CallbackController extends Controller {
         }
         
         // get user profile
-        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials);
+        final CommonProfile profile = client.getUserProfile(credentials);
         logger.debug("profile : {}", profile);
         
         // get or create sessionId

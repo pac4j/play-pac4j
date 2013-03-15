@@ -42,9 +42,8 @@ public class JavaController extends CallbackController {
      * 
      * @param clientName
      * @return the url of the provider where to redirect the user
-     * @throws TechnicalException
      */
-    protected static String getRedirectionUrl(final String clientName) throws TechnicalException {
+    protected static String getRedirectionUrl(final String clientName) {
         return getRedirectionUrl(clientName, null);
     }
     
@@ -56,10 +55,8 @@ public class JavaController extends CallbackController {
      * @param clientName
      * @param targetUrl
      * @return the url of the provider where to redirect the user
-     * @throws TechnicalException
      */
-    protected static String getRedirectionUrl(final String clientName, final String targetUrl)
-        throws TechnicalException {
+    protected static String getRedirectionUrl(final String clientName, final String targetUrl) {
         // get or create session id
         String sessionId = StorageHelper.getOrCreationSessionId(session());
         // requested url to save
