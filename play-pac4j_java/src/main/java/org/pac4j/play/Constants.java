@@ -37,5 +37,5 @@ public interface Constants {
     
     public final static String SEPARATOR = "$";
     
-    public final static String START_AUTHENTICATION_SUFFIX = SEPARATOR + "startAuthentication";
+    public final static String ATTEMPTED_AUTHENTICATION_SUFFIX = SEPARATOR + "attemptedAuthentication";
 }

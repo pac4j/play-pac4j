@@ -43,7 +43,6 @@ trait ScalaController extends Controller {
    * @return the (updated) session
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
-    var sessionId: String = null
     var newSession = request.session
     val optionSessionId = newSession.get(Constants.SESSION_ID)
     logger.debug("getOrCreateSessionId : {}", optionSessionId)
@@ -62,28 +61,32 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[AnyContent]) = Action { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A])(action: CommonProfile => Action[A]) = Action(parser) { request =>
+    logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId : {}", sessionId)
     val profile = getUserProfile(request)
     logger.debug("profile : {}", profile)
     if (profile == null) {
-      val startAuth = StorageHelper.get(sessionId, clientName + Constants.START_AUTHENTICATION_SUFFIX).asInstanceOf[String]
-      logger.debug("startAuth : {}", startAuth);
-      StorageHelper.remove(sessionId, clientName + Constants.START_AUTHENTICATION_SUFFIX)
-      if (CommonHelper.isNotBlank(startAuth)) {
-        logger.error("not authenticated successfully to access a protected area -> forbidden")
+      val triedAuth = StorageHelper.get(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX).asInstanceOf[String]
+      logger.debug("triedAuth : {}", triedAuth);
+      if (CommonHelper.isNotBlank(triedAuth)) {
+        StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX)
+        logger.error("authentication already tried -> forbidden")
         Forbidden(Config.getErrorPage403()).as(HTML)
       } else {
         val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true)
         logger.debug("redirectionUrl : {}", redirectionUrl)
-        StorageHelper.save(sessionId, clientName + Constants.START_AUTHENTICATION_SUFFIX, "true")
         Redirect(redirectionUrl).withSession(newSession)
       }
     } else {
       action(profile)(request)
     }
+  }
+  
+  protected def RequiresAuthentication(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = { 
+    RequiresAuthentication(clientName, targetUrl, parse.anyContent)(action)
   }
 
   /**
@@ -96,7 +99,7 @@ trait ScalaController extends Controller {
    * @param forceDirectRedirection
    * @return the redirection url to the provider
    */
-  protected def getRedirectionUrl(request: Request[AnyContent], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
+  protected def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save

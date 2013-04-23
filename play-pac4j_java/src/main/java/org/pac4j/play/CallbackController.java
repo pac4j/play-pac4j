@@ -81,9 +81,6 @@ public class CallbackController extends Controller {
             } else if (code == HttpConstants.OK) {
                 String content = context.getResponseContent();
                 logger.debug("render : {}", content);
-                if (content == null) {
-                    content = "";
-                }
                 return ok(content);
             }
             final String message = "Unsupported HTTP action : " + code;
@@ -97,6 +94,12 @@ public class CallbackController extends Controller {
         
         // get or create sessionId
         final String sessionId = StorageHelper.getOrCreationSessionId(session());
+        
+        if (profile == null) {
+            // save that this kind of authentication has already been attempted and returns a null profile
+            StorageHelper.save(sessionId, client.getName() + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX, "true");
+        }
+        
         // save user profile
         StorageHelper.saveProfile(sessionId, profile);
         // get requested url

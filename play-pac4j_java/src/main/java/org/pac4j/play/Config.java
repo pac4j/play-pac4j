@@ -34,8 +34,8 @@ public final class Config {
     // 1 hour = 3600 seconds
     private static int profileTimeout = 3600;
     
-    // 10 minutes = 600 seconds
-    private static int sessionTimeout = 600;
+    // 1 minute = 60 second
+    private static int sessionTimeout = 60;
     
     // all the clients
     private static Clients clients;

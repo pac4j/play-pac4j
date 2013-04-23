@@ -75,13 +75,13 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         if (profile != null) {
             return this.delegate.call(context);
         }
-        // no profile -> should try authentication if it has not already been tried
-        final String startAuth = (String) StorageHelper.get(sessionId, clientName
-                                                                       + Constants.START_AUTHENTICATION_SUFFIX);
-        logger.debug("startAuth : {}", startAuth);
-        StorageHelper.remove(sessionId, clientName + Constants.START_AUTHENTICATION_SUFFIX);
-        if (CommonHelper.isNotBlank(startAuth)) {
-            logger.error("not authenticated successfully to access a protected area -> forbidden");
+        // no profile -> has this authentication already be attempted ?
+        final String triedAuth = (String) StorageHelper.get(sessionId, clientName
+                                                                       + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
+        logger.debug("triedAuth : {}", triedAuth);
+        if (CommonHelper.isNotBlank(triedAuth)) {
+            StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
+            logger.error("authentication already tried -> forbidden");
             return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
         }
         // requested url to save
@@ -95,8 +95,6 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         final String redirectionUrl = client
             .getRedirectionUrl(new JavaWebContext(context.request(), context.response(), context.session()), true);
         logger.debug("redirectionUrl : {}", redirectionUrl);
-        // save that this kind of authentication has already been tried
-        StorageHelper.save(sessionId, clientName + Constants.START_AUTHENTICATION_SUFFIX, "true");
         return redirect(redirectionUrl);
     }
 }

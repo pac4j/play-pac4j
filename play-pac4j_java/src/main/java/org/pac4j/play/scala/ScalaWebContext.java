@@ -33,13 +33,13 @@ import scala.collection.Seq;
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public class ScalaWebContext implements WebContext {
+public class ScalaWebContext<C> implements WebContext {
     
-    private final Request<AnyContent> request;
+    private final Request<C> request;
     
     private final Session session;
     
-    public ScalaWebContext(final Request<AnyContent> request, final Session session) {
+    public ScalaWebContext(final Request<C> request, final Session session) {
         this.request = request;
         this.session = session;
     }
@@ -58,8 +58,8 @@ public class ScalaWebContext implements WebContext {
         if (values.isDefined()) {
             value = values.get().head();
         }
-        if (value == null) {
-            Option<scala.collection.immutable.Map<String, Seq<String>>> formParameters = this.request.body()
+        if (value == null && this.request instanceof AnyContent) {
+            Option<scala.collection.immutable.Map<String, Seq<String>>> formParameters = ((Request<AnyContent>)(this.request)).body()
                 .asFormUrlEncoded();
             if (formParameters.isDefined()) {
                 values = formParameters.get().get(name);
