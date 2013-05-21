@@ -90,7 +90,7 @@ You must define all the clients you want to support in the <i>onStart</i> method
 <pre><code>public void onStart(final Application app) {
   // OAuth
   final FacebookClient facebookClient = new FacebookClient("fb_key", "fb_secret");
-  final TwitterClient twitterClient = new TwitterClient("tw_key", "tw_secret");  
+  final TwitterClient twitterClient = new TwitterClient("tw_key", "tw_secret");
   // HTTP
   final FormClient formClient = new FormClient("http://localhost:9000/theForm", new SimpleTestUsernamePasswordAuthenticator());
   final BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
@@ -189,13 +189,13 @@ Demos with Facebook, Twitter, CAS, form authentication, basic auth authenticatio
 
 <h2>Versions</h2>
 
-The current version <b>1.1.0-SNAPSHOT</b> is under development. This is the first version of the <b>play-pac4j</b> project.
+The current version : <i>1.1.1-SNAPSHOT</i> is under development, it's available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype snapshots repository</a>.
 
-The last released version is the <b>play-oauth-client 1.0.0</b> library (which only supports OAuth) :
+The latest release of the <b>play-pac4j</b> project is the <b>1.1.0</b> version :
 <pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;com.github.leleuj.play.oauth.client&lt;/groupId&gt;
-    &lt;artifactId&gt;play-oauth-client&lt;/artifactId&gt;
-    &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;groupId&gt;org.pac4j&lt;/groupId&gt;
+    &lt;artifactId&gt;play-pac4j_java&lt;/artifactId&gt; or &lt;artifactId&gt;play-pac4j_scala2.9&lt;/artifactId&gt; or &lt;artifactId&gt;play-pac4j_scala2.10&lt;/artifactId&gt;
+    &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
 
