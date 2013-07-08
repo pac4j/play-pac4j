@@ -27,7 +27,7 @@
 	<artifactId>play-pac4j</artifactId>
 	<packaging>pom</packaging>
 	<name>Play pac4j</name>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.2-SNAPSHOT</version>
 	<description>Java and Scala multi protocols (CAS, OAuth, OpenID, HTTP...) client for Play 2.x framework</description>
 	<url>https://github.com/leleuj/play-pac4j</url>
 

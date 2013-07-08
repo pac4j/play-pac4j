@@ -61,7 +61,7 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A])(action: CommonProfile => Action[A]) = Action(parser) { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A], isAjax: Boolean = false)(action: CommonProfile => Action[A]) = Action(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get
@@ -76,17 +76,21 @@ trait ScalaController extends Controller {
         logger.error("authentication already tried -> forbidden")
         Forbidden(Config.getErrorPage403()).as(HTML)
       } else {
-        val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true)
-        logger.debug("redirectionUrl : {}", redirectionUrl)
-        Redirect(redirectionUrl).withSession(newSession)
+        if (isAjax) {
+          Unauthorized(Config.getErrorPage401()).as(HTML)
+        } else {
+          val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true)
+          logger.debug("redirectionUrl : {}", redirectionUrl)
+          Redirect(redirectionUrl).withSession(newSession)
+        }
       }
     } else {
       action(profile)(request)
     }
   }
   
-  protected def RequiresAuthentication(clientName: String, targetUrl: String = "")(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = { 
-    RequiresAuthentication(clientName, targetUrl, parse.anyContent)(action)
+  protected def RequiresAuthentication(clientName: String, targetUrl: String = "", isAjax: Boolean = false)(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = { 
+    RequiresAuthentication(clientName, targetUrl, parse.anyContent, isAjax)(action)
   }
 
   /**
