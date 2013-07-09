@@ -47,10 +47,13 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     
     private static final Method targetUrlMethod;
     
+    private static final Method isAjaxMethod;
+    
     static {
         try {
             clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
             targetUrlMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.TARGET_URL);
+            isAjaxMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.IS_AJAX);
         } catch (final SecurityException e) {
             throw new RuntimeException(e);
         } catch (final NoSuchMethodException e) {
@@ -66,6 +69,8 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         logger.debug("clientName : {}", clientName);
         final String targetUrl = (String) invocationHandler.invoke(this.configuration, targetUrlMethod, null);
         logger.debug("targetUrl : {}", targetUrl);
+        final Boolean isAjax = (Boolean) invocationHandler.invoke(this.configuration, isAjaxMethod, null);
+        logger.debug("isAjax : {}", isAjax);
         // get or create session id
         final String sessionId = StorageHelper.getOrCreationSessionId(context.session());
         logger.debug("sessionId : {}", sessionId);
@@ -83,6 +88,8 @@ public final class RequiresAuthenticationAction extends Action<Result> {
             StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
             logger.error("authentication already tried -> forbidden");
             return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+        } else if (isAjax) {
+            return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
         }
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());

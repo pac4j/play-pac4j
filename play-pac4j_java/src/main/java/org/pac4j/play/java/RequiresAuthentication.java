@@ -41,4 +41,6 @@ public @interface RequiresAuthentication {
     String clientName();
     
     String targetUrl() default "";
+    
+    boolean isAjax() default false;
 }
