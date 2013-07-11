@@ -79,7 +79,7 @@ public class CallbackController extends Controller {
             } else if (code == HttpConstants.TEMP_REDIRECT) {
                 return Results.status(HttpConstants.TEMP_REDIRECT);
             } else if (code == HttpConstants.OK) {
-                String content = context.getResponseContent();
+                final String content = context.getResponseContent();
                 logger.debug("render : {}", content);
                 return ok(content);
             }
@@ -98,10 +98,11 @@ public class CallbackController extends Controller {
         if (profile == null) {
             // save that this kind of authentication has already been attempted and returns a null profile
             StorageHelper.save(sessionId, client.getName() + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX, "true");
+        } else {
+            // save user profile only if it's not null
+            StorageHelper.saveProfile(sessionId, profile);
         }
         
-        // save user profile
-        StorageHelper.saveProfile(sessionId, profile);
         // get requested url
         final String requestedUrl = StorageHelper.getRequestedUrl(sessionId, client.getName());
         
