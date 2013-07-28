@@ -1,3 +1,7 @@
+---
+published: false
+---
+
 <h2>What is the play-pac4j library ?</h2>
 
 The <b>play-pac4j</b> library is a <i>Java and Scala</i> multi-protocols client for Play framework 2.x.
@@ -31,6 +35,7 @@ It's available under the Apache 2 license and based on my <a href="https://githu
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
 <tr><td>MyOpenId</td><td>OpenID</td><td>pac4j-openid</td><td>MyOpenIdClient</td><td>MyOpenIdProfile</td></tr>
+<tr><td>Google</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
 </table>
 
 
@@ -78,6 +83,14 @@ If you want to use a specific client support, you need to add the appropriate de
 <li>for HTTP support, the <i>pac4j-http</i> dependency is required</li>
 <li>for OpenID support, the <i>pac4j-openid</i> dependency is required.</li>
 </ul>
+
+    val appDependencies = Seq(
+        "org.pac4j" % "pac4j-http" % "1.4.2-SNAPSHOT",
+        "org.pac4j" % "pac4j-cas" % "1.4.2-SNAPSHOT",
+        "org.pac4j" % "pac4j-openid" % "1.4.2-SNAPSHOT",
+        "org.pac4j" % "pac4j-oauth" % "1.4.2-SNAPSHOT"
+    )
+
 
 <h3>Define the supported clients</h3>
 
