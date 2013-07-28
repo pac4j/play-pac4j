@@ -1,5 +1,5 @@
 ---
-published: false
+published: true
 ---
 
 <h2>What is the play-pac4j library ?</h2>
