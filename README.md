@@ -207,6 +207,7 @@ The latest release of the <b>play-pac4j</b> project is the <b>1.1.0</b> version 
     &lt;version&gt;1.1.0&lt;/version&gt;
 &lt;/dependency&gt;</code></pre>
 
+See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
 
 <h2>Contact</h2>
 
