@@ -58,9 +58,9 @@ public class ScalaWebContext<C> implements WebContext {
         if (values.isDefined()) {
             value = values.get().head();
         }
-        if (value == null && this.request instanceof AnyContent) {
-            Option<scala.collection.immutable.Map<String, Seq<String>>> formParameters = ((Request<AnyContent>)(this.request)).body()
-                .asFormUrlEncoded();
+        if (value == null && this.request instanceof Request) {
+            final Option<scala.collection.immutable.Map<String, Seq<String>>> formParameters = ((Request<AnyContent>) (this.request))
+                .body().asFormUrlEncoded();
             if (formParameters.isDefined()) {
                 values = formParameters.get().get(name);
                 if (values.isDefined()) {
@@ -84,7 +84,7 @@ public class ScalaWebContext<C> implements WebContext {
     }
     
     public void setSessionAttribute(final String key, final Object value) {
-        Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
         if (sessionId.isDefined()) {
             StorageHelper.save(sessionId.get(), key, value);
         }
