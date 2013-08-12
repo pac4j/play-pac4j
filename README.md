@@ -196,19 +196,22 @@ Demos with Facebook, Twitter, CAS, form authentication, basic auth authenticatio
 </ul>
 
 
-<h2>Versions</h2>
+## Versions
 
-The current version : <i>1.1.1-SNAPSHOT</i> is under development, it's available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype snapshots repository</a>.
+The current version **1.1.2-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
 
-The latest release of the <b>play-pac4j</b> project is the <b>1.1.0</b> version :
-<pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;org.pac4j&lt;/groupId&gt;
-    &lt;artifactId&gt;play-pac4j_java&lt;/artifactId&gt; or &lt;artifactId&gt;play-pac4j_scala2.9&lt;/artifactId&gt; or &lt;artifactId&gt;play-pac4j_scala2.10&lt;/artifactId&gt;
-    &lt;version&gt;1.1.0&lt;/version&gt;
-&lt;/dependency&gt;</code></pre>
+The latest release of the **play-pac4j** project is the **1.1.1** version :
+
+    <dependency>
+        <groupId>org.pac4j</groupId>
+        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.9</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId>
+        <version>1.1.1</version>
+    </dependency>
 
 See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
 
-<h2>Contact</h2>
 
-Find me on <a href="http://www.linkedin.com/in/jleleu">LinkedIn</a> or by email : leleuj@gmail.com
+## Contact
+
+Find me on [LinkedIn](http://www.linkedin.com/in/jleleu) or by email : leleuj@gmail.com
+
