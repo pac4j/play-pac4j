@@ -96,8 +96,19 @@ public class JavaWebContext extends BaseResponseContext {
     public void setResponseHeader(final String name, final String value) {
         this.response.setHeader(name, value);
     }
-    
+
     public Session getSession() {
         return this.session;
+    }
+
+    public String getServerName() {
+        String[] split = request.host().split(":");
+        return split[0];
+    }
+
+    public int getServerPort() {
+        String[] split = request.host().split(":");
+        String portStr = (split.length > 1) ? split[1] : "80";
+        return Integer.valueOf(portStr);
     }
 }

@@ -97,4 +97,15 @@ public class ScalaWebContext<C> implements WebContext {
     public void setResponseHeader(final String key, final String value) {
         throw new IllegalArgumentException("setResponseHeader not implemented");
     }
+
+    public String getServerName() {
+        String[] split = request.host().split(":");
+        return split[0];
+    }
+
+    public int getServerPort() {
+        String[] split = request.host().split(":");
+        String portStr = (split.length > 1) ? split[1] : "80";
+        return Integer.valueOf(portStr);
+    }
 }
