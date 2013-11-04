@@ -87,9 +87,9 @@ public class CallbackController extends Controller {
             logger.error(message);
             throw new TechnicalException(message);
         }
-        
+
         // get user profile
-        final CommonProfile profile = client.getUserProfile(credentials);
+        final CommonProfile profile = client.getUserProfile(credentials, context);
         logger.debug("profile : {}", profile);
         
         // get or create sessionId
