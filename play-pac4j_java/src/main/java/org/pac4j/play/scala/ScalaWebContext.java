@@ -108,4 +108,9 @@ public class ScalaWebContext<C> implements WebContext {
         String portStr = (split.length > 1) ? split[1] : "80";
         return Integer.valueOf(portStr);
     }
+
+    public String getScheme() {
+        // TODO: play api does not expose the scheme, just return http for now
+        return "http";
+    }
 }
