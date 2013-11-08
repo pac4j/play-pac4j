@@ -18,6 +18,7 @@ package org.pac4j.play.java;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.Callable;
 
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.profile.CommonProfile;
