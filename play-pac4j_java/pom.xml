@@ -37,8 +37,14 @@
 			<artifactId>pac4j-cas</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>play</groupId>
-			<artifactId>play_2.9.1</artifactId>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play_2.10</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.typesafe.play</groupId>
+			<artifactId>play-cache_2.10</artifactId>
+			<version>2.2.0</version>
 		</dependency>
 	</dependencies>
 
