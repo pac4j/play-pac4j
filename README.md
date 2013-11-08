@@ -1,19 +1,28 @@
-<h2>What is the play-pac4j library ?</h2>
+## What is the play-pac4j library ?
 
-The <b>play-pac4j</b> library is a <i>Java and Scala</i> multi-protocols client for Play framework 2.x.
+The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
 It supports these 4 protocols on client side : 
-<ol>
-<li>OAuth (1.0 & 2.0)</li>
-<li>CAS (1.0, 2.0, SAML, logout & proxy)</li>
-<li>HTTP (form & basic auth authentications)</li>
-<li>OpenID.</li>
-</ol>
 
-It's available under the Apache 2 license and based on my <a href="https://github.com/leleuj/pac4j">pac4j</a> library.
+1. OAuth (1.0 & 2.0)
+2. CAS (1.0, 2.0, SAML, logout & proxy)
+3. HTTP (form & basic auth authentications)
+4. OpenID.
+
+It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
+
+Regarding the languages :
+
+1. Use the play-pac4j_java library for Play in Java
+2. Use the play-pac4j_scala2.x library for Play in Scala.
+
+Regarding the versions :
+
+1. For Play 2.0 or 2.1, use the play-pac4j libraries in version 1.1.x
+2. For Play 2.2, use the play-pac4j libraries in version 1.2.x.
 
 
-<h2>Providers supported</h2>
+## Providers supported
 
 <table>
 <tr><th>Provider</th><th>Protocol</th><th>Maven dependency</th><th>Client class</th><th>Profile class</th></tr>
@@ -35,7 +44,7 @@ It's available under the Apache 2 license and based on my <a href="https://githu
 </table>
 
 
-<h2>Technical description</h2>
+## Technical description
 
 This library has <b>just 11 classes</b> :
 <ol>
