@@ -29,9 +29,12 @@ import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.libs.Akka;
+import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
+import play.mvc.SimpleResult;
 
 /**
  * This action checks if the user is not authenticated and starts the authentication process if necessary.
@@ -63,7 +66,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     
     @Override
     @SuppressWarnings("rawtypes")
-    public Result call(final Context context) throws Throwable {
+    public Promise<SimpleResult> call(final Context context) throws Throwable {
         final InvocationHandler invocationHandler = Proxy.getInvocationHandler(this.configuration);
         final String clientName = (String) invocationHandler.invoke(this.configuration, clientNameMethod, null);
         logger.debug("clientName : {}", clientName);
@@ -87,9 +90,25 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         if (CommonHelper.isNotBlank(triedAuth)) {
             StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
             logger.error("authentication already tried -> forbidden");
-            return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+            @SuppressWarnings("deprecation")
+			Promise<SimpleResult> promiseOfResult = Akka.future(
+                new Callable<SimpleResult>() {
+            	    public SimpleResult call() {
+            	        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+            	    }
+            	}
+            );
+            return promiseOfResult;
         } else if (isAjax) {
-            return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+            @SuppressWarnings("deprecation")
+        	Promise<SimpleResult> promiseOfResult = Akka.future(
+                new Callable<SimpleResult>() {
+            	    public SimpleResult call() {
+            	        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+            	    }
+            	}
+            );
+        	return promiseOfResult;
         }
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());
@@ -102,6 +121,14 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         final String redirectionUrl = client
             .getRedirectionUrl(new JavaWebContext(context.request(), context.response(), context.session()), true);
         logger.debug("redirectionUrl : {}", redirectionUrl);
-        return redirect(redirectionUrl);
+        @SuppressWarnings("deprecation")
+        Promise<SimpleResult> promiseOfResult = Akka.future(
+            new Callable<SimpleResult>() {
+        	    public SimpleResult call() {
+        	        return redirect(redirectionUrl);
+        	    }
+        	}
+        );
+        return promiseOfResult;
     }
 }
