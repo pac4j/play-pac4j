@@ -11,15 +11,12 @@ It supports these 4 protocols on client side :
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
-Regarding the languages :
-
-1. Use the play-pac4j_java library for Play in Java
-2. Use the play-pac4j_scala2.x library for Play in Scala.
-
-Regarding the versions :
-
-1. For Play 2.0 or 2.1, use the play-pac4j libraries in version 1.1.x
-2. For Play 2.2, use the play-pac4j libraries in version 1.2.x.
+<table>
+<tr><th>Play framework/ Language</th><th>Java</th><th>Scala</th></tr>
+<tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
+<tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
+<tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
+</table>
 
 
 ## Providers supported
@@ -74,7 +71,7 @@ First, the dependency on <b>play-pac4j_java</b> must be defined in the <i>Build.
 <pre><code>val appDependencies = Seq(
   "org.pac4j" % "play-pac4j_java" % "1.1.0-SNAPSHOT"
 )</code></pre>
-Or the <b>play-pac4j_scala2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j_scala2.10</b> dependency for a Scala application in Play framework 2.1.
+Or the <b>play-pac4j_scala*</b> dependency for a Scala application.
 
 As it's a snapshot only available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype Snapshots repository</a>, the appropriate resolver must also be defined in the <i>Build.scala</i> file :
 <pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
@@ -207,7 +204,7 @@ Demos with Facebook, Twitter, CAS, form authentication, basic auth authenticatio
 
 ## Versions
 
-The current version **1.1.2-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
+The current version **1.2.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
 
 The latest release of the **play-pac4j** project is the **1.1.1** version :
 

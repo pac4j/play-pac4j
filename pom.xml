@@ -76,12 +76,11 @@
 
 	<modules>
 		<module>play-pac4j_java</module>
-		<module>play-pac4j_scala2.9</module>
-		<module>play-pac4j_scala2.10</module>
+		<module>play-pac4j_scala</module>
 	</modules>
 
 	<properties>
-		<pac4j.version>1.4.2-SNAPSHOT</pac4j.version>
+		<pac4j.version>1.5.0-SNAPSHOT</pac4j.version>
 	</properties>
 
 	<dependencyManagement>
@@ -100,12 +99,6 @@
 				<groupId>org.pac4j</groupId>
 				<artifactId>pac4j-cas</artifactId>
 				<version>${pac4j.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>play</groupId>
-				<artifactId>play_2.9.1</artifactId>
-				<version>2.0.4</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
