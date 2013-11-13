@@ -81,7 +81,7 @@
 	</modules>
 
 	<properties>
-		<pac4j.version>1.4.2-SNAPSHOT</pac4j.version>
+		<pac4j.version>1.5.0-SNAPSHOT</pac4j.version>
 	</properties>
 
 	<dependencyManagement>
