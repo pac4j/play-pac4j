@@ -3,6 +3,12 @@ package org.pac4j.play;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * This class tests the @{link StorageHelper} class
+ *
+ * @author Ahsan Rabbani
+ * @since 1.1.2
+ */
 public class StorageHelperTests {
 
     private static final String CACHE_KEY = "cacheKey";

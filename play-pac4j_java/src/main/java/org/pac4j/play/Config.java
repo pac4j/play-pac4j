@@ -102,10 +102,22 @@ public final class Config {
         Config.errorPage403 = errorPage403;
     }
 
+    /**
+     * Gets the prefix used for all cache operations
+     *
+     * @return the prefix
+     * @since 1.1.2
+     */
     public static String getCacheKeyPrefix() {
         return cacheKeyPrefix;
     }
 
+    /**
+     * Sets the prefix to use for all cache operations
+     *
+     * @param cacheKeyPrefix
+     * @since 1.1.2
+     */
     public static void setCacheKeyPrefix(String cacheKeyPrefix) {
         Config.cacheKeyPrefix = cacheKeyPrefix;
     }
