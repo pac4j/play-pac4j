@@ -44,6 +44,12 @@
 			<groupId>com.typesafe.play</groupId>
 			<artifactId>play-cache_2.10</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.10</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

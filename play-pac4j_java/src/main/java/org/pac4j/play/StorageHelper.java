@@ -15,6 +15,7 @@
  */
 package org.pac4j.play;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -164,7 +165,7 @@ public final class StorageHelper {
      * @return the object
      */
     public static Object get(final String key) {
-        return Cache.get(key);
+        return Cache.get(getCacheKey(key));
     }
     
     /**
@@ -175,7 +176,7 @@ public final class StorageHelper {
      * @param timeout
      */
     public static void save(final String key, final Object value, final int timeout) {
-        Cache.set(key, value, timeout);
+        Cache.set(getCacheKey(key), value, timeout);
     }
     
     /**
@@ -185,5 +186,11 @@ public final class StorageHelper {
      */
     public static void remove(final String key) {
         save(key, null, 0);
+    }
+
+    static String getCacheKey(final String key) {
+        return (StringUtils.isNotBlank(Config.getCacheKeyPrefix()))
+                ? Config.getCacheKeyPrefix() + ":" + key
+                : key;
     }
 }

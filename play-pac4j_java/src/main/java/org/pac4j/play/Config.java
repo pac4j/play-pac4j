@@ -43,6 +43,8 @@ public final class Config {
     private static String errorPage401 = "authentication required";
     
     private static String errorPage403 = "forbidden";
+
+    private static String cacheKeyPrefix = "";
     
     public static String getDefaultSuccessUrl() {
         return defaultSuccessUrl;
@@ -98,5 +100,25 @@ public final class Config {
     
     public static void setErrorPage403(final String errorPage403) {
         Config.errorPage403 = errorPage403;
+    }
+
+    /**
+     * Gets the prefix used for all cache operations
+     *
+     * @return the prefix
+     * @since 1.1.2
+     */
+    public static String getCacheKeyPrefix() {
+        return cacheKeyPrefix;
+    }
+
+    /**
+     * Sets the prefix to use for all cache operations
+     *
+     * @param cacheKeyPrefix
+     * @since 1.1.2
+     */
+    public static void setCacheKeyPrefix(String cacheKeyPrefix) {
+        Config.cacheKeyPrefix = cacheKeyPrefix;
     }
 }
