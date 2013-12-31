@@ -43,9 +43,8 @@ public class JavaController extends CallbackController {
      * 
      * @param clientName
      * @return the url of the provider where to redirect the user
-     * @throws RequiresHttpAction
      */
-    protected static String getRedirectionUrl(final String clientName) throws RequiresHttpAction {
+    protected static String getRedirectionUrl(final String clientName) {
         return getRedirectionUrl(clientName, null);
     }
     
