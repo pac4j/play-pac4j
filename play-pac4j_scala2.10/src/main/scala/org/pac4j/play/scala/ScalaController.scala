@@ -24,7 +24,7 @@ import org.pac4j.core.util._
 import org.pac4j.play._
 import org.slf4j._
 import play.core.server.netty.RequestBodyHandler
-import org.pac4j.core.exception.TechnicalException
+import org.pac4j.core.exception._
 
 /**
  * This controller is the Scala controller to retrieve the user profile or the redirection url to start the authentication process.
@@ -58,10 +58,12 @@ trait ScalaController extends Controller {
    *
    * @param clientName
    * @param targetUrl
+   * @param parser
+   * @param isAjax
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A], isAjax: Boolean = false)(action: CommonProfile => Action[A]) = Action(parser) { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A], isAjax: Boolean)(action: CommonProfile => Action[A]) = Action(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get
@@ -69,19 +71,20 @@ trait ScalaController extends Controller {
     val profile = getUserProfile(request)
     logger.debug("profile : {}", profile)
     if (profile == null) {
-      val triedAuth = StorageHelper.get(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX).asInstanceOf[String]
-      logger.debug("triedAuth : {}", triedAuth);
-      if (CommonHelper.isNotBlank(triedAuth)) {
-        StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX)
-        logger.error("authentication already tried -> forbidden")
-        Forbidden(Config.getErrorPage403()).as(HTML)
-      } else {
-        if (isAjax) {
-          Unauthorized(Config.getErrorPage401()).as(HTML)
-        } else {
-          val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true)
-          logger.debug("redirectionUrl : {}", redirectionUrl)
-          Redirect(redirectionUrl).withSession(newSession)
+      try {
+        val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true, isAjax)
+        logger.debug("redirectionUrl : {}", redirectionUrl)          
+        Redirect(redirectionUrl).withSession(newSession)
+      } catch {
+        case ex: RequiresHttpAction => {
+          val code = ex.getCode()
+          if (code == 401) {
+            Unauthorized(Config.getErrorPage401()).as(HTML)
+          } else if (code == 403) {
+            Forbidden(Config.getErrorPage403()).as(HTML)
+          } else {
+            throw new TechnicalException("Unexpected HTTP code : " + code)
+          }
         }
       }
     } else {
@@ -100,10 +103,34 @@ trait ScalaController extends Controller {
    * @param newSession
    * @param clientName
    * @param targetUrl
-   * @param forceDirectRedirection
    * @return the redirection url to the provider
    */
-  protected def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = "", forceDirectRedirection: Boolean = false): String = {
+  protected def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = ""): String = {
+    var redirectionUrl:String = null
+    try {
+      // redirect to the provider for authentication
+      redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, false, false)
+    } catch {
+      case ex: RequiresHttpAction => {
+        // should not happen
+      }
+    }
+    logger.debug("redirectionUrl to : {}", redirectionUrl)
+    redirectionUrl    
+  }
+
+  /**
+   * Returns the redirection url to the provider for authentication.
+   *
+   * @param request
+   * @param newSession
+   * @param clientName
+   * @param targetUrl
+   * @param protectedPage
+   * @param isAjax
+   * @return the redirection url to the provider
+   */
+  private def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String, protectedPage: Boolean, isAjax: Boolean): String = {
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save
@@ -118,7 +145,7 @@ trait ScalaController extends Controller {
       throw new TechnicalException("No client defined. Use Config.setClients(clients)")
     }
     // redirect to the provider for authentication
-    val redirectionUrl = clients.findClient(clientName).asInstanceOf[BaseClient[Credentials, CommonProfile]].getRedirectionUrl(scalaWebContext, forceDirectRedirection)
+    val redirectionUrl = clients.findClient(clientName).getRedirectionUrl(scalaWebContext, protectedPage, isAjax)
     logger.debug("redirectionUrl to : {}", redirectionUrl)
     redirectionUrl
   }

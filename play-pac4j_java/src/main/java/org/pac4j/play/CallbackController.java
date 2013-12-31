@@ -87,7 +87,7 @@ public class CallbackController extends Controller {
             logger.error(message);
             throw new TechnicalException(message);
         }
-
+        
         // get user profile
         final CommonProfile profile = client.getUserProfile(credentials, context);
         logger.debug("profile : {}", profile);
@@ -95,11 +95,8 @@ public class CallbackController extends Controller {
         // get or create sessionId
         final String sessionId = StorageHelper.getOrCreationSessionId(session());
         
-        if (profile == null) {
-            // save that this kind of authentication has already been attempted and returns a null profile
-            StorageHelper.save(sessionId, client.getName() + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX, "true");
-        } else {
-            // save user profile only if it's not null
+        // save user profile only if it's not null
+        if (profile != null) {
             StorageHelper.saveProfile(sessionId, profile);
         }
         
