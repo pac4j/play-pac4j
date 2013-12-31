@@ -17,6 +17,7 @@ package org.pac4j.play.java;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
@@ -42,8 +43,9 @@ public class JavaController extends CallbackController {
      * 
      * @param clientName
      * @return the url of the provider where to redirect the user
+     * @throws RequiresHttpAction
      */
-    protected static String getRedirectionUrl(final String clientName) {
+    protected static String getRedirectionUrl(final String clientName) throws RequiresHttpAction {
         return getRedirectionUrl(clientName, null);
     }
     
@@ -70,9 +72,13 @@ public class JavaController extends CallbackController {
             throw new TechnicalException("No client defined. Use Config.setClients(clients)");
         }
         // redirect to the provider for authentication
-        final String redirectionUrl = clients.findClient(clientName).getRedirectionUrl(new JavaWebContext(request(),
-                                                                                                          response(),
-                                                                                                          session()));
+        JavaWebContext webContext = new JavaWebContext(request(), response(), session());
+        String redirectionUrl = null;
+        try {
+            redirectionUrl = clients.findClient(clientName).getRedirectionUrl(webContext, false, false);
+        } catch (RequiresHttpAction e) {
+            // should not happen
+        }
         logger.debug("redirectionUrl : {}", redirectionUrl);
         return redirectionUrl;
     }

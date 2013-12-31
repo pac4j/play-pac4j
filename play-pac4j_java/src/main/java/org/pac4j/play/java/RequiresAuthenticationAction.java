@@ -20,9 +20,13 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.Callable;
 
-import org.pac4j.core.client.BaseClient;
+import org.pac4j.core.client.Client;
+import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.credentials.Credentials;
+import org.pac4j.core.exception.RequiresHttpAction;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.CommonHelper;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
 import org.pac4j.play.Constants;
@@ -66,7 +70,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     }
     
     @Override
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("unchecked")
     public Promise<SimpleResult> call(final Context context) throws Throwable {
         final InvocationHandler invocationHandler = Proxy.getInvocationHandler(this.configuration);
         final String clientName = (String) invocationHandler.invoke(this.configuration, clientNameMethod, null);
@@ -84,52 +88,40 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         if (profile != null) {
             return this.delegate.call(context);
         }
-        // no profile -> has this authentication already be attempted ?
-        final String triedAuth = (String) StorageHelper.get(sessionId, clientName
-                                                                       + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
-        logger.debug("triedAuth : {}", triedAuth);
-        if (CommonHelper.isNotBlank(triedAuth)) {
-            StorageHelper.remove(sessionId, clientName + Constants.ATTEMPTED_AUTHENTICATION_SUFFIX);
-            logger.error("authentication already tried -> forbidden");
-            @SuppressWarnings("deprecation")
-			Promise<SimpleResult> promiseOfResult = Akka.future(
-                new Callable<SimpleResult>() {
-            	    public SimpleResult call() {
-            	        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
-            	    }
-            	}
-            );
-            return promiseOfResult;
-        } else if (isAjax) {
-            @SuppressWarnings("deprecation")
-        	Promise<SimpleResult> promiseOfResult = Akka.future(
-                new Callable<SimpleResult>() {
-            	    public SimpleResult call() {
-            	        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
-            	    }
-            	}
-            );
-        	return promiseOfResult;
-        }
+        
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());
         logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
         StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
         // get client
-        final BaseClient client = (BaseClient) Config.getClients().findClient(clientName);
+        final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
         logger.debug("client : {}", client);
-        // and compute redirection url (force immediate redirect)
-        final String redirectionUrl = client
-            .getRedirectionUrl(new JavaWebContext(context.request(), context.response(), context.session()), true);
-        logger.debug("redirectionUrl : {}", redirectionUrl);
         @SuppressWarnings("deprecation")
-        Promise<SimpleResult> promiseOfResult = Akka.future(
-            new Callable<SimpleResult>() {
-        	    public SimpleResult call() {
-        	        return redirect(redirectionUrl);
-        	    }
-        	}
-        );
+        Promise<SimpleResult> promiseOfResult = Akka.future(new Callable<SimpleResult>() {
+            public SimpleResult call() {
+                try {
+                    // and compute redirection url
+                    JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
+                        .session());
+                    final String redirectionUrl = client.getRedirectionUrl(webContext, true, isAjax);
+                    logger.debug("redirectionUrl : {}", redirectionUrl);
+                    return redirect(redirectionUrl);
+                } catch (final RequiresHttpAction e) {
+                    // requires some specific HTTP action
+                    final int code = e.getCode();
+                    logger.debug("requires HTTP action : {}", code);
+                    if (code == HttpConstants.UNAUTHORIZED) {
+                        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+                    } else if (code == HttpConstants.FORBIDDEN) {
+                        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+                    }
+                    final String message = "Unsupported HTTP action : " + code;
+                    logger.error(message);
+                    throw new TechnicalException(message);
+                }
+                
+            }
+        });
         return promiseOfResult;
     }
 }
