@@ -76,11 +76,16 @@ public class ScalaWebContext<C> implements WebContext {
     }
     
     public Object getSessionAttribute(final String key) {
-        throw new IllegalArgumentException("getSessionAttribute not implemented");
+        Object value = null;
+        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        if (sessionId.isDefined()) {
+            value = StorageHelper.get(sessionId.get(), key);
+        }
+        return value;
     }
     
     public void setResponseStatus(final int code) {
-        throw new IllegalArgumentException("setResponseStatus not implemented");
+        // do nothing
     }
     
     public void setSessionAttribute(final String key, final Object value) {
@@ -97,18 +102,18 @@ public class ScalaWebContext<C> implements WebContext {
     public void setResponseHeader(final String key, final String value) {
         throw new IllegalArgumentException("setResponseHeader not implemented");
     }
-
+    
     public String getServerName() {
-        String[] split = request.host().split(":");
+        String[] split = this.request.host().split(":");
         return split[0];
     }
-
+    
     public int getServerPort() {
-        String[] split = request.host().split(":");
+        String[] split = this.request.host().split(":");
         String portStr = (split.length > 1) ? split[1] : "80";
         return Integer.valueOf(portStr);
     }
-
+    
     public String getScheme() {
         // TODO: play api does not expose the scheme, just return http for now
         return "http";

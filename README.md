@@ -47,7 +47,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 This library has **just 11 classes**:
 
 * the *Config* class gathers all the configuration
-* the *Constants* class gathers all the constants*
+* the *Constants* class gathers all the constants
 * the *CallbackController* class is used to finish the authentication process and logout the user
 * the *StorageHelper* class deals with storing/retrieving data from the cache
 * the *JavaWebContext* class is a Java wrapper for the user request, response and session
@@ -87,7 +87,6 @@ If you want to use a specific client support, you need to add the appropriate de
 2. for CAS support, the *pac4j-cas* dependency is required
 3. for HTTP support, the *pac4j-http* dependency is required
 4. for OpenID support, the *pac4j-openid* dependency is required.
-
 
     libraryDependencies ++= Seq(
       "org.pac4j" % "pac4j-http" % "1.5.0-SNAPSHOT",
