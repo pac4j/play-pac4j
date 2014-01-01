@@ -2,7 +2,7 @@
 
 The <b>play-pac4j</b> library is a <i>Java and Scala</i> multi-protocols client for Play framework 2.x.
 
-It supports these 4 protocols on client side : 
+It supports these 4 protocols on client side: 
 <ol>
 <li>OAuth (1.0 & 2.0)</li>
 <li>CAS (1.0, 2.0, SAML, logout & proxy)</li>
@@ -37,7 +37,7 @@ It's available under the Apache 2 license and based on my <a href="https://githu
 
 <h2>Technical description</h2>
 
-This library has <b>just 11 classes</b> :
+This library has <b>just 11 classes</b>:
 <ol>
 <li>the <b>Config</b> class gathers all the configuration</li>
 <li>the <b>Constants</b> class gathers all the constants</li>
@@ -61,18 +61,18 @@ Learn more by browsing the <a href="http://www.pac4j.org/apidocs/play-pac4j/inde
 
 <h3>Add the required dependencies</h3>
 
-First, the dependency on <b>play-pac4j_java</b> must be defined in the <i>Build.scala</i> file for a Java application :
+First, the dependency on <b>play-pac4j_java</b> must be defined in the <i>Build.scala</i> file for a Java application:
 <pre><code>val appDependencies = Seq(
-  "org.pac4j" % "play-pac4j_java" % "1.1.0-SNAPSHOT"
+  "org.pac4j" % "play-pac4j_java" % "1.1.2-SNAPSHOT"
 )</code></pre>
 Or the <b>play-pac4j_scala2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j_scala2.10</b> dependency for a Scala application in Play framework 2.1.
 
-As it's a snapshot only available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype Snapshots repository</a>, the appropriate resolver must also be defined in the <i>Build.scala</i> file :
+As it's a snapshot only available in the <a href="https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/">Sonatype Snapshots repository</a>, the appropriate resolver must also be defined in the <i>Build.scala</i> file:
 <pre><code>val main = PlayProject(appName, appVersion, appDependencies, mainLang = SCALA).settings(
   resolvers += "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
 )</code></pre>
 
-If you want to use a specific client support, you need to add the appropriate dependency :
+If you want to use a specific client support, you need to add the appropriate dependency:
 <ul>
 <li>for OAuth support, the <i>pac4j-oauth</i> dependency is required</li>
 <li>for CAS support, the <i>pac4j-cas</i> dependency is required</li>
@@ -90,12 +90,12 @@ If you want to use a specific client support, you need to add the appropriate de
 
 <h3>Define the supported clients</h3>
 
-To use client support, your application must inherit from the JavaController class for a Java application :
+To use client support, your application must inherit from the JavaController class for a Java application:
 <pre><code>public class Application extends JavaController {</code></pre>
-or from the ScalaController trait for a Scala application :
+or from the ScalaController trait for a Scala application:
 <pre><code>object Application extends ScalaController {</code></pre>
 
-You must define all the clients you want to support in the <i>onStart</i> method of your Global class for your Java or Scala application : 
+You must define all the clients you want to support in the <i>onStart</i> method of your Global class for your Java or Scala application: 
 <pre><code>public void onStart(final Application app) {
   // OAuth
   final FacebookClient facebookClient = new FacebookClient("fb_key", "fb_secret");
@@ -123,13 +123,13 @@ The <i>/callback</i> url is the callback url where the providers (Facebook, Twit
 
 <h3>Get user profiles and protect actions</h3>
 
-You can get the profile of the (authenticated) user in a Java application by using the <i>getUserProfile()</i> method :
+You can get the profile of the (authenticated) user in a Java application by using the <i>getUserProfile()</i> method:
 <pre><code>public static Result index() {
   // profile (maybe null if not authenticated)
   final CommonProfile profile = getUserProfile();
   return ok(views.html.index.render(profile));
 }</code></pre>
-And protect the access of a specific url by using the <i>RequiresAuthentication</i> annotation :
+And protect the access of a specific url by using the <i>RequiresAuthentication</i> annotation:
 <pre><code>@RequiresAuthentication(clientName = "FacebookClient")
 public static Result protectedIndex() {
   // profile
@@ -137,12 +137,12 @@ public static Result protectedIndex() {
   return ok(views.html.protectedIndex.render(profile));
 }</code></pre>
 
-Or you can get the profile of the (authenticated) user in a Scala application by using the <i>getUserProfile(request)</i> method :
+Or you can get the profile of the (authenticated) user in a Scala application by using the <i>getUserProfile(request)</i> method:
 <pre><code>def index = Action { request =>
   val profile = getUserProfile(request)
   Ok(views.html.index(profile))
 }</code></pre>
-And protect the access of a specific url by using the <i>RequiresAuthentication</i> function :
+And protect the access of a specific url by using the <i>RequiresAuthentication</i> function:
 <pre><code>def protectedIndex = RequiresAuthentication("FacebookClient") { profile =>
  Action { request =>
    Ok(views.html.protectedIndex(profile))
@@ -153,12 +153,12 @@ After successfull authentication, the originally requested url is restored.
 
 <h3>Get redirection urls</h3>
 
-You can also explicitely compute a redirection url to a provider for authentication by using the <i>getRedirectionUrl</i> method for a Java application :
+You can also explicitely compute a redirection url to a provider for authentication by using the <i>getRedirectionUrl</i> method for a Java application:
 <pre><code>public static Result index() {
   final String url = getRedirectionUrl("TwitterClient", "/targetUrl");
   return ok(views.html.index.render(url));
 }</code></pre>
-Or in a Scala application (always call the <i>getOrCreateSessionId(request)</i> method first) :
+Or in a Scala application (always call the <i>getOrCreateSessionId(request)</i> method first):
 <pre><code>def index = Action { request =>
   val newSession = getOrCreateSessionId(request)
   val url = getRedirectionUrl(request, newSession, "FacebookClient", "/targetUrl")
@@ -167,7 +167,7 @@ Or in a Scala application (always call the <i>getOrCreateSessionId(request)</i> 
 
 <h3>Define the callback url</h3>
 
-The callback url must be defined in the <i>routes</i> file as well as the logout :
+The callback url must be defined in the <i>routes</i> file as well as the logout:
 <pre><code>GET   /                       controllers.Application.index()
 GET   /protected/index.html   controllers.Application.protectedIndex()
 GET   /callback               org.pac4j.play.CallbackController.callback()
@@ -178,10 +178,10 @@ GET   /logout                 org.pac4j.play.CallbackController.logoutAndRedirec
 
 From the <i>CommonProfile</i>, you can retrieve the most common properties that all profiles share.
 But you can also cast the user profile to the appropriate profile according to the provider used for authentication.
-For example, after a Facebook authentication : 
+For example, after a Facebook authentication: 
 <pre><code>// facebook profile
 FacebookProfile facebookProfile = (FacebookProfile) commonProfile;</code></pre>
-Or for all the OAuth profiles, to get the access token :
+Or for all the OAuth profiles, to get the access token:
 <pre><code>OAuthProfile oauthProfile = (OAuthProfile) commonProfile
 String accessToken = oauthProfile.getAccessToken();
 // or
@@ -189,7 +189,7 @@ String accessToken = facebookProfile.getAccessToken();</code></pre>
 
 <h3>Demos</h3>
 
-Demos with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers are available at :
+Demos with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers are available at:
 <ul>
 <li><a href="https://github.com/leleuj/play-pac4j-java-demo">play-pac4j-java-demo</a> for Java applications</li>
 <li><a href="https://github.com/leleuj/play-pac4j-scala-demo">play-pac4j-scala-demo</a> for Scala applications.</li>
@@ -198,9 +198,9 @@ Demos with Facebook, Twitter, CAS, form authentication, basic auth authenticatio
 
 ## Versions
 
-The current version **1.1.2-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency :
+The current version **1.1.2-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.1.1** version :
+The latest release of the **play-pac4j** project is the **1.1.1** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
@@ -213,7 +213,7 @@ See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes)
 
 ## Contact
 
-If you have any question, please use the following mailing lists :
+If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
 
