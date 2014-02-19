@@ -30,7 +30,6 @@ It's available under the Apache 2 license and based on my <a href="https://githu
 <tr><td>Yahoo</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>YahooClient</td><td>YahooProfile</td></tr>
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
-<tr><td>MyOpenId</td><td>OpenID</td><td>pac4j-openid</td><td>MyOpenIdClient</td><td>MyOpenIdProfile</td></tr>
 <tr><td>Google</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
 </table>
 
@@ -112,10 +111,8 @@ You must define all the clients you want to support in the <i>onStart</i> method
   casProxyReceptor.setCallbackUrl("http://localhost:9000/casProxyCallback");
   casClient.setCasProxyReceptor(casProxyReceptor);*/
   casClient.setCasLoginUrl("http://localhost:8080/cas/login");
-  // OpenID
-  final MyOpenIdClient myOpenIdClient = new MyOpenIdClient();
-        
-  final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient, myOpenIdClient); // , casProxyReceptor);
+
+  final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient); // , casProxyReceptor);
   Config.setClients(clients);
 }</code></pre>
 
@@ -189,7 +186,7 @@ String accessToken = facebookProfile.getAccessToken();</code></pre>
 
 <h3>Demos</h3>
 
-Demos with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers are available at:
+Demos with Facebook, Twitter, CAS, form authentication and basic auth authentication providers are available at:
 <ul>
 <li><a href="https://github.com/leleuj/play-pac4j-java-demo">play-pac4j-java-demo</a> for Java applications</li>
 <li><a href="https://github.com/leleuj/play-pac4j-scala-demo">play-pac4j-scala-demo</a> for Scala applications.</li>
