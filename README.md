@@ -37,7 +37,6 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>PayPal</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>PayPalClient</td><td>PayPalProfile</td></tr>
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
-<tr><td>MyOpenId</td><td>OpenID</td><td>pac4j-openid</td><td>MyOpenIdClient</td><td>MyOpenIdProfile</td></tr>
 <tr><td>Google</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
 </table>
 
@@ -123,10 +122,8 @@ You must define all the clients you want to support in the *onStart* method of y
       casProxyReceptor.setCallbackUrl("http://localhost:9000/casProxyCallback");
       casClient.setCasProxyReceptor(casProxyReceptor);*/
       casClient.setCasLoginUrl("http://localhost:8080/cas/login");
-      // OpenID
-      final MyOpenIdClient myOpenIdClient = new MyOpenIdClient();
       
-      final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient, myOpenIdClient); // , casProxyReceptor);
+      final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient); // , casProxyReceptor);
       Config.setClients(clients);
     }
 
@@ -213,7 +210,7 @@ Or for all the OAuth profiles, to get the access token:
 
 ### Demos
 
-Demos with Facebook, Twitter, CAS, form authentication, basic auth authentication and myopenid.com providers are available at:
+Demos with Facebook, Twitter, CAS, form authentication and basic auth authentication providers are available at:
 
 1. [play-pac4j-java-demo](https://github.com/leleuj/play-pac4j-java-demo) for Java applications
 2. [play-pac4j-scala-demo](https://github.com/leleuj/play-pac4j-scala-demo) for Scala applications.
@@ -239,3 +236,4 @@ See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes)
 If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
+
