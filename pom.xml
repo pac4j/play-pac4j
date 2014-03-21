@@ -57,7 +57,7 @@
 		<repository>
 			<id>typesafe</id>
 			<name>typesafe-releases</name>
-			<url>http://repo.typesafe.com/typesafe/repo</url>
+			<url>http://repo.typesafe.com/typesafe/releases</url>
 		</repository>
 		<repository>
 			<id>scala-tools.org</id>
