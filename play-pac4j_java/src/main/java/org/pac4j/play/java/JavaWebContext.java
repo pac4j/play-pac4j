@@ -34,27 +34,27 @@ import play.mvc.Http.Session;
  * @since 1.1.0
  */
 public class JavaWebContext extends BaseResponseContext {
-    
+
     private final Request request;
-    
+
     private final Response response;
-    
+
     private final Session session;
-    
+
     public JavaWebContext(final Request request, final Response response, final Session session) {
         this.request = request;
         this.response = response;
         this.session = session;
     }
-    
+
     public String getRequestHeader(final String name) {
         return this.request.getHeader(name);
     }
-    
+
     public String getRequestMethod() {
         return this.request.method();
     }
-    
+
     public String getRequestParameter(final String name) {
         final Map<String, String[]> parameters = getRequestParameters();
         final String[] values = parameters.get(name);
@@ -63,7 +63,7 @@ public class JavaWebContext extends BaseResponseContext {
         }
         return null;
     }
-    
+
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> formParameters = this.request.body().asFormUrlEncoded();
         final Map<String, String[]> urlParameters = this.request.queryString();
@@ -76,7 +76,7 @@ public class JavaWebContext extends BaseResponseContext {
         }
         return parameters;
     }
-    
+
     public Object getSessionAttribute(final String key) {
         String sessionId = this.session.get(Constants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
@@ -84,14 +84,14 @@ public class JavaWebContext extends BaseResponseContext {
         }
         return null;
     }
-    
+
     public void setSessionAttribute(final String key, final Object value) {
         String sessionId = this.session.get(Constants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
             StorageHelper.save(sessionId, key, value);
         }
     }
-    
+
     @Override
     public void setResponseHeader(final String name, final String value) {
         this.response.setHeader(name, value);
@@ -115,5 +115,16 @@ public class JavaWebContext extends BaseResponseContext {
     public String getScheme() {
         // TODO: play api does not expose the scheme, just return http for now
         return "http";
+    }
+
+    public String readRequestContent() {
+        if (request.body() != null) {
+            return request.body().asText();
+        }
+        return "";
+    }
+
+    public String getFullRequestURL() {
+        return request.uri();
     }
 }
