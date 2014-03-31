@@ -20,7 +20,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.Callable;
 
+import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
+import org.pac4j.core.client.RedirectAction;
+import org.pac4j.core.client.RedirectAction.RedirectType;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
@@ -48,15 +51,15 @@ import play.mvc.SimpleResult;
  * @since 1.0.0
  */
 public final class RequiresAuthenticationAction extends Action<Result> {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationAction.class);
-    
+
     private static final Method clientNameMethod;
-    
+
     private static final Method targetUrlMethod;
-    
+
     private static final Method isAjaxMethod;
-    
+
     static {
         try {
             clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
@@ -68,7 +71,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
             throw new RuntimeException(e);
         }
     }
-    
+
     @Override
     @SuppressWarnings("unchecked")
     public Promise<SimpleResult> call(final Context context) throws Throwable {
@@ -88,7 +91,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         if (profile != null) {
             return this.delegate.call(context);
         }
-        
+
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());
         logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
@@ -102,10 +105,10 @@ public final class RequiresAuthenticationAction extends Action<Result> {
                 try {
                     // and compute redirection url
                     JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
-                        .session());
-                    final String redirectionUrl = client.getRedirectionUrl(webContext, true, isAjax);
-                    logger.debug("redirectionUrl : {}", redirectionUrl);
-                    return redirect(redirectionUrl);
+                            .session());
+                    final RedirectAction action = ((BaseClient) client).getRedirectAction(webContext, true, isAjax);
+                    logger.debug("redirectAction : {}", action);
+                    return convertToPromise(action);
                 } catch (final RequiresHttpAction e) {
                     // requires some specific HTTP action
                     final int code = e.getCode();
@@ -119,9 +122,19 @@ public final class RequiresAuthenticationAction extends Action<Result> {
                     logger.error(message);
                     throw new TechnicalException(message);
                 }
-                
             }
         });
         return promiseOfResult;
+    }
+
+    private SimpleResult convertToPromise(RedirectAction action) {
+        if (action.getType() == RedirectType.REDIRECT) {
+            return redirect(action.getLocation());
+        } else if (action.getType() == RedirectType.SUCCESS) {
+            return ok(action.getContent());
+        } else {
+            // Should not happen
+            return null;
+        }
     }
 }

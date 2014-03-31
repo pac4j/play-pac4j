@@ -75,9 +75,10 @@ trait ScalaController extends Controller {
    
     if (profile == null) {
       try {
-        val redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, true, isAjax)
-        logger.debug("redirectionUrl : {}", redirectionUrl)          
-        Future.successful(Redirect(redirectionUrl).withSession(newSession))
+        val redirectAction = getRedirectAction(request, newSession, clientName, targetUrl, true, isAjax)
+        logger.debug("redirectAction : {}", redirectAction)          
+        if (redirectAction.getType() == RedirectAction.RedirectType.REDIRECT) Future.successful(Redirect(redirectAction.getLocation()).withSession(newSession))
+        else Future.successful(Ok(redirectAction.getContent()).withSession(newSession))
       } catch {
         case ex: RequiresHttpAction => {
           val code = ex.getCode()
@@ -100,7 +101,7 @@ trait ScalaController extends Controller {
   }
 
     /**
-   * Returns the redirection url to the provider for authentication.
+   * Returns the redirection action to the provider for authentication.
    *
    * @param request
    * @param newSession
@@ -108,22 +109,22 @@ trait ScalaController extends Controller {
    * @param targetUrl
    * @return the redirection url to the provider
    */
-  protected def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = ""): String = {
-    var redirectionUrl:String = null
+  protected def getRedirectAction[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = ""): RedirectAction = {
+    var action:RedirectAction = null
     try {
       // redirect to the provider for authentication
-      redirectionUrl = getRedirectionUrl(request, newSession, clientName, targetUrl, false, false)
+      action = getRedirectAction(request, newSession, clientName, targetUrl, false, false)
     } catch {
       case ex: RequiresHttpAction => {
         // should not happen
       }
     }
-    logger.debug("redirectionUrl to : {}", redirectionUrl)
-    redirectionUrl    
+    logger.debug("redirectAction to : {}", action)
+    action    
   }
 
   /**
-   * Returns the redirection url to the provider for authentication.
+   * Returns the redirection action to the provider for authentication.
    *
    * @param request
    * @param newSession
@@ -133,7 +134,7 @@ trait ScalaController extends Controller {
    * @param isAjax
    * @return the redirection url to the provider
    */
-  private def getRedirectionUrl[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String, protectedPage: Boolean, isAjax: Boolean): String = {
+  private def getRedirectAction[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String, protectedPage: Boolean, isAjax: Boolean): RedirectAction = {
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save
@@ -147,9 +148,10 @@ trait ScalaController extends Controller {
     if (clients == null) {
       throw new TechnicalException("No client defined. Use Config.setClients(clients)")
     }
-    val redirectionUrl = clients.findClient(clientName).getRedirectionUrl(scalaWebContext, protectedPage, isAjax)
-    logger.debug("redirectionUrl to : {}", redirectionUrl)
-    redirectionUrl
+    val client = clients.findClient(clientName) match { case c:BaseClient[_,_] => c }
+    val action = client.getRedirectAction(scalaWebContext, protectedPage, isAjax)
+    logger.debug("redirectAction to : {}", action)
+    action
   }
 
   /**
