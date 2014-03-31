@@ -8,5 +8,4 @@ jdk:
 env:
   global:
   - secure: "WJ7zuzGgjYegBmIz3iJXnMKjbGjLFg8SYspbMZUzFI8Au7rTa/68dvu+Lt7hX+frSQWT0Lx7N6iraMjWS3M5yWzFrXa9HltSYlwhsqJkXUc5tk9EEHViWHx2xtfQrMm8zDy2fgKonmxHIQxzMjpPCkBXXhmJ3ZCf/YgY2iCpJPY="
-  - secure: "AQYDtDJzv2Mh66gb6pP2rUCCWA+XV2Gr4FZx/Ds/TdRTAJKV+YkCp7LCdua/O5CEmtR17c/THOHaeFkzsxK4qTFWHNGB3aeLN2wMZH9IddAjUCjaC0DQbWwbaWP8EuE+3rAiSm0ABcoprXCZJ7/KOzgaxH3B+Fs2jlx0qKZJ00E="
-
+  - secure: "4FSNxmGiDb/lPF4+fw02JFxTLZGQJDJxjQCLTbKJLOwMAx9L05ZccPaq6gX8TAwN2dVP8eINvpbPeidJ1t/MC8wX/Cvt1E+GWrrkn62sJYDR7fmuBJyRZyweDHT6wt6N5qGg+eqBu1SejTeylM7rNkAzeRH0qL/ZkS4qfv6RGN0="
