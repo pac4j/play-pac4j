@@ -16,6 +16,7 @@
 package org.pac4j.play;
 
 import org.pac4j.core.client.Clients;
+import java.util.regex.Pattern;
 
 /**
  * This class gathers all the configuration.
@@ -27,10 +28,15 @@ public final class Config {
     
     private final static String DEFAULT_URL = "/";
     
+    // just relative urls
+    private final static String DEFAULT_LOGOUT_URL_PATTERN = "/.*";
+
     private static String defaultSuccessUrl = DEFAULT_URL;
     
     private static String defaultLogoutUrl = DEFAULT_URL;
     
+    private static Pattern logoutUrlPattern = Pattern.compile(DEFAULT_LOGOUT_URL_PATTERN);
+
     // 1 hour = 3600 seconds
     private static int profileTimeout = 3600;
     
@@ -100,6 +106,14 @@ public final class Config {
     
     public static void setErrorPage403(final String errorPage403) {
         Config.errorPage403 = errorPage403;
+    }
+
+    public static Pattern getLogoutUrlPattern() {
+        return logoutUrlPattern;
+    }
+
+    public static void setLogoutUrlPattern(String logoutUrlPattern) {
+        Config.logoutUrlPattern = Pattern.compile(logoutUrlPattern);
     }
 
     /**
