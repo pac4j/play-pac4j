@@ -65,20 +65,23 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser:BodyParser[A], isAjax: Boolean = false)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean = false)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get
     logger.debug("sessionId : {}", sessionId)
     val profile = getUserProfile(request)
     logger.debug("profile : {}", profile)
-   
+
     if (profile == null) {
       try {
         val redirectAction = getRedirectAction(request, newSession, clientName, targetUrl, true, isAjax)
-        logger.debug("redirectAction : {}", redirectAction)          
-        if (redirectAction.getType() == RedirectAction.RedirectType.REDIRECT) Future.successful(Redirect(redirectAction.getLocation()).withSession(newSession))
-        else Future.successful(Ok(redirectAction.getContent()).withSession(newSession))
+        logger.debug("redirectAction : {}", redirectAction)
+        redirectAction.getType() match {
+          case RedirectAction.RedirectType.REDIRECT => Future.successful(Redirect(redirectAction.getLocation()).withSession(newSession))
+          case RedirectAction.RedirectType.SUCCESS => Future.successful(Ok(redirectAction.getContent()).withSession(newSession).as(HTML))
+          case _ => throw new TechnicalException("Unexpected RedirectAction : " + redirectAction.getType)
+        }
       } catch {
         case ex: RequiresHttpAction => {
           val code = ex.getCode()
@@ -92,15 +95,15 @@ trait ScalaController extends Controller {
         }
       }
     } else {
-      action(profile)(request)      
+      action(profile)(request)
     }
   }
-  
-  protected def RequiresAuthentication(clientName: String, targetUrl: String = "", isAjax: Boolean = false)(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = { 
+
+  protected def RequiresAuthentication(clientName: String, targetUrl: String = "", isAjax: Boolean = false)(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = {
     RequiresAuthentication(clientName, targetUrl, parse.anyContent, isAjax)(action)
   }
 
-    /**
+  /**
    * Returns the redirection action to the provider for authentication.
    *
    * @param request
@@ -110,7 +113,7 @@ trait ScalaController extends Controller {
    * @return the redirection url to the provider
    */
   protected def getRedirectAction[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String = ""): RedirectAction = {
-    var action:RedirectAction = null
+    var action: RedirectAction = null
     try {
       // redirect to the provider for authentication
       action = getRedirectAction(request, newSession, clientName, targetUrl, false, false)
@@ -120,7 +123,7 @@ trait ScalaController extends Controller {
       }
     }
     logger.debug("redirectAction to : {}", action)
-    action    
+    action
   }
 
   /**
@@ -148,7 +151,7 @@ trait ScalaController extends Controller {
     if (clients == null) {
       throw new TechnicalException("No client defined. Use Config.setClients(clients)")
     }
-    val client = clients.findClient(clientName) match { case c:BaseClient[_,_] => c }
+    val client = clients.findClient(clientName) match { case c: BaseClient[_, _] => c }
     val action = client.getRedirectAction(scalaWebContext, protectedPage, isAjax)
     logger.debug("redirectAction to : {}", action)
     action
