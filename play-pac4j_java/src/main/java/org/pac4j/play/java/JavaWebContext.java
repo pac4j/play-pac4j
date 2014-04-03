@@ -41,10 +41,17 @@ public class JavaWebContext extends BaseResponseContext {
 
     private final Session session;
 
+    // play api does not expose the scheme, just return http for now
+    private String scheme = "http";
+
     public JavaWebContext(final Request request, final Response response, final Session session) {
         this.request = request;
         this.response = response;
         this.session = session;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
     }
 
     public String getRequestHeader(final String name) {
@@ -113,18 +120,14 @@ public class JavaWebContext extends BaseResponseContext {
     }
 
     public String getScheme() {
-        // TODO: play api does not expose the scheme, just return http for now
-        return "http";
+        return this.scheme;
     }
 
     public String readRequestContent() {
-        if (request.body() != null) {
-            return request.body().asText();
-        }
         return "";
     }
 
     public String getFullRequestURL() {
-        return request.uri();
+        return getScheme() + "://" + request.host() + request.uri();
     }
 }

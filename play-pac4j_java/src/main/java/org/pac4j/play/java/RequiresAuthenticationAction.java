@@ -23,7 +23,6 @@ import java.util.concurrent.Callable;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.RedirectAction;
-import org.pac4j.core.client.RedirectAction.RedirectType;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
@@ -128,13 +127,13 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     }
 
     private SimpleResult convertToPromise(RedirectAction action) {
-        if (action.getType() == RedirectType.REDIRECT) {
+        switch (action.getType()) {
+        case REDIRECT:
             return redirect(action.getLocation());
-        } else if (action.getType() == RedirectType.SUCCESS) {
-            return ok(action.getContent());
-        } else {
-            // Should not happen
-            return null;
+        case SUCCESS:
+            return ok(action.getContent()).as(Constants.HTML_CONTENT_TYPE);
+        default:
+            throw new TechnicalException("Unsupported RedirectAction type " + action.getType());
         }
     }
 }
