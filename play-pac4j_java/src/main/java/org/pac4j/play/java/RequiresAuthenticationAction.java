@@ -19,7 +19,9 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
+import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
@@ -44,15 +46,15 @@ import play.mvc.Result;
  * @since 1.0.0
  */
 public final class RequiresAuthenticationAction extends Action<Result> {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationAction.class);
-    
+
     private static final Method clientNameMethod;
-    
+
     private static final Method targetUrlMethod;
-    
+
     private static final Method isAjaxMethod;
-    
+
     static {
         try {
             clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
@@ -64,7 +66,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
             throw new RuntimeException(e);
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public Result call(final Context context) throws Throwable {
@@ -84,7 +86,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         if (profile != null) {
             return this.delegate.call(context);
         }
-        
+
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());
         logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
@@ -95,9 +97,9 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         try {
             // and compute redirection url
             JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context.session());
-            final String redirectionUrl = client.getRedirectionUrl(webContext, true, isAjax);
-            logger.debug("redirectionUrl : {}", redirectionUrl);
-            return redirect(redirectionUrl);
+            final RedirectAction action = ((BaseClient) client).getRedirectAction(webContext, true, isAjax);
+            logger.debug("redirectionAction : {}", action);
+            return convertToResult(action);
         } catch (final RequiresHttpAction e) {
             // requires some specific HTTP action
             final int code = e.getCode();
@@ -110,6 +112,17 @@ public final class RequiresAuthenticationAction extends Action<Result> {
             final String message = "Unsupported HTTP action : " + code;
             logger.error(message);
             throw new TechnicalException(message);
+        }
+    }
+
+    private Result convertToResult(RedirectAction action) {
+        switch (action.getType()) {
+        case REDIRECT:
+            return redirect(action.getLocation());
+        case SUCCESS:
+            return ok(action.getContent()).as(Constants.HTML_CONTENT_TYPE);
+        default:
+            throw new TechnicalException("Unsupported RedirectAction type " + action.getType());
         }
     }
 }
