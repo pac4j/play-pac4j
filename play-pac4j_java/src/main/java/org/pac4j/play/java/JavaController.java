@@ -16,7 +16,9 @@
 package org.pac4j.play.java;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
@@ -34,9 +36,9 @@ import org.slf4j.LoggerFactory;
  * @since 1.0.0
  */
 public class JavaController extends CallbackController {
-    
+
     protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
-    
+
     /**
      * This method returns the url of the provider where the user must be redirected for authentication.<br />
      * The current requested url is saved into session to be restored after authentication.
@@ -44,10 +46,10 @@ public class JavaController extends CallbackController {
      * @param clientName
      * @return the url of the provider where to redirect the user
      */
-    protected static String getRedirectionUrl(final String clientName) {
-        return getRedirectionUrl(clientName, null);
+    protected static RedirectAction getRedirectAction(final String clientName) {
+        return getRedirectAction(clientName, null);
     }
-    
+
     /**
      * This method returns the url of the provider where the user must be redirected for authentication.<br />
      * The input <code>targetUrl</code> (or the current requested url if <code>null</code>) is saved into session to be restored after
@@ -57,7 +59,7 @@ public class JavaController extends CallbackController {
      * @param targetUrl
      * @return the url of the provider where to redirect the user
      */
-    protected static String getRedirectionUrl(final String clientName, final String targetUrl) {
+    protected static RedirectAction getRedirectAction(final String clientName, final String targetUrl) {
         // get or create session id
         String sessionId = StorageHelper.getOrCreationSessionId(session());
         // requested url to save
@@ -72,16 +74,16 @@ public class JavaController extends CallbackController {
         }
         // redirect to the provider for authentication
         JavaWebContext webContext = new JavaWebContext(request(), response(), session());
-        String redirectionUrl = null;
+        RedirectAction action = null;
         try {
-            redirectionUrl = clients.findClient(clientName).getRedirectionUrl(webContext, false, false);
+            action = ((BaseClient) clients.findClient(clientName)).getRedirectAction(webContext, false, false);
         } catch (RequiresHttpAction e) {
             // should not happen
         }
-        logger.debug("redirectionUrl : {}", redirectionUrl);
-        return redirectionUrl;
+        logger.debug("redirectionAction : {}", action);
+        return action;
     }
-    
+
     /**
      * This method returns the user profile if the user is authenticated or <code>null</code> otherwise.
      * 

@@ -42,29 +42,27 @@ import play.mvc.Results;
  * @since 1.0.0
  */
 public class CallbackController extends Controller {
-    
+
     protected static final Logger logger = LoggerFactory.getLogger(CallbackController.class);
-    
+
     /**
      * This method handles the callback call from the provider to finish the authentication process. The credentials and then the profile of
      * the authenticated user is retrieved and the originally requested url (or the specific saved url) is restored.
      * 
      * @return the redirection to the saved request
      */
-    @SuppressWarnings({
-        "rawtypes", "unchecked"
-    })
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public static Result callback() {
         // clients group from config
         final Clients clientsGroup = Config.getClients();
-        
+
         // web context
         final JavaWebContext context = new JavaWebContext(request(), response(), session());
-        
+
         // get the client from its type
         final BaseClient client = (BaseClient) clientsGroup.findClient(context);
         logger.debug("client : {}", client);
-        
+
         // get credentials
         Credentials credentials = null;
         try {
@@ -81,32 +79,32 @@ public class CallbackController extends Controller {
             } else if (code == HttpConstants.OK) {
                 final String content = context.getResponseContent();
                 logger.debug("render : {}", content);
-                return ok(content);
+                return ok(content).as(Constants.HTML_CONTENT_TYPE);
             }
             final String message = "Unsupported HTTP action : " + code;
             logger.error(message);
             throw new TechnicalException(message);
         }
-        
+
         // get user profile
         final CommonProfile profile = client.getUserProfile(credentials, context);
         logger.debug("profile : {}", profile);
-        
+
         // get or create sessionId
         final String sessionId = StorageHelper.getOrCreationSessionId(session());
-        
+
         // save user profile only if it's not null
         if (profile != null) {
             StorageHelper.saveProfile(sessionId, profile);
         }
-        
+
         // get requested url
         final String requestedUrl = StorageHelper.getRequestedUrl(sessionId, client.getName());
-        
+
         // retrieve saved request and redirect
         return redirect(defaultUrl(requestedUrl, Config.getDefaultSuccessUrl()));
     }
-    
+
     /**
      * This method logouts the authenticated user.
      */
@@ -121,7 +119,7 @@ public class CallbackController extends Controller {
         }
         session().remove(Constants.SESSION_ID);
     }
-    
+
     /**
      * This method logouts the authenticated user and send him to a blank page.
      * 
@@ -131,7 +129,7 @@ public class CallbackController extends Controller {
         logout();
         return ok();
     }
-    
+
     /**
      * This method logouts the authenticated user and send him to the url defined in the
      * {@link Constants#REDIRECT_URL_LOGOUT_PARAMETER_NAME} parameter name or to the <code>defaultLogoutUrl</code>.
@@ -149,7 +147,7 @@ public class CallbackController extends Controller {
         }
         return redirect(defaultUrl(value, Config.getDefaultLogoutUrl()));
     }
-    
+
     /**
      * This method returns the default url from a specified url compared with a default url.
      * 
