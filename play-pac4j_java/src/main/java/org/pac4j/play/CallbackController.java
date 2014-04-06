@@ -133,6 +133,7 @@ public class CallbackController extends Controller {
     /**
      * This method logouts the authenticated user and send him to the url defined in the
      * {@link Constants#REDIRECT_URL_LOGOUT_PARAMETER_NAME} parameter name or to the <code>defaultLogoutUrl</code>.
+     * This parameter is matched against the {@link Config.getLogoutUrlPattern()}.
      * 
      * @return the redirection to the "logout url"
      */
@@ -143,7 +144,11 @@ public class CallbackController extends Controller {
         final String[] values = parameters.get(Constants.REDIRECT_URL_LOGOUT_PARAMETER_NAME);
         String value = null;
         if (values != null && values.length == 1) {
-            value = values[0];
+            String value0 = values[0];
+            // check the url pattern
+            if (Config.getLogoutUrlPattern().matcher(value0).matches()) {
+                value = value0;
+            }
         }
         return redirect(defaultUrl(value, Config.getDefaultLogoutUrl()));
     }
