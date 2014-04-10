@@ -185,7 +185,7 @@ public final class StorageHelper {
      * @param key
      */
     public static void remove(final String key) {
-        save(key, null, 0);
+        Cache.remove(getCacheKey(key));
     }
 
     static String getCacheKey(final String key) {
