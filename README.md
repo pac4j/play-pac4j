@@ -7,7 +7,8 @@ It supports these 4 protocols on client side:
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
-4. OpenID.
+4. OpenID
+5. SAML 2.0.
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
