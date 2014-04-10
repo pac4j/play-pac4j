@@ -72,7 +72,7 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.2.0-SNAPSHOT"
+      "org.pac4j" % "play-pac4j_java" % "1.2.0"
     )
 
 Or the **play-pac4j_scala** dependency for a Scala application.
@@ -91,10 +91,10 @@ If you want to use a specific client support, you need to add the appropriate de
 4. for OpenID support, the *pac4j-openid* dependency is required.
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "pac4j-http" % "1.5.0-SNAPSHOT",
-      "org.pac4j" % "pac4j-cas" % "1.5.0-SNAPSHOT",
-      "org.pac4j" % "pac4j-openid" % "1.5.0-SNAPSHOT",
-      "org.pac4j" % "pac4j-oauth" % "1.5.0-SNAPSHOT"
+      "org.pac4j" % "pac4j-http" % "1.5.0",
+      "org.pac4j" % "pac4j-cas" % "1.5.0",
+      "org.pac4j" % "pac4j-openid" % "1.5.0",
+      "org.pac4j" % "pac4j-oauth" % "1.5.0"
     )
 
 ### Define the supported clients
@@ -221,14 +221,14 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.2.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.2.1-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.1.1** version:
+The latest release of the **play-pac4j** project is the **1.2.0** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
-        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.9</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId>
-        <version>1.1.1</version>
+        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala</artifactId>
+        <version>1.2.0</version>
     </dependency>
 
 See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
@@ -239,4 +239,3 @@ See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes)
 If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
-
