@@ -119,11 +119,6 @@ public class ScalaWebContext<C> implements WebContext {
         return "http";
     }
 
-    public String readRequestContent() {
-        // TODO method to remove from WebContext
-        return "";
-    }
-
     public String getFullRequestURL() {
         throw new IllegalArgumentException("not implemented");
     }
