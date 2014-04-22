@@ -128,7 +128,4 @@ public class ScalaWebContext<C> implements WebContext {
         throw new IllegalArgumentException("not implemented");
     }
 
-    public void sendRedirect(String location) {
-        throw new IllegalArgumentException("not implemented");
-    }
 }
