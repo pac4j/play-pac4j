@@ -123,10 +123,6 @@ public class JavaWebContext extends BaseResponseContext {
         return this.scheme;
     }
 
-    public String readRequestContent() {
-        return "";
-    }
-
     public String getFullRequestURL() {
         return getScheme() + "://" + request.host() + request.uri();
     }
