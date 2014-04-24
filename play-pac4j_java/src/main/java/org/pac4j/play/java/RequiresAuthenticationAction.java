@@ -18,7 +18,6 @@ package org.pac4j.play.java;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.concurrent.Callable;
 
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
@@ -36,7 +35,7 @@ import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import play.libs.Akka;
+import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
@@ -98,9 +97,9 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         // get client
         final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
         logger.debug("client : {}", client);
-        @SuppressWarnings("deprecation")
-        Promise<SimpleResult> promiseOfResult = Akka.future(new Callable<SimpleResult>() {
-            public SimpleResult call() {
+        Promise<SimpleResult> promise = Promise.promise(new Function0<SimpleResult>() {
+            @SuppressWarnings("rawtypes")
+            public SimpleResult apply() {
                 try {
                     // and compute redirection url
                     JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
@@ -123,7 +122,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
                 }
             }
         });
-        return promiseOfResult;
+        return promise;
     }
 
     private SimpleResult convertToPromise(RedirectAction action) {
