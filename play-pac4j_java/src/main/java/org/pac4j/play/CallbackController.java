@@ -16,6 +16,7 @@
 package org.pac4j.play;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
@@ -29,7 +30,9 @@ import org.pac4j.play.java.JavaWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.libs.Akka;
 import play.mvc.Controller;
+import play.mvc.Http.Session;
 import play.mvc.Result;
 import play.mvc.Results;
 
@@ -57,52 +60,58 @@ public class CallbackController extends Controller {
         final Clients clientsGroup = Config.getClients();
 
         // web context
-        final JavaWebContext context = new JavaWebContext(request(), response(), session());
+        final Session session = session();
+        final JavaWebContext context = new JavaWebContext(request(), response(), session);
 
         // get the client from its type
         final BaseClient client = (BaseClient) clientsGroup.findClient(context);
         logger.debug("client : {}", client);
 
-        // get credentials
-        Credentials credentials = null;
-        try {
-            credentials = client.getCredentials(context);
-            logger.debug("credentials : {}", credentials);
-        } catch (final RequiresHttpAction e) {
-            // requires some specific HTTP action
-            final int code = context.getResponseStatus();
-            logger.debug("requires HTTP action : {}", code);
-            if (code == HttpConstants.UNAUTHORIZED) {
-                return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
-            } else if (code == HttpConstants.TEMP_REDIRECT) {
-                return Results.status(HttpConstants.TEMP_REDIRECT);
-            } else if (code == HttpConstants.OK) {
-                final String content = context.getResponseContent();
-                logger.debug("render : {}", content);
-                return ok(content).as(Constants.HTML_CONTENT_TYPE);
+        return async(Akka.future(new Callable<Result>() {
+            public Result call() {
+                // get credentials
+                Credentials credentials = null;
+                try {
+                    credentials = client.getCredentials(context);
+                    logger.debug("credentials : {}", credentials);
+                } catch (final RequiresHttpAction e) {
+                    // requires some specific HTTP action
+                    final int code = context.getResponseStatus();
+                    logger.debug("requires HTTP action : {}", code);
+                    if (code == HttpConstants.UNAUTHORIZED) {
+                        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+                    } else if (code == HttpConstants.TEMP_REDIRECT) {
+                        return Results.status(HttpConstants.TEMP_REDIRECT);
+                    } else if (code == HttpConstants.OK) {
+                        final String content = context.getResponseContent();
+                        logger.debug("render : {}", content);
+                        return ok(content).as(Constants.HTML_CONTENT_TYPE);
+                    }
+                    final String message = "Unsupported HTTP action : " + code;
+                    logger.error(message);
+                    throw new TechnicalException(message);
+                }
+
+                // get user profile
+                final CommonProfile profile = client.getUserProfile(credentials, context);
+                logger.debug("profile : {}", profile);
+
+                // get or create sessionId
+                final String sessionId = StorageHelper.getOrCreationSessionId(session);
+
+                // save user profile only if it's not null
+                if (profile != null) {
+                    StorageHelper.saveProfile(sessionId, profile);
+                }
+
+                // get requested url
+                final String requestedUrl = StorageHelper.getRequestedUrl(sessionId, client.getName());
+
+                // retrieve saved request and redirect
+                return redirect(defaultUrl(requestedUrl, Config.getDefaultSuccessUrl()));
+
             }
-            final String message = "Unsupported HTTP action : " + code;
-            logger.error(message);
-            throw new TechnicalException(message);
-        }
-
-        // get user profile
-        final CommonProfile profile = client.getUserProfile(credentials, context);
-        logger.debug("profile : {}", profile);
-
-        // get or create sessionId
-        final String sessionId = StorageHelper.getOrCreationSessionId(session());
-
-        // save user profile only if it's not null
-        if (profile != null) {
-            StorageHelper.saveProfile(sessionId, profile);
-        }
-
-        // get requested url
-        final String requestedUrl = StorageHelper.getRequestedUrl(sessionId, client.getName());
-
-        // retrieve saved request and redirect
-        return redirect(defaultUrl(requestedUrl, Config.getDefaultSuccessUrl()));
+        }));
     }
 
     /**

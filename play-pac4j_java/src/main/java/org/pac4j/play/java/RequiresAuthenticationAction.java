@@ -18,6 +18,7 @@ package org.pac4j.play.java;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.Callable;
 
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
@@ -35,6 +36,7 @@ import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.libs.Akka;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
@@ -94,25 +96,31 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         // get client
         final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
         logger.debug("client : {}", client);
-        try {
-            // and compute redirection url
-            JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context.session());
-            final RedirectAction action = ((BaseClient) client).getRedirectAction(webContext, true, isAjax);
-            logger.debug("redirectionAction : {}", action);
-            return convertToResult(action);
-        } catch (final RequiresHttpAction e) {
-            // requires some specific HTTP action
-            final int code = e.getCode();
-            logger.debug("requires HTTP action : {}", code);
-            if (code == HttpConstants.UNAUTHORIZED) {
-                return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
-            } else if (code == HttpConstants.FORBIDDEN) {
-                return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+
+        return async(Akka.future(new Callable<Result>() {
+            public Result call() {
+                try {
+                    // and compute redirection url
+                    JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
+                            .session());
+                    final RedirectAction action = ((BaseClient) client).getRedirectAction(webContext, true, isAjax);
+                    logger.debug("redirectionAction : {}", action);
+                    return convertToResult(action);
+                } catch (final RequiresHttpAction e) {
+                    // requires some specific HTTP action
+                    final int code = e.getCode();
+                    logger.debug("requires HTTP action : {}", code);
+                    if (code == HttpConstants.UNAUTHORIZED) {
+                        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+                    } else if (code == HttpConstants.FORBIDDEN) {
+                        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+                    }
+                    final String message = "Unsupported HTTP action : " + code;
+                    logger.error(message);
+                    throw new TechnicalException(message);
+                }
             }
-            final String message = "Unsupported HTTP action : " + code;
-            logger.error(message);
-            throw new TechnicalException(message);
-        }
+        }));
     }
 
     private Result convertToResult(RedirectAction action) {
