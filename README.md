@@ -90,13 +90,17 @@ If you want to use a specific client support, you need to add the appropriate de
 2. for CAS support, the *pac4j-cas* dependency is required
 3. for HTTP support, the *pac4j-http* dependency is required
 4. for OpenID support, the *pac4j-openid* dependency is required.
+5. for SAML 2.0 support, the *pac4j-saml* dependency is required.
 
+```
     libraryDependencies ++= Seq(
-      "org.pac4j" % "pac4j-http" % "1.5.0",
-      "org.pac4j" % "pac4j-cas" % "1.5.0",
-      "org.pac4j" % "pac4j-openid" % "1.5.0",
-      "org.pac4j" % "pac4j-oauth" % "1.5.0"
+      "org.pac4j" % "pac4j-http" % "1.5.1",
+      "org.pac4j" % "pac4j-cas" % "1.5.1",
+      "org.pac4j" % "pac4j-openid" % "1.5.1",
+      "org.pac4j" % "pac4j-oauth" % "1.5.1",
+      "org.pac4j" % "pac4j-saml" % "1.5.1"
     )
+```
 
 ### Define the supported clients
 
