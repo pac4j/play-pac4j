@@ -67,7 +67,7 @@ Learn more by browsing the <a href="http://www.pac4j.org/apidocs/play-pac4j/inde
 
 First, the dependency on <b>play-pac4j_java</b> must be defined in the <i>Build.scala</i> file for a Java application:
 <pre><code>val appDependencies = Seq(
-  "org.pac4j" % "play-pac4j_java" % "1.1.2"
+  "org.pac4j" % "play-pac4j_java" % "1.1.3"
 )</code></pre>
 Or the <b>play-pac4j_scala2.9</b> dependency for a Scala application in Play framework 2.0 or the <b>play-pac4j_scala2.10</b> dependency for a Scala application in Play framework 2.1.
 
@@ -85,10 +85,10 @@ If you want to use a specific client support, you need to add the appropriate de
 </ul>
 
     val appDependencies = Seq(
-        "org.pac4j" % "pac4j-http" % "1.5.0",
-        "org.pac4j" % "pac4j-cas" % "1.5.0",
-        "org.pac4j" % "pac4j-openid" % "1.5.0",
-        "org.pac4j" % "pac4j-oauth" % "1.5.0"
+        "org.pac4j" % "pac4j-http" % "1.5.1",
+        "org.pac4j" % "pac4j-cas" % "1.5.1",
+        "org.pac4j" % "pac4j-openid" % "1.5.1",
+        "org.pac4j" % "pac4j-oauth" % "1.5.1"
     )
 
 
@@ -200,14 +200,14 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.1.3-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.1.4-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.1.2** version:
+The latest release of the **play-pac4j** project is the **1.1.3** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
         <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.9</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId>
-        <version>1.1.2</version>
+        <version>1.1.3</version>
     </dependency>
 
 See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
