@@ -72,7 +72,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Promise<SimpleResult> call(final Context context) throws Throwable {
+    public Promise<Result> call(final Context context) throws Throwable {
         final InvocationHandler invocationHandler = Proxy.getInvocationHandler(this.configuration);
         final String clientName = (String) invocationHandler.invoke(this.configuration, clientNameMethod, null);
         logger.debug("clientName : {}", clientName);
@@ -97,9 +97,9 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         // get client
         final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
         logger.debug("client : {}", client);
-        Promise<SimpleResult> promise = Promise.promise(new Function0<SimpleResult>() {
+        Promise<Result> promise = Promise.promise(new Function0<Result>() {
             @SuppressWarnings("rawtypes")
-            public SimpleResult apply() {
+            public Result apply() {
                 try {
                     // and compute redirection url
                     JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
@@ -125,7 +125,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         return promise;
     }
 
-    private SimpleResult convertToPromise(RedirectAction action) {
+    private Result convertToPromise(RedirectAction action) {
         switch (action.getType()) {
         case REDIRECT:
             return redirect(action.getLocation());

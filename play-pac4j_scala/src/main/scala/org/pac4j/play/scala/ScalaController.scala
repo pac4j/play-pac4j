@@ -65,7 +65,7 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean = false)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Constants.SESSION_ID).get

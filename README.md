@@ -17,6 +17,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
+<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x</td><td>play-pac4j_scala v1.3.x</td></tr>
 </table>
 
 
@@ -73,7 +74,7 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.2.1"
+      "org.pac4j" % "play-pac4j_java" % "1.3.0-SNAPSHOT"
     )
 
 Or the **play-pac4j_scala** dependency for a Scala application.
@@ -226,7 +227,7 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.2.2-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.3.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
 The latest release of the **play-pac4j** project is the **1.2.1** version:
 
