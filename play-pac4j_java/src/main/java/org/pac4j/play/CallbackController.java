@@ -142,7 +142,7 @@ public class CallbackController extends Controller {
     /**
      * This method logouts the authenticated user and send him to the url defined in the
      * {@link Constants#REDIRECT_URL_LOGOUT_PARAMETER_NAME} parameter name or to the <code>defaultLogoutUrl</code>.
-     * This parameter is matched against the {@link Config.getLogoutUrlPattern()}.
+     * This parameter is matched against the {@link Config#getLogoutUrlPattern()}.
      * 
      * @return the redirection to the "logout url"
      */
