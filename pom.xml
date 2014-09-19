@@ -67,7 +67,7 @@
     </modules>
 
     <properties>
-        <pac4j.version>1.5.1</pac4j.version>
+        <pac4j.version>1.6.0-RC2-SNAPSHOT</pac4j.version>
     </properties>
 
     <dependencyManagement>
@@ -110,8 +110,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.5.1</version>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>1.6</source>
+                        <target>1.6</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>
