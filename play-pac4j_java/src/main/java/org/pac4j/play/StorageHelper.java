@@ -144,7 +144,11 @@ public final class StorageHelper {
      */
     public static void save(final String sessionId, final String key, final Object value) {
         if (sessionId != null) {
-            save(sessionId + Constants.SEPARATOR + key, value, Config.getSessionTimeout());
+            if (value != null) {
+                save(sessionId + Constants.SEPARATOR + key, value, Config.getSessionTimeout());
+            } else {
+                remove(sessionId + Constants.SEPARATOR + key);
+            }
         }
     }
     
