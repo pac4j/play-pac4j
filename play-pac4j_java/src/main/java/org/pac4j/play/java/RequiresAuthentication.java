@@ -43,4 +43,8 @@ public @interface RequiresAuthentication {
     String targetUrl() default "";
     
     boolean isAjax() default false;
+    
+    String requireAnyRole() default "";
+    
+    String requireAllRoles() default "";
 }
