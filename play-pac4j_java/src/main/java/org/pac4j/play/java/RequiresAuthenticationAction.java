@@ -101,13 +101,13 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         // has a profile
         if (profile != null) {
             boolean access = true;
-            if (requireAnyRole != null) {
+            if (StringUtils.isNotBlank(requireAnyRole)) {
                 final String[] expectedRoles = StringUtils.split(requireAnyRole, ",");
                 // not the expected role -> 403
                 if (!profile.hasAnyRole(expectedRoles)) {
                     access = false;
                 }
-            } else if (requireAllRoles != null) {
+            } else if (StringUtils.isNotBlank(requireAllRoles)) {
                 final String[] expectedRoles = StringUtils.split(requireAllRoles, ",");
                 // not all the expected roles -> 403
                 if (!profile.hasAllRoles(expectedRoles)) {
