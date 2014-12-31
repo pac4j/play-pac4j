@@ -20,6 +20,7 @@ import scala.concurrent.Future
 import play.api._
 import play.api.mvc._
 import org.pac4j.core.client._
+import org.pac4j.core.context._
 import org.pac4j.core.credentials._
 import org.pac4j.core.profile._
 import org.pac4j.core.util._
@@ -86,9 +87,9 @@ trait ScalaController extends Controller {
         case ex: RequiresHttpAction => {
           val code = ex.getCode()
           if (code == 401) {
-            Future.successful(Unauthorized(Config.getErrorPage401()).as(HTML))
+            Future.successful(Unauthorized(BaseConfig.getErrorPage401()).as(HTML))
           } else if (code == 403) {
-            Future.successful(Forbidden(Config.getErrorPage403()).as(HTML))
+            Future.successful(Forbidden(BaseConfig.getErrorPage403()).as(HTML))
           } else {
             throw new TechnicalException("Unexpected HTTP code : " + code)
           }

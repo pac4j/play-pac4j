@@ -78,13 +78,13 @@ public class CallbackController extends Controller {
                     final int code = context.getResponseStatus();
                     logger.debug("requires HTTP action : {}", code);
                     if (code == HttpConstants.UNAUTHORIZED) {
-                        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+                        return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
                     } else if (code == HttpConstants.TEMP_REDIRECT) {
                         return Results.status(HttpConstants.TEMP_REDIRECT);
                     } else if (code == HttpConstants.OK) {
                         final String content = context.getResponseContent();
                         logger.debug("render : {}", content);
-                        return ok(content).as(Constants.HTML_CONTENT_TYPE);
+                        return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
                     }
                     final String message = "Unsupported HTTP action : " + code;
                     logger.error(message);

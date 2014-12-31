@@ -16,6 +16,7 @@
 package org.pac4j.play;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,9 +31,9 @@ import play.mvc.Http.Session;
  * @since 1.1.0
  */
 public final class StorageHelper {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(StorageHelper.class);
-    
+
     /**
      * Get a session identifier and generates it if no session exists.
      * 
@@ -53,7 +54,7 @@ public final class StorageHelper {
         }
         return sessionId;
     }
-    
+
     /**
      * Generate a session identifier.
      * 
@@ -62,7 +63,7 @@ public final class StorageHelper {
     public static String generateSessionId() {
         return java.util.UUID.randomUUID().toString();
     }
-    
+
     /**
      * Get the profile from storage.
      * 
@@ -75,7 +76,7 @@ public final class StorageHelper {
         }
         return null;
     }
-    
+
     /**
      * Save a user profile in storage.
      * 
@@ -87,7 +88,7 @@ public final class StorageHelper {
             save(sessionId, profile, Config.getProfileTimeout());
         }
     }
-    
+
     /**
      * Remove a user profile from storage.
      * 
@@ -98,7 +99,7 @@ public final class StorageHelper {
             remove(sessionId);
         }
     }
-    
+
     /**
      * Get a requested url from storage.
      * 
@@ -107,9 +108,9 @@ public final class StorageHelper {
      * @return the requested url
      */
     public static String getRequestedUrl(final String sessionId, final String clientName) {
-        return (String) get(sessionId, clientName + Constants.SEPARATOR + Constants.REQUESTED_URL);
+        return (String) get(sessionId, clientName + Constants.SEPARATOR + HttpConstants.REQUESTED_URL);
     }
-    
+
     /**
      * Save a requested url to storage.
      * 
@@ -118,9 +119,9 @@ public final class StorageHelper {
      * @param requestedUrl
      */
     public static void saveRequestedUrl(final String sessionId, final String clientName, final String requestedUrl) {
-        save(sessionId, clientName + Constants.SEPARATOR + Constants.REQUESTED_URL, requestedUrl);
+        save(sessionId, clientName + Constants.SEPARATOR + HttpConstants.REQUESTED_URL, requestedUrl);
     }
-    
+
     /**
      * Get an object from storage.
      * 
@@ -134,7 +135,7 @@ public final class StorageHelper {
         }
         return null;
     }
-    
+
     /**
      * Save an object in storage.
      * 
@@ -151,7 +152,7 @@ public final class StorageHelper {
             }
         }
     }
-    
+
     /**
      * Remove an object in storage.
      * 
@@ -161,7 +162,7 @@ public final class StorageHelper {
     public static void remove(final String sessionId, final String key) {
         remove(sessionId + Constants.SEPARATOR + key);
     }
-    
+
     /**
      * Get an object from storage.
      * 
@@ -171,7 +172,7 @@ public final class StorageHelper {
     public static Object get(final String key) {
         return Cache.get(getCacheKey(key));
     }
-    
+
     /**
      * Save an object in storage.
      * 
@@ -182,7 +183,7 @@ public final class StorageHelper {
     public static void save(final String key, final Object value, final int timeout) {
         Cache.set(getCacheKey(key), value, timeout);
     }
-    
+
     /**
      * Remove an object from storage.
      * 
@@ -193,8 +194,6 @@ public final class StorageHelper {
     }
 
     static String getCacheKey(final String key) {
-        return (StringUtils.isNotBlank(Config.getCacheKeyPrefix()))
-                ? Config.getCacheKeyPrefix() + ":" + key
-                : key;
+        return (StringUtils.isNotBlank(Config.getCacheKeyPrefix())) ? Config.getCacheKeyPrefix() + ":" + key : key;
     }
 }
