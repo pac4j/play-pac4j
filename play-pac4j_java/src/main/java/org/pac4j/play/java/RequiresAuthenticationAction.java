@@ -57,9 +57,9 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     private static final Method targetUrlMethod;
 
     private static final Method isAjaxMethod;
-    
+
     private static final Method requireAnyRoleMethod;
-    
+
     private static final Method requireAllRolesMethod;
 
     static {
@@ -79,16 +79,16 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     @Override
     @SuppressWarnings("unchecked")
     public Promise<Result> call(final Context context) throws Throwable {
-        final InvocationHandler invocationHandler = Proxy.getInvocationHandler(this.configuration);
-        final String clientName = (String) invocationHandler.invoke(this.configuration, clientNameMethod, null);
+        final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
+        final String clientName = (String) invocationHandler.invoke(configuration, clientNameMethod, null);
         logger.debug("clientName : {}", clientName);
-        final String targetUrl = (String) invocationHandler.invoke(this.configuration, targetUrlMethod, null);
+        final String targetUrl = (String) invocationHandler.invoke(configuration, targetUrlMethod, null);
         logger.debug("targetUrl : {}", targetUrl);
-        final Boolean isAjax = (Boolean) invocationHandler.invoke(this.configuration, isAjaxMethod, null);
+        final Boolean isAjax = (Boolean) invocationHandler.invoke(configuration, isAjaxMethod, null);
         logger.debug("isAjax : {}", isAjax);
-        final String requireAnyRole = (String) invocationHandler.invoke(this.configuration, requireAnyRoleMethod, null);
+        final String requireAnyRole = (String) invocationHandler.invoke(configuration, requireAnyRoleMethod, null);
         logger.debug("requireAnyRole : {}", requireAnyRole);
-        final String requireAllRoles = (String) invocationHandler.invoke(this.configuration, requireAllRolesMethod, null);
+        final String requireAllRoles = (String) invocationHandler.invoke(configuration, requireAllRolesMethod, null);
         logger.debug("requireAllRoles : {}", requireAllRoles);
 
         // get or create session id
@@ -111,14 +111,15 @@ public final class RequiresAuthenticationAction extends Action<Result> {
                 // not all the expected roles -> 403
                 if (!profile.hasAllRoles(expectedRoles)) {
                     access = false;
-                }                
+                }
             }
             if (access) {
-                return this.delegate.call(context);
+                return delegate.call(context);
             } else {
                 return Promise.promise(new Function0<Result>() {
+                    @Override
                     public Result apply() {
-                        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+                        return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
                     }
                 });
             }
@@ -132,6 +133,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
         logger.debug("client : {}", client);
         Promise<Result> promise = Promise.promise(new Function0<Result>() {
+            @Override
             @SuppressWarnings("rawtypes")
             public Result apply() {
                 try {
