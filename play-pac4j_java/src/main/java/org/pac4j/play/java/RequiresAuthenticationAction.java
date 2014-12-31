@@ -19,6 +19,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.RedirectAction;
@@ -56,12 +57,18 @@ public final class RequiresAuthenticationAction extends Action<Result> {
     private static final Method targetUrlMethod;
 
     private static final Method isAjaxMethod;
+    
+    private static final Method requireAnyRoleMethod;
+    
+    private static final Method requireAllRolesMethod;
 
     static {
         try {
             clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
             targetUrlMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.TARGET_URL);
             isAjaxMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.IS_AJAX);
+            requireAnyRoleMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ANY_ROLE);
+            requireAllRolesMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ALL_ROLES);
         } catch (final SecurityException e) {
             throw new RuntimeException(e);
         } catch (final NoSuchMethodException e) {
@@ -79,14 +86,42 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         logger.debug("targetUrl : {}", targetUrl);
         final Boolean isAjax = (Boolean) invocationHandler.invoke(this.configuration, isAjaxMethod, null);
         logger.debug("isAjax : {}", isAjax);
+        final String requireAnyRole = (String) invocationHandler.invoke(this.configuration, requireAnyRoleMethod, null);
+        logger.debug("requireAnyRole : {}", requireAnyRole);
+        final String requireAllRoles = (String) invocationHandler.invoke(this.configuration, requireAllRolesMethod, null);
+        logger.debug("requireAllRoles : {}", requireAllRoles);
+
         // get or create session id
         final String sessionId = StorageHelper.getOrCreationSessionId(context.session());
         logger.debug("sessionId : {}", sessionId);
         final CommonProfile profile = StorageHelper.getProfile(sessionId);
         logger.debug("profile : {}", profile);
-        // has a profile -> access resource
+
+        // has a profile
         if (profile != null) {
-            return this.delegate.call(context);
+            boolean access = true;
+            if (StringUtils.isNotBlank(requireAnyRole)) {
+                final String[] expectedRoles = StringUtils.split(requireAnyRole, ",");
+                // not the expected role -> 403
+                if (!profile.hasAnyRole(expectedRoles)) {
+                    access = false;
+                }
+            } else if (StringUtils.isNotBlank(requireAllRoles)) {
+                final String[] expectedRoles = StringUtils.split(requireAllRoles, ",");
+                // not all the expected roles -> 403
+                if (!profile.hasAllRoles(expectedRoles)) {
+                    access = false;
+                }                
+            }
+            if (access) {
+                return this.delegate.call(context);
+            } else {
+                return Promise.promise(new Function0<Result>() {
+                    public Result apply() {
+                        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+                    }
+                });
+            }
         }
 
         // requested url to save

@@ -14,7 +14,7 @@
     <artifactId>play-pac4j</artifactId>
     <packaging>pom</packaging>
     <name>Play pac4j</name>
-    <version>1.3.0-SNAPSHOT</version>
+    <version>1.3.1-SNAPSHOT</version>
     <description>Java and Scala multi protocols (CAS, OAuth, OpenID, HTTP...) client for Play 2.3 framework</description>
     <url>https://github.com/leleuj/play-pac4j</url>
 
@@ -63,11 +63,12 @@
 
     <modules>
         <module>play-pac4j_java</module>
-        <module>play-pac4j_scala</module>
+        <module>play-pac4j_scala2.10</module>
+        <module>play-pac4j_scala2.11</module>
     </modules>
 
     <properties>
-        <pac4j.version>1.6.0-SNAPSHOT</pac4j.version>
+        <pac4j.version>1.6.1-SNAPSHOT</pac4j.version>
     </properties>
 
     <dependencyManagement>
@@ -88,17 +89,6 @@
                 <version>${pac4j.version}</version>
                 <scope>provided</scope>
             </dependency>
-            <dependency>
-                <groupId>com.typesafe.play</groupId>
-                <artifactId>play_2.11</artifactId>
-                <version>2.3.0</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.typesafe.play</groupId>
-                <artifactId>play-cache_2.11</artifactId>
-                <version>2.3.0</version>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -110,8 +100,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.5.1</version>
                     <configuration>
-                        <source>1.5</source>
-                        <target>1.5</target>
+                        <source>1.6</source>
+                        <target>1.6</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

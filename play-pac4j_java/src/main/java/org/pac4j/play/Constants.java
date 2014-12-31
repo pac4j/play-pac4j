@@ -33,5 +33,11 @@ public interface Constants {
 
     public final static String IS_AJAX = "isAjax";
 
+    public final static String REQUIRE_ANY_ROLE = "requireAnyRole";
+
+    public final static String REQUIRE_ALL_ROLES = "requireAllRoles";
+
+    public final static String HTML_CONTENT_TYPE = "text/html; charset=utf-8";
+
     public final static String SEPARATOR = "$";
 }

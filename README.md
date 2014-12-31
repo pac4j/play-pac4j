@@ -2,13 +2,14 @@
 
 The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
-It supports these 4 protocols on client side: 
+It supports these 6 authentication mechanisms on client side: 
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
 4. OpenID
-5. SAML 2.0.
+5. SAML (2.0)
+6. Google App Engine UserService.
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
@@ -17,7 +18,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
-<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x</td><td>play-pac4j_scala v1.3.x</td></tr>
+<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.3.x</td></tr>
 </table>
 
 
@@ -40,9 +41,13 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Vk</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>VkClient</td><td>VkProfile</td></tr>
 <tr><td>Foursquare</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FoursquareClient</td><td>FoursquareProfile</td></tr>
 <tr><td>Bitbucket</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>BitbucketClient</td><td>BitbucketProfile</td></tr>
+<tr><td>ORCiD</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>OrcidClient</td><td>OrcidProfile</td></tr>
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
-<tr><td>Google</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
+<tr><td>Google - Deprecated</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
+<tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
+<tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
+<tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
 </table>
 
 
@@ -74,12 +79,12 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.3.0-SNAPSHOT"
+      "org.pac4j" % "play-pac4j_java" % "1.3.0"
     )
 
-Or the **play-pac4j_scala** dependency for a Scala application.
+Or the **play-pac4j_scala2.10** or **play-pac4j_scala2.11** dependency for a Scala application.
 
-As it's a snapshot only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate resolver must also be defined in the *build.sbt* file:
+For snapshots that are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate resolver must also be defined in the *build.sbt* file:
 
     resolvers ++= Seq(
       "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/"
@@ -91,15 +96,17 @@ If you want to use a specific client support, you need to add the appropriate de
 2. for CAS support, the *pac4j-cas* dependency is required
 3. for HTTP support, the *pac4j-http* dependency is required
 4. for OpenID support, the *pac4j-openid* dependency is required.
-5. for SAML 2.0 support, the *pac4j-saml* dependency is required.
+5. for SAML 2.0 support, the *pac4j-saml* dependency is required
+6. for Google App Engine, the *pac4j-gae* dependency is required.
 
 ```
     libraryDependencies ++= Seq(
-      "org.pac4j" % "pac4j-http" % "1.5.1",
-      "org.pac4j" % "pac4j-cas" % "1.5.1",
-      "org.pac4j" % "pac4j-openid" % "1.5.1",
-      "org.pac4j" % "pac4j-oauth" % "1.5.1",
-      "org.pac4j" % "pac4j-saml" % "1.5.1"
+      "org.pac4j" % "pac4j-http" % "1.6.0",
+      "org.pac4j" % "pac4j-cas" % "1.6.0",
+      "org.pac4j" % "pac4j-openid" % "1.6.0",
+      "org.pac4j" % "pac4j-oauth" % "1.6.0",
+      "org.pac4j" % "pac4j-saml" % "1.6.0",
+      "org.pac4j" % "pac4j-gae" % "1.6.0"
     )
 ```
 
@@ -227,14 +234,14 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.3.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.3.1-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.2.1** version:
+The latest release of the **play-pac4j** project is the **1.3.0** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
-        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala</artifactId>
-        <version>1.2.1</version>
+        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId> or <artifactId>play-pac4j_scala2.11</artifactId>
+        <version>1.3.0</version>
     </dependency>
 
 See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
@@ -245,4 +252,3 @@ See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes)
 If you have any question, please use the following mailing lists:
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
-
