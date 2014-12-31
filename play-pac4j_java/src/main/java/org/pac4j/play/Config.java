@@ -81,16 +81,4 @@ public final class Config extends BaseConfig {
         Config.cacheKeyPrefix = cacheKeyPrefix;
     }
 
-    /**
-     * Redefinition of methods for Scala.
-     * 
-     * @return
-     */
-    public static String getErrorPage401() {
-        return BaseConfig.getErrorPage401();
-    }
-
-    public static String getErrorPage403() {
-        return BaseConfig.getErrorPage403();
-    }
 }
