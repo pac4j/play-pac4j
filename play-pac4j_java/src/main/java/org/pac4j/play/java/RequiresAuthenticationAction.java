@@ -40,7 +40,6 @@ import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
-import play.mvc.SimpleResult;
 
 /**
  * This action checks if the user is not authenticated and starts the authentication process if necessary.
@@ -112,9 +111,9 @@ public final class RequiresAuthenticationAction extends Action<Result> {
                     final int code = e.getCode();
                     logger.debug("requires HTTP action : {}", code);
                     if (code == HttpConstants.UNAUTHORIZED) {
-                        return unauthorized(Config.getErrorPage401()).as(Constants.HTML_CONTENT_TYPE);
+                        return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
                     } else if (code == HttpConstants.FORBIDDEN) {
-                        return forbidden(Config.getErrorPage403()).as(Constants.HTML_CONTENT_TYPE);
+                        return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
                     }
                     final String message = "Unsupported HTTP action : " + code;
                     logger.error(message);
@@ -130,7 +129,7 @@ public final class RequiresAuthenticationAction extends Action<Result> {
         case REDIRECT:
             return redirect(action.getLocation());
         case SUCCESS:
-            return ok(action.getContent()).as(Constants.HTML_CONTENT_TYPE);
+            return ok(action.getContent()).as(HttpConstants.HTML_CONTENT_TYPE);
         default:
             throw new TechnicalException("Unsupported RedirectAction type " + action.getType());
         }
