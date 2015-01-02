@@ -26,9 +26,7 @@ import play.mvc.With;
 
 @With(RequiresAuthenticationAction.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target({
-    ElementType.METHOD, ElementType.TYPE
-})
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @Documented
 /**
@@ -39,12 +37,14 @@ import play.mvc.With;
  */
 public @interface RequiresAuthentication {
     String clientName();
-    
+
     String targetUrl() default "";
-    
+
+    boolean stateless() default false;
+
     boolean isAjax() default false;
-    
+
     String requireAnyRole() default "";
-    
+
     String requireAllRoles() default "";
 }

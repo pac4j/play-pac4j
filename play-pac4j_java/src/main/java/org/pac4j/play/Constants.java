@@ -31,6 +31,8 @@ public interface Constants {
 
     public final static String TARGET_URL = "targetUrl";
 
+    public static final String STATELESS = "stateless";
+
     public final static String IS_AJAX = "isAjax";
 
     public final static String REQUIRE_ANY_ROLE = "requireAnyRole";

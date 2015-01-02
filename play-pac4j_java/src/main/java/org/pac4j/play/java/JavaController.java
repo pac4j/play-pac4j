@@ -19,6 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.RedirectAction;
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
@@ -99,6 +100,7 @@ public class JavaController extends CallbackController {
             logger.debug("profile : {}", profile);
             return profile;
         }
-        return null;
+        // Try to get the User Profile from the current request (stateless flow)
+        return (CommonProfile) ctx().args.get(HttpConstants.USER_PROFILE);
     }
 }

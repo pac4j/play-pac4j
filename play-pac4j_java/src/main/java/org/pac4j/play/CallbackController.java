@@ -18,14 +18,8 @@ package org.pac4j.play;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pac4j.core.client.BaseClient;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.context.HttpConstants;
-import org.pac4j.core.credentials.Credentials;
-import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.play.java.JavaWebContext;
+import org.pac4j.play.java.RequiresAuthenticationAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +27,6 @@ import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.mvc.Results;
 
 /**
  * This controller is the class to finish the authentication process and logout the user.
@@ -47,71 +40,47 @@ public class CallbackController extends Controller {
 
     protected static final Logger logger = LoggerFactory.getLogger(CallbackController.class);
 
+    private static RequiresAuthenticationAction action = new RequiresAuthenticationAction() {
+
+        @Override
+        protected Promise<CommonProfile> retrieveUserProfile(ActionContext actionContext) {
+            return super.authenticate(actionContext);
+        }
+
+        @Override
+        protected Promise<Result> authenticationSuccess(CommonProfile profile, ActionContext actionContext)
+                throws Throwable {
+            return redirectToTarget(actionContext);
+        }
+
+        @Override
+        protected Promise<Result> authenticationFailure(ActionContext actionContext) {
+            return redirectToTarget(actionContext);
+        }
+
+        private Promise<Result> redirectToTarget(final ActionContext actionContext) {
+            // retrieve saved request and redirect
+            return Promise.promise(new Function0<Result>() {
+                @Override
+                public Result apply() {
+                    return redirect(defaultUrl(retrieveOriginalUrl(actionContext), Config.getDefaultSuccessUrl()));
+                }
+            });
+        }
+
+    };
+
     /**
      * This method handles the callback call from the provider to finish the authentication process. The credentials and then the profile of
      * the authenticated user is retrieved and the originally requested url (or the specific saved url) is restored.
      * 
      * @return the redirection to the saved request
+     * @throws Throwable 
      */
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public static Promise<Result> callback() {
-        // clients group from config
-        final Clients clientsGroup = Config.getClients();
+    public static Promise<Result> callback() throws Throwable {
 
-        // web context
-        final JavaWebContext context = new JavaWebContext(request(), response(), session());
+        return action.call(ctx());
 
-        // get the client from its type
-        final BaseClient client = (BaseClient) clientsGroup.findClient(context);
-        logger.debug("client : {}", client);
-
-        // get credentials
-        Promise<Result> promise = Promise.promise(new Function0<Result>() {
-            public Result apply() {
-                Credentials credentials = null;
-                try {
-                    credentials = client.getCredentials(context);
-                    logger.debug("credentials : {}", credentials);
-
-                } catch (final RequiresHttpAction e) {
-                    // requires some specific HTTP action
-                    final int code = context.getResponseStatus();
-                    logger.debug("requires HTTP action : {}", code);
-                    if (code == HttpConstants.UNAUTHORIZED) {
-                        return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
-                    } else if (code == HttpConstants.TEMP_REDIRECT) {
-                        return Results.status(HttpConstants.TEMP_REDIRECT);
-                    } else if (code == HttpConstants.OK) {
-                        final String content = context.getResponseContent();
-                        logger.debug("render : {}", content);
-                        return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
-                    }
-                    final String message = "Unsupported HTTP action : " + code;
-                    logger.error(message);
-                    throw new TechnicalException(message);
-                }
-
-                // get user profile
-                final CommonProfile profile = client.getUserProfile(credentials, context);
-                logger.debug("profile : {}", profile);
-
-                // get or create sessionId
-                final String sessionId = StorageHelper.getOrCreationSessionId(session());
-
-                // save user profile only if it's not null
-                if (profile != null) {
-                    StorageHelper.saveProfile(sessionId, profile);
-                }
-
-                // get requested url
-                final String requestedUrl = StorageHelper.getRequestedUrl(sessionId, client.getName());
-
-                // retrieve saved request and redirect
-                return redirect(defaultUrl(requestedUrl, Config.getDefaultSuccessUrl()));
-            }
-        });
-
-        return promise;
     }
 
     /**
