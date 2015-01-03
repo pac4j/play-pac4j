@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2014 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -44,13 +44,15 @@ import play.mvc.Result;
 
 /**
  * <p>This action checks if the user is not authenticated and starts the authentication process if necessary.</p>
- * <p>It handles both statefull (default) or stateless resources by delegating to a pac4j client.
- *  - If statefull, it relies on the session and on the callback filter to terminate the authentication process.
- *  - If stateless it validates the provided credentials and forward the request to
- * the underlying resource if the authentication succeeds.</p>
+ * <p>It handles both statefull (default) or stateless resources by delegating to a pac4j client.</p>
+ * <ul>
+ * <li>If statefull, it relies on the session and on the callback filter to terminate the authentication process.</li>
+ * <li>If stateless it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ * </ul>
  * <p>The filter also handles basic authorization based on two parameters: requireAnyRole and requireAllRoles.</p>
  * 
  * @author Jerome Leleu
+ * @author Michael Remond
  * @since 1.0.0
  */
 @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -94,6 +96,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
 
         final ActionContext actionContext = buildActionContext(ctx);
 
+        // Retrieve User Profile
         Promise<CommonProfile> profile = retrieveUserProfile(actionContext);
         return profile.flatMap(new Function<CommonProfile, Promise<Result>>() {
 
@@ -116,7 +119,8 @@ public class RequiresAuthenticationAction extends Action<Result> {
                     RequiresHttpAction e = (RequiresHttpAction) a;
                     return requireActionToResult(e.getCode(), actionContext);
                 } else {
-                    return internalServerError();
+                    logger.error("Unexpected error", a);
+                    return internalServerError(a.getMessage());
                 }
             }
 
@@ -128,6 +132,8 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * Retrieve user profile either by looking in the session or trying to authenticate directly
      * if stateless web service.
      * 
+     * @param actionContext
+     * @return
      */
     protected Promise<CommonProfile> retrieveUserProfile(final ActionContext actionContext) {
         if (isStateless(actionContext)) {
@@ -150,6 +156,8 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * Default authentication failure strategy which generates an unauthorized page if stateless web service
      * or redirect to the authentication provider after saving the original url.
      * 
+     * @param actionContext
+     * @return
      */
     protected Promise<Result> authenticationFailure(final ActionContext actionContext) {
 
@@ -172,6 +180,8 @@ public class RequiresAuthenticationAction extends Action<Result> {
     /**
      * Save the user profile in session or attach it to the request if stateless web service.
      * 
+     * @param profile
+     * @param actionContext
      */
     protected void saveUserProfile(CommonProfile profile, final ActionContext actionContext) {
         if (isStateless(actionContext)) {
@@ -182,11 +192,13 @@ public class RequiresAuthenticationAction extends Action<Result> {
     }
 
     /**
-     * Default authentication success strategy which forward to the next filter if the user
+     * Default authentication success strategy which forward to the next action if the user
      * has access or returns an access denied error otherwise.
-     * @return 
-     * @throws Throwable 
      * 
+     * @param profile
+     * @param actionContext
+     * @return
+     * @throws Throwable
      */
     protected Promise<Result> authenticationSuccess(CommonProfile profile, final ActionContext actionContext)
             throws Throwable {
@@ -205,8 +217,9 @@ public class RequiresAuthenticationAction extends Action<Result> {
 
     /**
      * Authenticates the current request by getting the credentials and the corresponding user profile.
-     * @param ctx 
      * 
+     * @param actionContext
+     * @return
      */
     protected Promise<CommonProfile> authenticate(final ActionContext actionContext) {
 
@@ -236,7 +249,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * depending on the requireAnyRole and requireAllRoles fields.
      * 
      * @param profile
-     * @param request 
+     * @param actionContext
      * @return
      */
     protected boolean hasAccess(CommonProfile profile, final ActionContext actionContext) {
@@ -244,6 +257,11 @@ public class RequiresAuthenticationAction extends Action<Result> {
         return profile.hasAccess(actionContext.requireAnyRole, actionContext.requireAllRoles);
     }
 
+    /**
+     * Save the requested url in session if the request is not Ajax.
+     * 
+     * @param actionContext
+     */
     protected void saveOriginalUrl(final ActionContext actionContext) {
         if (!isAjaxRequest(actionContext)) {
             // requested url to save
@@ -254,14 +272,32 @@ public class RequiresAuthenticationAction extends Action<Result> {
         }
     }
 
+    /**
+     * Retrieve the requested url from the session.
+     * 
+     * @param actionContext
+     * @return
+     */
     protected String retrieveOriginalUrl(final ActionContext actionContext) {
         return StorageHelper.getRequestedUrl(actionContext.sessionId, actionContext.clientName);
     }
 
+    /**
+     * Is it a request Ajax?
+     * 
+     * @param actionContext
+     * @return
+     */
     protected boolean isAjaxRequest(ActionContext actionContext) {
         return actionContext.isAjax;
     }
 
+    /**
+     * Is it a stateless authentication flow? 
+     * 
+     * @param actionContext
+     * @return
+     */
     protected boolean isStateless(final ActionContext actionContext) {
         return actionContext.stateless;
     }
@@ -286,7 +322,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
     }
 
     /**
-     * Build the action context from Play context and {@link RequiresAuthentication} annotation.
+     * Build the action context from the Play {@link Context} and the {@link RequiresAuthentication} annotation.
      * 
      * @param ctx
      * @return
@@ -318,8 +354,8 @@ public class RequiresAuthenticationAction extends Action<Result> {
         clientName = (clientName != null) ? clientName : context.getRequestParameter(Config.getClients()
                 .getClientNameParameter());
         logger.debug("clientName : {}", clientName);
-
         String sessionId = (stateless) ? null : StorageHelper.getOrCreationSessionId(ctx.session());
+
         return new ActionContext(ctx, ctx.request(), sessionId, context, clientName, targetUrl, isAjax, stateless,
                 requireAnyRole, requireAllRoles);
     }

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2014 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ public class JavaController extends CallbackController {
     protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The current requested url is saved into session to be restored after authentication.
      * 
      * @param clientName
@@ -52,7 +52,7 @@ public class JavaController extends CallbackController {
     }
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The input <code>targetUrl</code> (or the current requested url if <code>null</code>) is saved into session to be restored after
      * authentication.
      * 
@@ -94,13 +94,14 @@ public class JavaController extends CallbackController {
         // get the session id
         final String sessionId = session(Constants.SESSION_ID);
         logger.debug("sessionId for profile : {}", sessionId);
+        CommonProfile profile = null;
         if (StringUtils.isNotBlank(sessionId)) {
             // get the user profile
-            final CommonProfile profile = StorageHelper.getProfile(sessionId);
-            logger.debug("profile : {}", profile);
-            return profile;
+            profile = StorageHelper.getProfile(sessionId);
         }
         // Try to get the User Profile from the current request (stateless flow)
-        return (CommonProfile) ctx().args.get(HttpConstants.USER_PROFILE);
+        profile = (profile != null) ? profile : (CommonProfile) ctx().args.get(HttpConstants.USER_PROFILE);
+        logger.debug("profile : {}", profile);
+        return profile;
     }
 }

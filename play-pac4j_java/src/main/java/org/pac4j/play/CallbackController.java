@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2014 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -29,9 +29,8 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 /**
- * This controller is the class to finish the authentication process and logout the user.
- * <p />
- * Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.
+ * <p>This controller is the class to finish the authentication process and logout the user.</p>
+ * <p>Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.</p>
  * 
  * @author Jerome Leleu
  * @since 1.0.0

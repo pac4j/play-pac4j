@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2014 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -54,14 +54,17 @@ public class JavaWebContext extends BaseResponseContext {
         this.scheme = scheme;
     }
 
+    @Override
     public String getRequestHeader(final String name) {
         return this.request.getHeader(name);
     }
 
+    @Override
     public String getRequestMethod() {
         return this.request.method();
     }
 
+    @Override
     public String getRequestParameter(final String name) {
         final Map<String, String[]> parameters = getRequestParameters();
         final String[] values = parameters.get(name);
@@ -71,6 +74,7 @@ public class JavaWebContext extends BaseResponseContext {
         return null;
     }
 
+    @Override
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> formParameters = this.request.body().asFormUrlEncoded();
         final Map<String, String[]> urlParameters = this.request.queryString();
@@ -84,6 +88,7 @@ public class JavaWebContext extends BaseResponseContext {
         return parameters;
     }
 
+    @Override
     public Object getSessionAttribute(final String key) {
         String sessionId = this.session.get(Constants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
@@ -92,6 +97,7 @@ public class JavaWebContext extends BaseResponseContext {
         return null;
     }
 
+    @Override
     public void setSessionAttribute(final String key, final Object value) {
         String sessionId = this.session.get(Constants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
@@ -108,21 +114,25 @@ public class JavaWebContext extends BaseResponseContext {
         return this.session;
     }
 
+    @Override
     public String getServerName() {
         String[] split = request.host().split(":");
         return split[0];
     }
 
+    @Override
     public int getServerPort() {
         String[] split = request.host().split(":");
         String portStr = (split.length > 1) ? split[1] : "80";
         return Integer.valueOf(portStr);
     }
 
+    @Override
     public String getScheme() {
         return this.scheme;
     }
 
+    @Override
     public String getFullRequestURL() {
         return getScheme() + "://" + request.host() + request.uri();
     }
