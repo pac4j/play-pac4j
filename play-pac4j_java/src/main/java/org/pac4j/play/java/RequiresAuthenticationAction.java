@@ -92,7 +92,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * 
      */
     @Override
-    public Promise<Result> call(final Context ctx) throws Throwable {
+    public Promise<Result> call(final Context ctx) {
 
         final ActionContext actionContext = buildActionContext(ctx);
 
@@ -328,7 +328,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * @return
      * @throws Throwable
      */
-    private ActionContext buildActionContext(Context ctx) throws Throwable {
+    private ActionContext buildActionContext(Context ctx) {
         JavaWebContext context = new JavaWebContext(ctx.request(), ctx.response(), ctx.session());
         String clientName = null;
         String targetUrl = "";
@@ -338,18 +338,23 @@ public class RequiresAuthenticationAction extends Action<Result> {
         String requireAllRoles = "";
 
         if (configuration != null) {
-            final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
-            clientName = (String) invocationHandler.invoke(configuration, clientNameMethod, null);
-            targetUrl = (String) invocationHandler.invoke(configuration, targetUrlMethod, null);
-            logger.debug("targetUrl : {}", targetUrl);
-            isAjax = (Boolean) invocationHandler.invoke(configuration, isAjaxMethod, null);
-            logger.debug("isAjax : {}", isAjax);
-            stateless = (Boolean) invocationHandler.invoke(configuration, statelessMethod, null);
-            logger.debug("stateless : {}", stateless);
-            requireAnyRole = (String) invocationHandler.invoke(configuration, requireAnyRoleMethod, null);
-            logger.debug("requireAnyRole : {}", requireAnyRole);
-            requireAllRoles = (String) invocationHandler.invoke(configuration, requireAllRolesMethod, null);
-            logger.debug("requireAllRoles : {}", requireAllRoles);
+            try {
+                final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
+                clientName = (String) invocationHandler.invoke(configuration, clientNameMethod, null);
+                targetUrl = (String) invocationHandler.invoke(configuration, targetUrlMethod, null);
+                logger.debug("targetUrl : {}", targetUrl);
+                isAjax = (Boolean) invocationHandler.invoke(configuration, isAjaxMethod, null);
+                logger.debug("isAjax : {}", isAjax);
+                stateless = (Boolean) invocationHandler.invoke(configuration, statelessMethod, null);
+                logger.debug("stateless : {}", stateless);
+                requireAnyRole = (String) invocationHandler.invoke(configuration, requireAnyRoleMethod, null);
+                logger.debug("requireAnyRole : {}", requireAnyRole);
+                requireAllRoles = (String) invocationHandler.invoke(configuration, requireAllRolesMethod, null);
+                logger.debug("requireAllRoles : {}", requireAllRoles);
+            } catch (Throwable e) {
+                logger.error("Error during configuration retrieval", e);
+                throw new TechnicalException(e);
+            }
         }
         clientName = (clientName != null) ? clientName : context.getRequestParameter(Config.getClients()
                 .getClientNameParameter());

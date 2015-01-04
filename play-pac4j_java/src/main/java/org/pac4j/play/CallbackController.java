@@ -47,8 +47,7 @@ public class CallbackController extends Controller {
         }
 
         @Override
-        protected Promise<Result> authenticationSuccess(CommonProfile profile, ActionContext actionContext)
-                throws Throwable {
+        protected Promise<Result> authenticationSuccess(CommonProfile profile, ActionContext actionContext) {
             return redirectToTarget(actionContext);
         }
 
@@ -76,7 +75,7 @@ public class CallbackController extends Controller {
      * @return the redirection to the saved request
      * @throws Throwable 
      */
-    public static Promise<Result> callback() throws Throwable {
+    public static Promise<Result> callback() {
 
         return action.call(ctx());
 
