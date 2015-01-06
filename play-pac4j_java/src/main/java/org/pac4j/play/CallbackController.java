@@ -18,7 +18,9 @@ package org.pac4j.play;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.play.java.ActionContext;
 import org.pac4j.play.java.RequiresAuthenticationAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,7 +75,6 @@ public class CallbackController extends Controller {
      * the authenticated user is retrieved and the originally requested url (or the specific saved url) is restored.
      * 
      * @return the redirection to the saved request
-     * @throws Throwable 
      */
     public static Promise<Result> callback() {
 
@@ -86,14 +87,14 @@ public class CallbackController extends Controller {
      */
     private static void logout() {
         // get the session id
-        final String sessionId = session(Constants.SESSION_ID);
+        final String sessionId = session(Pac4jConstants.SESSION_ID);
         logger.debug("sessionId for logout : {}", sessionId);
         if (StringUtils.isNotBlank(sessionId)) {
             // remove user profile from cache
             StorageHelper.removeProfile(sessionId);
             logger.debug("remove user profile for sessionId : {}", sessionId);
         }
-        session().remove(Constants.SESSION_ID);
+        session().remove(Pac4jConstants.SESSION_ID);
     }
 
     /**

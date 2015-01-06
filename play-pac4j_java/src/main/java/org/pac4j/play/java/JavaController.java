@@ -19,13 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.RedirectAction;
-import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,16 +91,18 @@ public class JavaController extends CallbackController {
      */
     protected static CommonProfile getUserProfile() {
         // get the session id
-        final String sessionId = session(Constants.SESSION_ID);
+        final String sessionId = session(Pac4jConstants.SESSION_ID);
         logger.debug("sessionId for profile : {}", sessionId);
         CommonProfile profile = null;
         if (StringUtils.isNotBlank(sessionId)) {
             // get the user profile
             profile = StorageHelper.getProfile(sessionId);
         }
-        // Try to get the User Profile from the current request (stateless flow)
-        profile = (profile != null) ? profile : (CommonProfile) ctx().args.get(HttpConstants.USER_PROFILE);
-        logger.debug("profile : {}", profile);
-        return profile;
+        if (profile == null) {
+            // Try to get the User Profile from the current request (stateless flow)
+            return (CommonProfile) ctx().args.get(Pac4jConstants.USER_PROFILE);
+        } else {
+            return profile;
+        }
     }
 }

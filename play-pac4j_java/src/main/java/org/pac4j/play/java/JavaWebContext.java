@@ -19,8 +19,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.pac4j.core.context.BaseResponseContext;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 
 import play.mvc.Http.Request;
@@ -56,12 +56,12 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public String getRequestHeader(final String name) {
-        return this.request.getHeader(name);
+        return request.getHeader(name);
     }
 
     @Override
     public String getRequestMethod() {
-        return this.request.method();
+        return request.method();
     }
 
     @Override
@@ -76,8 +76,8 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public Map<String, String[]> getRequestParameters() {
-        final Map<String, String[]> formParameters = this.request.body().asFormUrlEncoded();
-        final Map<String, String[]> urlParameters = this.request.queryString();
+        final Map<String, String[]> formParameters = request.body().asFormUrlEncoded();
+        final Map<String, String[]> urlParameters = request.queryString();
         final Map<String, String[]> parameters = new HashMap<String, String[]>();
         if (formParameters != null) {
             parameters.putAll(formParameters);
@@ -90,7 +90,7 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public Object getSessionAttribute(final String key) {
-        String sessionId = this.session.get(Constants.SESSION_ID);
+        String sessionId = session.get(Pac4jConstants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
             return StorageHelper.get(sessionId, key);
         }
@@ -99,7 +99,7 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public void setSessionAttribute(final String key, final Object value) {
-        String sessionId = this.session.get(Constants.SESSION_ID);
+        String sessionId = session.get(Pac4jConstants.SESSION_ID);
         if (CommonHelper.isNotBlank(sessionId)) {
             StorageHelper.save(sessionId, key, value);
         }
@@ -107,11 +107,11 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public void setResponseHeader(final String name, final String value) {
-        this.response.setHeader(name, value);
+        response.setHeader(name, value);
     }
 
     public Session getSession() {
-        return this.session;
+        return session;
     }
 
     @Override
@@ -129,7 +129,7 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public String getScheme() {
-        return this.scheme;
+        return scheme;
     }
 
     @Override

@@ -15,21 +15,17 @@
  */
 package org.pac4j.play.java;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +35,6 @@ import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
-import play.mvc.Http.Request;
 import play.mvc.Result;
 
 /**
@@ -60,33 +55,6 @@ public class RequiresAuthenticationAction extends Action<Result> {
 
     private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationAction.class);
 
-    private static final Method clientNameMethod;
-
-    private static final Method targetUrlMethod;
-
-    private static final Method statelessMethod;
-
-    private static final Method isAjaxMethod;
-
-    private static final Method requireAnyRoleMethod;
-
-    private static final Method requireAllRolesMethod;
-
-    static {
-        try {
-            clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
-            targetUrlMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.TARGET_URL);
-            statelessMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.STATELESS);
-            isAjaxMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.IS_AJAX);
-            requireAnyRoleMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ANY_ROLE);
-            requireAllRolesMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ALL_ROLES);
-        } catch (final SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (final NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     /**
      * Authentication algorithm.
      * 
@@ -94,7 +62,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
     @Override
     public Promise<Result> call(final Context ctx) {
 
-        final ActionContext actionContext = buildActionContext(ctx);
+        final ActionContext actionContext = ActionContext.build(ctx, configuration);
 
         // Retrieve User Profile
         Promise<CommonProfile> profile = retrieveUserProfile(actionContext);
@@ -120,7 +88,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
                     return requireActionToResult(e.getCode(), actionContext);
                 } else {
                     logger.error("Unexpected error", a);
-                    return internalServerError(a.getMessage());
+                    throw a;
                 }
             }
 
@@ -185,7 +153,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      */
     protected void saveUserProfile(CommonProfile profile, final ActionContext actionContext) {
         if (isStateless(actionContext)) {
-            actionContext.ctx.args.put(HttpConstants.USER_PROFILE, profile);
+            actionContext.ctx.args.put(Pac4jConstants.USER_PROFILE, profile);
         } else {
             StorageHelper.saveProfile(actionContext.sessionId, profile);
         }
@@ -321,50 +289,6 @@ public class RequiresAuthenticationAction extends Action<Result> {
         }
     }
 
-    /**
-     * Build the action context from the Play {@link Context} and the {@link RequiresAuthentication} annotation.
-     * 
-     * @param ctx
-     * @return
-     * @throws Throwable
-     */
-    private ActionContext buildActionContext(Context ctx) {
-        JavaWebContext context = new JavaWebContext(ctx.request(), ctx.response(), ctx.session());
-        String clientName = null;
-        String targetUrl = "";
-        Boolean isAjax = false;
-        Boolean stateless = false;
-        String requireAnyRole = "";
-        String requireAllRoles = "";
-
-        if (configuration != null) {
-            try {
-                final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
-                clientName = (String) invocationHandler.invoke(configuration, clientNameMethod, null);
-                targetUrl = (String) invocationHandler.invoke(configuration, targetUrlMethod, null);
-                logger.debug("targetUrl : {}", targetUrl);
-                isAjax = (Boolean) invocationHandler.invoke(configuration, isAjaxMethod, null);
-                logger.debug("isAjax : {}", isAjax);
-                stateless = (Boolean) invocationHandler.invoke(configuration, statelessMethod, null);
-                logger.debug("stateless : {}", stateless);
-                requireAnyRole = (String) invocationHandler.invoke(configuration, requireAnyRoleMethod, null);
-                logger.debug("requireAnyRole : {}", requireAnyRole);
-                requireAllRoles = (String) invocationHandler.invoke(configuration, requireAllRolesMethod, null);
-                logger.debug("requireAllRoles : {}", requireAllRoles);
-            } catch (Throwable e) {
-                logger.error("Error during configuration retrieval", e);
-                throw new TechnicalException(e);
-            }
-        }
-        clientName = (clientName != null) ? clientName : context.getRequestParameter(Config.getClients()
-                .getClientNameParameter());
-        logger.debug("clientName : {}", clientName);
-        String sessionId = (stateless) ? null : StorageHelper.getOrCreationSessionId(ctx.session());
-
-        return new ActionContext(ctx, ctx.request(), sessionId, context, clientName, targetUrl, isAjax, stateless,
-                requireAnyRole, requireAllRoles);
-    }
-
     private Result requireActionToResult(int code, ActionContext actionContext) {
         // requires some specific HTTP action
         logger.debug("requires HTTP action : {}", code);
@@ -384,37 +308,4 @@ public class RequiresAuthenticationAction extends Action<Result> {
         throw new TechnicalException(message);
     }
 
-    /**
-     * Context for the action.
-     * 
-     */
-    protected static class ActionContext {
-
-        Context ctx;
-        Request request;
-        String sessionId;
-        JavaWebContext webContext;
-        String clientName;
-        String targetUrl;
-        boolean isAjax;
-        boolean stateless;
-        String requireAnyRole;
-        String requireAllRoles;
-
-        private ActionContext(Context ctx, Request request, String sessionId, JavaWebContext webContext,
-                String clientName, String targetUrl, boolean isAjax, Boolean stateless, String requireAnyRole,
-                String requireAllRoles) {
-            this.ctx = ctx;
-            this.request = request;
-            this.sessionId = sessionId;
-            this.webContext = webContext;
-            this.clientName = clientName;
-            this.targetUrl = targetUrl;
-            this.isAjax = isAjax;
-            this.stateless = stateless;
-            this.requireAnyRole = requireAnyRole;
-            this.requireAllRoles = requireAllRoles;
-        }
-
-    }
 }

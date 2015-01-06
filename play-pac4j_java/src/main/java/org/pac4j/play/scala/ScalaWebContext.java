@@ -17,8 +17,8 @@ package org.pac4j.play.scala;
 
 import java.util.Map;
 
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 
 import play.api.mvc.AnyContent;
@@ -82,7 +82,7 @@ public class ScalaWebContext<C> implements WebContext {
     @Override
     public Object getSessionAttribute(final String key) {
         Object value = null;
-        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        final Option<String> sessionId = this.session.get(Pac4jConstants.SESSION_ID);
         if (sessionId.isDefined()) {
             value = StorageHelper.get(sessionId.get(), key);
         }
@@ -96,7 +96,7 @@ public class ScalaWebContext<C> implements WebContext {
 
     @Override
     public void setSessionAttribute(final String key, final Object value) {
-        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        final Option<String> sessionId = this.session.get(Pac4jConstants.SESSION_ID);
         if (sessionId.isDefined()) {
             StorageHelper.save(sessionId.get(), key, value);
         }
