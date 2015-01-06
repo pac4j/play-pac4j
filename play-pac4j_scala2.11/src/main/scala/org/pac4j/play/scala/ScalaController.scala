@@ -47,10 +47,10 @@ trait ScalaController extends Controller {
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
     var newSession = request.session
-    val optionSessionId = newSession.get(Constants.SESSION_ID)
+    val optionSessionId = newSession.get(Pac4jConstants.SESSION_ID)
     logger.debug("getOrCreateSessionId : {}", optionSessionId)
     if (!optionSessionId.isDefined) {
-      newSession += Constants.SESSION_ID -> StorageHelper.generateSessionId()
+      newSession += Pac4jConstants.SESSION_ID -> StorageHelper.generateSessionId()
     }
     newSession
   }
@@ -69,7 +69,7 @@ trait ScalaController extends Controller {
   protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
-    val sessionId = newSession.get(Constants.SESSION_ID).get
+    val sessionId = newSession.get(Pac4jConstants.SESSION_ID).get
     logger.debug("sessionId : {}", sessionId)
     val profile = getUserProfile(request)
     logger.debug("profile : {}", profile)
@@ -139,7 +139,7 @@ trait ScalaController extends Controller {
    * @return the redirection url to the provider
    */
   private def getRedirectAction[A](request: Request[A], newSession: Session, clientName: String, targetUrl: String, protectedPage: Boolean, isAjax: Boolean): RedirectAction = {
-    val sessionId = newSession.get(Constants.SESSION_ID).get
+    val sessionId = newSession.get(Pac4jConstants.SESSION_ID).get
     logger.debug("sessionId for getRedirectionUrl() : {}", sessionId)
     // save requested url to save
     val requestedUrlToSave = CallbackController.defaultUrl(targetUrl, request.uri)
@@ -167,7 +167,7 @@ trait ScalaController extends Controller {
   protected def getUserProfile(request: RequestHeader): CommonProfile = {
     // get the session id
     var profile: CommonProfile = null
-    val sessionId = request.session.get(Constants.SESSION_ID)
+    val sessionId = request.session.get(Pac4jConstants.SESSION_ID)
     logger.debug("sessionId for profile : {}", sessionId)
     if (sessionId.isDefined) {
       // get the user profile
