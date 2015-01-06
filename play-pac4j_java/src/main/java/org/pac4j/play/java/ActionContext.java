@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 
 import play.mvc.Http.Context;
 import play.mvc.Http.Request;
-import play.mvc.Result;
 
 /**
  * <p>Context for the {@link RequiresAuthenticationAction} aggregating the Play {@link Context} and the {@link RequiresAuthentication} annotation.</p>
@@ -114,7 +113,7 @@ public class ActionContext {
      * @param configuration
      * @return
      */
-    public static ActionContext build(Context ctx, Result configuration) {
+    public static ActionContext build(Context ctx, Object configuration) {
         JavaWebContext context = new JavaWebContext(ctx.request(), ctx.response(), ctx.session());
         String clientName = null;
         String targetUrl = "";
