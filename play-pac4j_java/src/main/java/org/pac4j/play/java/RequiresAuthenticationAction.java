@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,27 +15,22 @@
  */
 package org.pac4j.play.java;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
-
-import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.UserProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import play.libs.F.Function;
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Action;
@@ -43,125 +38,249 @@ import play.mvc.Http.Context;
 import play.mvc.Result;
 
 /**
- * This action checks if the user is not authenticated and starts the authentication process if necessary.
+ * <p>This action checks if the user is not authenticated and starts the authentication process if necessary.</p>
+ * <p>It handles both statefull (default) or stateless resources by delegating to a pac4j client.</p>
+ * <ul>
+ * <li>If statefull, it relies on the session and on the callback filter to terminate the authentication process.</li>
+ * <li>If stateless it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ * </ul>
+ * <p>The filter also handles basic authorization based on two parameters: requireAnyRole and requireAllRoles.</p>
  * 
  * @author Jerome Leleu
+ * @author Michael Remond
  * @since 1.0.0
  */
-public final class RequiresAuthenticationAction extends Action<Result> {
+@SuppressWarnings({ "rawtypes", "unchecked" })
+public class RequiresAuthenticationAction extends Action<Result> {
 
     private static final Logger logger = LoggerFactory.getLogger(RequiresAuthenticationAction.class);
 
-    private static final Method clientNameMethod;
+    /**
+     * Authentication algorithm.
+     * 
+     */
+    @Override
+    public Promise<Result> call(final Context ctx) {
 
-    private static final Method targetUrlMethod;
+        final ActionContext actionContext = ActionContext.build(ctx, configuration);
 
-    private static final Method isAjaxMethod;
+        // Retrieve User Profile
+        Promise<CommonProfile> profile = retrieveUserProfile(actionContext);
+        return profile.flatMap(new Function<CommonProfile, Promise<Result>>() {
 
-    private static final Method requireAnyRoleMethod;
+            @Override
+            public Promise<Result> apply(CommonProfile profile) throws Throwable {
+                // authentication success or failure strategy
+                if (profile == null) {
+                    return authenticationFailure(actionContext);
+                } else {
+                    saveUserProfile(profile, actionContext);
+                    return authenticationSuccess(profile, actionContext);
+                }
+            }
 
-    private static final Method requireAllRolesMethod;
+        }).recover(new Function<Throwable, Result>() {
 
-    static {
-        try {
-            clientNameMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.CLIENT_NAME);
-            targetUrlMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.TARGET_URL);
-            isAjaxMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.IS_AJAX);
-            requireAnyRoleMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ANY_ROLE);
-            requireAllRolesMethod = RequiresAuthentication.class.getDeclaredMethod(Constants.REQUIRE_ALL_ROLES);
-        } catch (final SecurityException e) {
-            throw new RuntimeException(e);
-        } catch (final NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
+            @Override
+            public Result apply(Throwable a) throws Throwable {
+                if (a instanceof RequiresHttpAction) {
+                    RequiresHttpAction e = (RequiresHttpAction) a;
+                    return requireActionToResult(e.getCode(), actionContext);
+                } else {
+                    logger.error("Unexpected error", a);
+                    throw a;
+                }
+            }
+
+        });
+
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Promise<Result> call(final Context context) throws Throwable {
-        final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
-        final String clientName = (String) invocationHandler.invoke(configuration, clientNameMethod, null);
-        logger.debug("clientName : {}", clientName);
-        final String targetUrl = (String) invocationHandler.invoke(configuration, targetUrlMethod, null);
-        logger.debug("targetUrl : {}", targetUrl);
-        final Boolean isAjax = (Boolean) invocationHandler.invoke(configuration, isAjaxMethod, null);
-        logger.debug("isAjax : {}", isAjax);
-        final String requireAnyRole = (String) invocationHandler.invoke(configuration, requireAnyRoleMethod, null);
-        logger.debug("requireAnyRole : {}", requireAnyRole);
-        final String requireAllRoles = (String) invocationHandler.invoke(configuration, requireAllRolesMethod, null);
-        logger.debug("requireAllRoles : {}", requireAllRoles);
+    /**
+     * Retrieve user profile either by looking in the session or trying to authenticate directly
+     * if stateless web service.
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected Promise<CommonProfile> retrieveUserProfile(final ActionContext actionContext) {
+        if (isStateless(actionContext)) {
+            return authenticate(actionContext);
+        } else {
+            return Promise.promise(new Function0<CommonProfile>() {
 
-        // get or create session id
-        final String sessionId = StorageHelper.getOrCreationSessionId(context.session());
-        logger.debug("sessionId : {}", sessionId);
-        final CommonProfile profile = StorageHelper.getProfile(sessionId);
-        logger.debug("profile : {}", profile);
-
-        // has a profile
-        if (profile != null) {
-            boolean access = true;
-            if (StringUtils.isNotBlank(requireAnyRole)) {
-                final String[] expectedRoles = StringUtils.split(requireAnyRole, ",");
-                // not the expected role -> 403
-                if (!profile.hasAnyRole(expectedRoles)) {
-                    access = false;
+                @Override
+                public CommonProfile apply() {
+                    final CommonProfile profile = StorageHelper.getProfile(actionContext.getSessionId());
+                    logger.debug("profile : {}", profile);
+                    return profile;
                 }
-            } else if (StringUtils.isNotBlank(requireAllRoles)) {
-                final String[] expectedRoles = StringUtils.split(requireAllRoles, ",");
-                // not all the expected roles -> 403
-                if (!profile.hasAllRoles(expectedRoles)) {
-                    access = false;
-                }
-            }
-            if (access) {
-                return delegate.call(context);
-            } else {
-                return Promise.promise(new Function0<Result>() {
-                    @Override
-                    public Result apply() {
-                        return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
-                    }
-                });
-            }
+            });
         }
 
-        // requested url to save
-        final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, context.request().uri());
-        logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
-        StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
-        // get client
-        final Client<Credentials, UserProfile> client = Config.getClients().findClient(clientName);
-        logger.debug("client : {}", client);
-        Promise<Result> promise = Promise.promise(new Function0<Result>() {
+    }
+
+    /**
+     * Default authentication failure strategy which generates an unauthorized page if stateless web service
+     * or redirect to the authentication provider after saving the original url.
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected Promise<Result> authenticationFailure(final ActionContext actionContext) {
+
+        return Promise.promise(new Function0<Result>() {
             @Override
-            @SuppressWarnings("rawtypes")
-            public Result apply() {
-                try {
-                    // and compute redirection url
-                    JavaWebContext webContext = new JavaWebContext(context.request(), context.response(), context
-                            .session());
-                    final RedirectAction action = ((BaseClient) client).getRedirectAction(webContext, true, isAjax);
-                    logger.debug("redirectAction : {}", action);
-                    return convertToPromise(action);
-                } catch (final RequiresHttpAction e) {
-                    // requires some specific HTTP action
-                    final int code = e.getCode();
-                    logger.debug("requires HTTP action : {}", code);
-                    if (code == HttpConstants.UNAUTHORIZED) {
-                        return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
-                    } else if (code == HttpConstants.FORBIDDEN) {
-                        return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
-                    }
-                    final String message = "Unsupported HTTP action : " + code;
-                    logger.error(message);
-                    throw new TechnicalException(message);
+            public Result apply() throws RequiresHttpAction {
+                if (isStateless(actionContext)) {
+                    return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
+                } else {
+                    // no authentication tried -> redirect to provider
+                    // keep the current url
+                    saveOriginalUrl(actionContext);
+                    // compute and perform the redirection
+                    return redirectToIdentityProvider(actionContext);
                 }
             }
         });
-        return promise;
     }
 
-    private Result convertToPromise(RedirectAction action) {
+    /**
+     * Save the user profile in session or attach it to the request if stateless web service.
+     * 
+     * @param profile
+     * @param actionContext
+     */
+    protected void saveUserProfile(CommonProfile profile, final ActionContext actionContext) {
+        if (isStateless(actionContext)) {
+            actionContext.getCtx().args.put(Pac4jConstants.USER_PROFILE, profile);
+        } else {
+            StorageHelper.saveProfile(actionContext.getSessionId(), profile);
+        }
+    }
+
+    /**
+     * Default authentication success strategy which forward to the next action if the user
+     * has access or returns an access denied error otherwise.
+     * 
+     * @param profile
+     * @param actionContext
+     * @return
+     * @throws Throwable
+     */
+    protected Promise<Result> authenticationSuccess(CommonProfile profile, final ActionContext actionContext)
+            throws Throwable {
+
+        if (hasAccess(profile, actionContext)) {
+            return delegate.call(actionContext.getCtx());
+        } else {
+            return Promise.promise(new Function0<Result>() {
+                @Override
+                public Result apply() {
+                    return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
+                }
+            });
+        }
+    }
+
+    /**
+     * Authenticates the current request by getting the credentials and the corresponding user profile.
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected Promise<CommonProfile> authenticate(final ActionContext actionContext) {
+
+        return Promise.promise(new Function0<CommonProfile>() {
+
+            @Override
+            public CommonProfile apply() throws RequiresHttpAction {
+                final Client client = Config.getClients().findClient(actionContext.getClientName());
+                logger.debug("client : {}", client);
+
+                final Credentials credentials;
+                credentials = client.getCredentials(actionContext.getWebContext());
+                logger.debug("credentials : {}", credentials);
+
+                // get user profile
+                CommonProfile profile = (CommonProfile) client.getUserProfile(credentials,
+                        actionContext.getWebContext());
+                logger.debug("profile : {}", profile);
+
+                return profile;
+            }
+
+        });
+    }
+
+    /**
+     * Returns true if the user defined by the profile has access to the underlying resource
+     * depending on the requireAnyRole and requireAllRoles fields.
+     * 
+     * @param profile
+     * @param actionContext
+     * @return
+     */
+    protected boolean hasAccess(CommonProfile profile, final ActionContext actionContext) {
+
+        return profile.hasAccess(actionContext.getRequireAnyRole(), actionContext.getRequireAllRoles());
+    }
+
+    /**
+     * Save the requested url in session if the request is not Ajax.
+     * 
+     * @param actionContext
+     */
+    protected void saveOriginalUrl(final ActionContext actionContext) {
+        if (!isAjaxRequest(actionContext)) {
+            // requested url to save
+            final String requestedUrlToSave = CallbackController.defaultUrl(actionContext.getTargetUrl(), actionContext
+                    .getRequest().uri());
+            logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
+            StorageHelper.saveRequestedUrl(actionContext.getSessionId(), actionContext.getClientName(),
+                    requestedUrlToSave);
+        }
+    }
+
+    /**
+     * Retrieve the requested url from the session.
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected String retrieveOriginalUrl(final ActionContext actionContext) {
+        return StorageHelper.getRequestedUrl(actionContext.getSessionId(), actionContext.getClientName());
+    }
+
+    /**
+     * Is it a request Ajax?
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected boolean isAjaxRequest(ActionContext actionContext) {
+        return actionContext.isAjax();
+    }
+
+    /**
+     * Is it a stateless authentication flow? 
+     * 
+     * @param actionContext
+     * @return
+     */
+    protected boolean isStateless(final ActionContext actionContext) {
+        return actionContext.isStateless();
+    }
+
+    private Result redirectToIdentityProvider(final ActionContext actionContext) throws RequiresHttpAction {
+        Client<Credentials, CommonProfile> client = Config.getClients().findClient(actionContext.getClientName());
+        RedirectAction action = ((BaseClient) client).getRedirectAction(actionContext.getWebContext(), true,
+                isAjaxRequest(actionContext));
+        logger.debug("redirectAction : {}", action);
+        return toResult(action);
+    }
+
+    private Result toResult(RedirectAction action) {
         switch (action.getType()) {
         case REDIRECT:
             return redirect(action.getLocation());
@@ -171,4 +290,24 @@ public final class RequiresAuthenticationAction extends Action<Result> {
             throw new TechnicalException("Unsupported RedirectAction type " + action.getType());
         }
     }
+
+    private Result requireActionToResult(int code, ActionContext actionContext) {
+        // requires some specific HTTP action
+        logger.debug("requires HTTP action : {}", code);
+        if (code == HttpConstants.UNAUTHORIZED) {
+            return unauthorized(Config.getErrorPage401()).as(HttpConstants.HTML_CONTENT_TYPE);
+        } else if (code == HttpConstants.FORBIDDEN) {
+            return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
+        } else if (code == HttpConstants.TEMP_REDIRECT) {
+            return redirect(actionContext.getWebContext().getResponseLocation());
+        } else if (code == HttpConstants.OK) {
+            final String content = actionContext.getWebContext().getResponseContent();
+            logger.debug("render : {}", content);
+            return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
+        }
+        final String message = "Unsupported HTTP action : " + code;
+        logger.error(message);
+        throw new TechnicalException(message);
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 package org.pac4j.play;
 
 import org.apache.commons.lang3.StringUtils;
-import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.profile.CommonProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public final class StorageHelper {
      */
     public static String getOrCreationSessionId(final Session session) {
         // get current sessionId
-        String sessionId = session.get(Constants.SESSION_ID);
+        String sessionId = session.get(Pac4jConstants.SESSION_ID);
         logger.debug("retrieved sessionId : {}", sessionId);
         // if null, generate a new one
         if (sessionId == null) {
@@ -50,7 +50,7 @@ public final class StorageHelper {
             sessionId = generateSessionId();
             logger.debug("generated sessionId : {}", sessionId);
             // and save it to session
-            session.put(Constants.SESSION_ID, sessionId);
+            session.put(Pac4jConstants.SESSION_ID, sessionId);
         }
         return sessionId;
     }
@@ -108,7 +108,7 @@ public final class StorageHelper {
      * @return the requested url
      */
     public static String getRequestedUrl(final String sessionId, final String clientName) {
-        return (String) get(sessionId, clientName + Constants.SEPARATOR + HttpConstants.REQUESTED_URL);
+        return (String) get(sessionId, clientName + Constants.SEPARATOR + Pac4jConstants.REQUESTED_URL);
     }
 
     /**
@@ -119,7 +119,7 @@ public final class StorageHelper {
      * @param requestedUrl
      */
     public static void saveRequestedUrl(final String sessionId, final String clientName, final String requestedUrl) {
-        save(sessionId, clientName + Constants.SEPARATOR + HttpConstants.REQUESTED_URL, requestedUrl);
+        save(sessionId, clientName + Constants.SEPARATOR + Pac4jConstants.REQUESTED_URL, requestedUrl);
     }
 
     /**

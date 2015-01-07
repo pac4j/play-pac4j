@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.client.BaseClient;
 import org.pac4j.core.client.Clients;
 import org.pac4j.core.client.RedirectAction;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +40,7 @@ public class JavaController extends CallbackController {
     protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The current requested url is saved into session to be restored after authentication.
      * 
      * @param clientName
@@ -51,7 +51,7 @@ public class JavaController extends CallbackController {
     }
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The input <code>targetUrl</code> (or the current requested url if <code>null</code>) is saved into session to be restored after
      * authentication.
      * 
@@ -91,14 +91,18 @@ public class JavaController extends CallbackController {
      */
     protected static CommonProfile getUserProfile() {
         // get the session id
-        final String sessionId = session(Constants.SESSION_ID);
+        final String sessionId = session(Pac4jConstants.SESSION_ID);
         logger.debug("sessionId for profile : {}", sessionId);
+        CommonProfile profile = null;
         if (StringUtils.isNotBlank(sessionId)) {
             // get the user profile
-            final CommonProfile profile = StorageHelper.getProfile(sessionId);
-            logger.debug("profile : {}", profile);
+            profile = StorageHelper.getProfile(sessionId);
+        }
+        if (profile == null) {
+            // Try to get the User Profile from the current request (stateless flow)
+            return (CommonProfile) ctx().args.get(Pac4jConstants.USER_PROFILE);
+        } else {
             return profile;
         }
-        return null;
     }
 }

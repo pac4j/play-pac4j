@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -26,9 +26,7 @@ import play.mvc.With;
 
 @With(RequiresAuthenticationAction.class)
 @Retention(RetentionPolicy.RUNTIME)
-@Target({
-    ElementType.METHOD, ElementType.TYPE
-})
+@Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @Documented
 /**
@@ -39,12 +37,14 @@ import play.mvc.With;
  */
 public @interface RequiresAuthentication {
     String clientName();
-    
+
     String targetUrl() default "";
-    
+
+    boolean stateless() default false;
+
     boolean isAjax() default false;
-    
+
     String requireAnyRole() default "";
-    
+
     String requireAllRoles() default "";
 }

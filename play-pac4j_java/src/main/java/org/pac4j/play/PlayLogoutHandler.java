@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package org.pac4j.play;
 
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.cas.logout.NoLogoutHandler;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.play.java.JavaWebContext;
 import org.slf4j.Logger;
@@ -29,9 +30,9 @@ import org.slf4j.LoggerFactory;
  * @since 1.1.0
  */
 public final class PlayLogoutHandler extends NoLogoutHandler {
-    
+
     private static final Logger logger = LoggerFactory.getLogger(PlayLogoutHandler.class);
-    
+
     @Override
     public void destroySession(final WebContext context) {
         final String logoutRequest = context.getRequestParameter("logoutRequest");
@@ -43,12 +44,12 @@ public final class PlayLogoutHandler extends NoLogoutHandler {
         StorageHelper.removeProfile(sessionId);
         StorageHelper.remove(ticket);
     }
-    
+
     @Override
     public void recordSession(final WebContext context, final String ticket) {
         logger.debug("ticket : {}", ticket);
         final JavaWebContext javaWebContext = (JavaWebContext) context;
-        final String sessionId = javaWebContext.getSession().get(Constants.SESSION_ID);
+        final String sessionId = javaWebContext.getSession().get(Pac4jConstants.SESSION_ID);
         logger.debug("save sessionId : {}", sessionId);
         StorageHelper.save(ticket, sessionId, Config.getProfileTimeout());
     }

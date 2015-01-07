@@ -1,5 +1,5 @@
 /*
-  Copyright 2012 - 2014 Jerome Leleu
+  Copyright 2012 - 2015 pac4j organization
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,8 +17,8 @@ package org.pac4j.play.scala;
 
 import java.util.Map;
 
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
-import org.pac4j.play.Constants;
 import org.pac4j.play.StorageHelper;
 
 import play.api.mvc.AnyContent;
@@ -44,14 +44,17 @@ public class ScalaWebContext<C> implements WebContext {
         this.session = session;
     }
 
+    @Override
     public String getRequestHeader(final String name) {
         throw new IllegalArgumentException("getRequestHeader not implemented");
     }
 
+    @Override
     public String getRequestMethod() {
         throw new IllegalArgumentException("getRequestMethod not implemented");
     }
 
+    @Override
     public String getRequestParameter(final String name) {
         String value = null;
         Option<Seq<String>> values = this.request.queryString().get(name);
@@ -71,54 +74,64 @@ public class ScalaWebContext<C> implements WebContext {
         return value;
     }
 
+    @Override
     public Map<String, String[]> getRequestParameters() {
         throw new IllegalArgumentException("getRequestParameters not implemented");
     }
 
+    @Override
     public Object getSessionAttribute(final String key) {
         Object value = null;
-        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        final Option<String> sessionId = this.session.get(Pac4jConstants.SESSION_ID);
         if (sessionId.isDefined()) {
             value = StorageHelper.get(sessionId.get(), key);
         }
         return value;
     }
 
+    @Override
     public void setResponseStatus(final int code) {
         // do nothing
     }
 
+    @Override
     public void setSessionAttribute(final String key, final Object value) {
-        final Option<String> sessionId = this.session.get(Constants.SESSION_ID);
+        final Option<String> sessionId = this.session.get(Pac4jConstants.SESSION_ID);
         if (sessionId.isDefined()) {
             StorageHelper.save(sessionId.get(), key, value);
         }
     }
 
+    @Override
     public void writeResponseContent(final String content) {
         throw new IllegalArgumentException("writeResponseContent not implemented");
     }
 
+    @Override
     public void setResponseHeader(final String key, final String value) {
         throw new IllegalArgumentException("setResponseHeader not implemented");
     }
 
+    @Override
     public String getServerName() {
         String[] split = this.request.host().split(":");
         return split[0];
     }
 
+    @Override
     public int getServerPort() {
         String[] split = this.request.host().split(":");
         String portStr = (split.length > 1) ? split[1] : "80";
         return Integer.valueOf(portStr);
     }
 
+    @Override
     public String getScheme() {
         // TODO: play api does not expose the scheme, just return http for now
         return "http";
     }
 
+    @Override
     public String getFullRequestURL() {
         throw new IllegalArgumentException("not implemented");
     }
