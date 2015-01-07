@@ -36,7 +36,7 @@ import play.mvc.Http.Request;
  * @author Michael Remond
  * @since 1.4.0
  */
-public class ActionContext {
+public final class ActionContext {
 
     private static final Logger logger = LoggerFactory.getLogger(ActionContext.class);
 
@@ -68,25 +68,25 @@ public class ActionContext {
     }
 
     /* The Play context */
-    Context ctx;
+    private final Context ctx;
     /* The play request */
-    Request request;
+    private final Request request;
     /* The sessionId used to retrieve the session attributes */
-    String sessionId;
+    private final String sessionId;
     /* The Play Pac4j Context */
-    JavaWebContext webContext;
+    private final JavaWebContext webContext;
     /* The client name */
-    String clientName;
+    private final String clientName;
     /* The target url parameter */
-    String targetUrl;
+    private final String targetUrl;
     /* The isAjax parameter */
-    boolean isAjax;
+    private final boolean isAjax;
     /* The stateless parameter */
-    boolean stateless;
+    private final boolean stateless;
     /* The requireAnyRole parameter */
-    String requireAnyRole;
+    private final String requireAnyRole;
     /* The requireAllRoles parameter */
-    String requireAllRoles;
+    private final String requireAllRoles;
 
     /**
      * Private constructor.
@@ -104,6 +104,46 @@ public class ActionContext {
         this.stateless = stateless;
         this.requireAnyRole = requireAnyRole;
         this.requireAllRoles = requireAllRoles;
+    }
+
+    public Context getCtx() {
+        return ctx;
+    }
+
+    public Request getRequest() {
+        return request;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public JavaWebContext getWebContext() {
+        return webContext;
+    }
+
+    public String getClientName() {
+        return clientName;
+    }
+
+    public String getTargetUrl() {
+        return targetUrl;
+    }
+
+    public boolean isAjax() {
+        return isAjax;
+    }
+
+    public boolean isStateless() {
+        return stateless;
+    }
+
+    public String getRequireAnyRole() {
+        return requireAnyRole;
+    }
+
+    public String getRequireAllRoles() {
+        return requireAllRoles;
     }
 
     /**

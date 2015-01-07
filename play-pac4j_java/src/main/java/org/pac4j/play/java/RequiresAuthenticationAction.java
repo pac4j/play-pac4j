@@ -111,7 +111,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
 
                 @Override
                 public CommonProfile apply() {
-                    final CommonProfile profile = StorageHelper.getProfile(actionContext.sessionId);
+                    final CommonProfile profile = StorageHelper.getProfile(actionContext.getSessionId());
                     logger.debug("profile : {}", profile);
                     return profile;
                 }
@@ -153,9 +153,9 @@ public class RequiresAuthenticationAction extends Action<Result> {
      */
     protected void saveUserProfile(CommonProfile profile, final ActionContext actionContext) {
         if (isStateless(actionContext)) {
-            actionContext.ctx.args.put(Pac4jConstants.USER_PROFILE, profile);
+            actionContext.getCtx().args.put(Pac4jConstants.USER_PROFILE, profile);
         } else {
-            StorageHelper.saveProfile(actionContext.sessionId, profile);
+            StorageHelper.saveProfile(actionContext.getSessionId(), profile);
         }
     }
 
@@ -172,7 +172,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
             throws Throwable {
 
         if (hasAccess(profile, actionContext)) {
-            return delegate.call(actionContext.ctx);
+            return delegate.call(actionContext.getCtx());
         } else {
             return Promise.promise(new Function0<Result>() {
                 @Override
@@ -195,15 +195,16 @@ public class RequiresAuthenticationAction extends Action<Result> {
 
             @Override
             public CommonProfile apply() throws RequiresHttpAction {
-                final Client client = Config.getClients().findClient(actionContext.clientName);
+                final Client client = Config.getClients().findClient(actionContext.getClientName());
                 logger.debug("client : {}", client);
 
                 final Credentials credentials;
-                credentials = client.getCredentials(actionContext.webContext);
+                credentials = client.getCredentials(actionContext.getWebContext());
                 logger.debug("credentials : {}", credentials);
 
                 // get user profile
-                CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, actionContext.webContext);
+                CommonProfile profile = (CommonProfile) client.getUserProfile(credentials,
+                        actionContext.getWebContext());
                 logger.debug("profile : {}", profile);
 
                 return profile;
@@ -222,7 +223,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      */
     protected boolean hasAccess(CommonProfile profile, final ActionContext actionContext) {
 
-        return profile.hasAccess(actionContext.requireAnyRole, actionContext.requireAllRoles);
+        return profile.hasAccess(actionContext.getRequireAnyRole(), actionContext.getRequireAllRoles());
     }
 
     /**
@@ -233,10 +234,11 @@ public class RequiresAuthenticationAction extends Action<Result> {
     protected void saveOriginalUrl(final ActionContext actionContext) {
         if (!isAjaxRequest(actionContext)) {
             // requested url to save
-            final String requestedUrlToSave = CallbackController.defaultUrl(actionContext.targetUrl,
-                    actionContext.request.uri());
+            final String requestedUrlToSave = CallbackController.defaultUrl(actionContext.getTargetUrl(), actionContext
+                    .getRequest().uri());
             logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
-            StorageHelper.saveRequestedUrl(actionContext.sessionId, actionContext.clientName, requestedUrlToSave);
+            StorageHelper.saveRequestedUrl(actionContext.getSessionId(), actionContext.getClientName(),
+                    requestedUrlToSave);
         }
     }
 
@@ -247,7 +249,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * @return
      */
     protected String retrieveOriginalUrl(final ActionContext actionContext) {
-        return StorageHelper.getRequestedUrl(actionContext.sessionId, actionContext.clientName);
+        return StorageHelper.getRequestedUrl(actionContext.getSessionId(), actionContext.getClientName());
     }
 
     /**
@@ -257,7 +259,7 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * @return
      */
     protected boolean isAjaxRequest(ActionContext actionContext) {
-        return actionContext.isAjax;
+        return actionContext.isAjax();
     }
 
     /**
@@ -267,12 +269,12 @@ public class RequiresAuthenticationAction extends Action<Result> {
      * @return
      */
     protected boolean isStateless(final ActionContext actionContext) {
-        return actionContext.stateless;
+        return actionContext.isStateless();
     }
 
     private Result redirectToIdentityProvider(final ActionContext actionContext) throws RequiresHttpAction {
-        Client<Credentials, CommonProfile> client = Config.getClients().findClient(actionContext.clientName);
-        RedirectAction action = ((BaseClient) client).getRedirectAction(actionContext.webContext, true,
+        Client<Credentials, CommonProfile> client = Config.getClients().findClient(actionContext.getClientName());
+        RedirectAction action = ((BaseClient) client).getRedirectAction(actionContext.getWebContext(), true,
                 isAjaxRequest(actionContext));
         logger.debug("redirectAction : {}", action);
         return toResult(action);
@@ -297,9 +299,9 @@ public class RequiresAuthenticationAction extends Action<Result> {
         } else if (code == HttpConstants.FORBIDDEN) {
             return forbidden(Config.getErrorPage403()).as(HttpConstants.HTML_CONTENT_TYPE);
         } else if (code == HttpConstants.TEMP_REDIRECT) {
-            return redirect(actionContext.webContext.getResponseLocation());
+            return redirect(actionContext.getWebContext().getResponseLocation());
         } else if (code == HttpConstants.OK) {
-            final String content = actionContext.webContext.getResponseContent();
+            final String content = actionContext.getWebContext().getResponseContent();
             logger.debug("render : {}", content);
             return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
         }
