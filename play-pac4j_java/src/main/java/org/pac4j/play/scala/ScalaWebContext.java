@@ -127,8 +127,11 @@ public class ScalaWebContext<C> implements WebContext {
 
     @Override
     public String getScheme() {
-        // TODO: play api does not expose the scheme, just return http for now
-        return "http";
+        if (request.secure()) {
+            return "https";
+        } else {
+            return "http";
+        }
     }
 
     @Override

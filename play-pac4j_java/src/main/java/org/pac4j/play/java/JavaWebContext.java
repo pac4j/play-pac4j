@@ -41,17 +41,10 @@ public class JavaWebContext extends BaseResponseContext {
 
     private final Session session;
 
-    // play api does not expose the scheme, just return http for now
-    private String scheme = "http";
-
     public JavaWebContext(final Request request, final Response response, final Session session) {
         this.request = request;
         this.response = response;
         this.session = session;
-    }
-
-    public void setScheme(String scheme) {
-        this.scheme = scheme;
     }
 
     @Override
@@ -129,7 +122,11 @@ public class JavaWebContext extends BaseResponseContext {
 
     @Override
     public String getScheme() {
-        return scheme;
+        if (request.secure()) {
+            return "https";
+        } else {
+            return "http";
+        }
     }
 
     @Override
