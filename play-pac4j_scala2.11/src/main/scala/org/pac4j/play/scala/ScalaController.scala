@@ -35,7 +35,7 @@ import org.pac4j.core.exception._
  * @author Jerome Leleu
  * @since 1.0.0
  */
-trait ScalaController extends Controller {
+trait ScalaController[P<:CommonProfile] extends Controller {
 
   protected val logger = LoggerFactory.getLogger("org.pac4j.play.scala.ScalaController")
 
@@ -66,7 +66,7 @@ trait ScalaController extends Controller {
    * @param action
    * @return the current action to process or the redirection to the provider if the user is not authenticated
    */
-  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean)(action: CommonProfile => Action[A]) = Action.async(parser) { request =>
+  protected def RequiresAuthentication[A](clientName: String, targetUrl: String, parser: BodyParser[A], isAjax: Boolean)(action: P => Action[A]) = Action.async(parser) { request =>
     logger.debug("Entering RequiresAuthentication")
     var newSession = getOrCreateSessionId(request)
     val sessionId = newSession.get(Pac4jConstants.SESSION_ID).get
@@ -100,7 +100,7 @@ trait ScalaController extends Controller {
     }
   }
 
-  protected def RequiresAuthentication(clientName: String, targetUrl: String = "", isAjax: Boolean = false)(action: CommonProfile => Action[AnyContent]): Action[AnyContent] = {
+  protected def RequiresAuthentication(clientName: String, targetUrl: String = "", isAjax: Boolean = false)(action: P => Action[AnyContent]): Action[AnyContent] = {
     RequiresAuthentication(clientName, targetUrl, parse.anyContent, isAjax)(action)
   }
 
@@ -164,14 +164,14 @@ trait ScalaController extends Controller {
    * @param request
    * @return the user profile
    */
-  protected def getUserProfile(request: RequestHeader): CommonProfile = {
+  protected def getUserProfile(request: RequestHeader): P = {
     // get the session id
-    var profile: CommonProfile = null
+    var profile = null.asInstanceOf[P]
     val sessionId = request.session.get(Pac4jConstants.SESSION_ID)
     logger.debug("sessionId for profile : {}", sessionId)
     if (sessionId.isDefined) {
       // get the user profile
-      profile = StorageHelper.getProfile(sessionId.get)
+      profile = StorageHelper.getProfile(sessionId.get).asInstanceOf[P]
       logger.debug("profile : {}", profile)
     }
     profile
