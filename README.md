@@ -21,7 +21,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
-<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x / v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.3.x / v1.4.x</td></tr>
+<tr><td>Play 2.3</td><td>play-pac4j_java v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.4.x</td></tr>
 </table>
 
 
