@@ -2,14 +2,17 @@
 
 The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
-It supports these 6 authentication mechanisms on client side: 
+It supports these 7 authentication mechanisms on client side (stateful, redirection back and forth to an identity provider for login):
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
 4. OpenID
 5. SAML (2.0)
-6. Google App Engine UserService.
+6. GAE UserService
+7. OpenID Connect (1.0).
+
+as well as stateless REST calls (direct access to the web application with credentials).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
@@ -18,7 +21,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
-<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.3.x</td></tr>
+<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x / v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.3.x / v1.4.x</td></tr>
 </table>
 
 
@@ -48,12 +51,13 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
 <tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 <tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
+<tr><td>OpenID Connect Provider</td><td>OpenID Connect 1.0</td><td>pac4j-oidc</td><td>OidcClient</td><td>OidcProfile</td></tr>
 </table>
 
 
 ## Technical description
 
-This library has **just 11 classes**:
+This library has **only 12 classes**:
 
 * the *Config* class gathers all the configuration
 * the *Constants* class gathers all the constants
@@ -62,7 +66,7 @@ This library has **just 11 classes**:
 * the *JavaWebContext* class is a Java wrapper for the user request, response and session
 * the *JavaController* class is the Java controller to retrieve the user profile or the redirection url to start the authentication process
 * the *RequiresAuthentication* annotation is to protect an action if the user is not authenticated and starts the authentication process if necessary
-* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary
+* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class) 
 * the *ScalaController* trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process
 * the *ScalaWebContext* class is a Scala wrapper for the user request, response and session
 * the *PlayLogoutHandler* class is dedicated to CAS support to handle CAS logout request.
@@ -79,7 +83,7 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.3.0"
+      "org.pac4j" % "play-pac4j_java" % "1.4.0"
     )
 
 Or the **play-pac4j_scala2.10** or **play-pac4j_scala2.11** dependency for a Scala application.
@@ -97,16 +101,18 @@ If you want to use a specific client support, you need to add the appropriate de
 3. for HTTP support, the *pac4j-http* dependency is required
 4. for OpenID support, the *pac4j-openid* dependency is required.
 5. for SAML 2.0 support, the *pac4j-saml* dependency is required
-6. for Google App Engine, the *pac4j-gae* dependency is required.
+6. for Google App Engine, the *pac4j-gae* dependency is required
+7. for OpenID Connect, the *pac4j-oidc* dependency is required
 
 ```
     libraryDependencies ++= Seq(
-      "org.pac4j" % "pac4j-http" % "1.6.0",
-      "org.pac4j" % "pac4j-cas" % "1.6.0",
-      "org.pac4j" % "pac4j-openid" % "1.6.0",
-      "org.pac4j" % "pac4j-oauth" % "1.6.0",
-      "org.pac4j" % "pac4j-saml" % "1.6.0",
-      "org.pac4j" % "pac4j-gae" % "1.6.0"
+      "org.pac4j" % "pac4j-http" % "1.7.0",
+      "org.pac4j" % "pac4j-cas" % "1.7.0",
+      "org.pac4j" % "pac4j-openid" % "1.7.0",
+      "org.pac4j" % "pac4j-oauth" % "1.7.0",
+      "org.pac4j" % "pac4j-saml" % "1.7.0",
+      "org.pac4j" % "pac4j-gae" % "1.7.0",
+      "org.pac4j" % "pac4j-oidc" % "1.7.0"
     )
 ```
 
@@ -234,14 +240,14 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.4.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.4.1-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.3.0** version:
+The latest release of the **play-pac4j** project is the **1.4.0** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
         <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId> or <artifactId>play-pac4j_scala2.11</artifactId>
-        <version>1.3.0</version>
+        <version>1.4.0</version>
     </dependency>
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
