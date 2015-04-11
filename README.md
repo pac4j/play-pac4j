@@ -187,6 +187,15 @@ And protect the access of a specific url by using the *RequiresAuthentication* f
 
 After successfull authentication, the originally requested url is restored.
 
+### Direct calls and stateless mode
+
+For the Java library (play-pac4j_java), you can enable direct calls with authentication credentials by using the `stateless` parameter. For example:
+
+    @RequiresAuthentication(clientName = "BasicAuthClient", stateless = true)
+    public static Result statelessIndex() {
+        return protectedIndex();
+    }
+
 ### Get redirection urls
 
 You can also explicitely compute a redirection url to a provider for authentication by using the *getRedirectionUrl* method for a Java application:
