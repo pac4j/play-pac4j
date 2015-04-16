@@ -2,14 +2,15 @@
 
 The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
-It supports these 6 authentication mechanisms on client side: 
+It supports these 7 authentication mechanisms on client side:
 
 1. OAuth (1.0 & 2.0)
 2. CAS (1.0, 2.0, SAML, logout & proxy)
 3. HTTP (form & basic auth authentications)
 4. OpenID
 5. SAML (2.0)
-6. Google App Engine UserService.
+6. GAE UserService
+7. OpenID Connect (1.0).
 
 It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
 
@@ -18,7 +19,7 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Play 2.0</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.9 v1.1.x</td></tr>
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
-<tr><td>Play 2.3</td><td>play-pac4j_java v1.3.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.3.x</td></tr>
+<tr><td>Play 2.3</td><td>play-pac4j_java v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.4.x</td></tr>
 </table>
 
 
@@ -42,12 +43,14 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Foursquare</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>FoursquareClient</td><td>FoursquareProfile</td></tr>
 <tr><td>Bitbucket</td><td>OAuth 1.0</td><td>pac4j-oauth</td><td>BitbucketClient</td><td>BitbucketProfile</td></tr>
 <tr><td>ORCiD</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>OrcidClient</td><td>OrcidProfile</td></tr>
+<tr><td>Strava</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>StravaClient</td><td>StravaProfile</td></tr>
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
 <tr><td>Google - Deprecated</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
 <tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
 <tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 <tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
+<tr><td>OpenID Connect Provider</td><td>OpenID Connect 1.0</td><td>pac4j-oidc</td><td>OidcClient</td><td>OidcProfile</td></tr>
 </table>
 
 
@@ -101,12 +104,13 @@ If you want to use a specific client support, you need to add the appropriate de
 
 ```
     libraryDependencies ++= Seq(
-      "org.pac4j" % "pac4j-http" % "1.6.0",
-      "org.pac4j" % "pac4j-cas" % "1.6.0",
-      "org.pac4j" % "pac4j-openid" % "1.6.0",
-      "org.pac4j" % "pac4j-oauth" % "1.6.0",
-      "org.pac4j" % "pac4j-saml" % "1.6.0",
-      "org.pac4j" % "pac4j-gae" % "1.6.0"
+      "org.pac4j" % "pac4j-http" % "1.7.0",
+      "org.pac4j" % "pac4j-cas" % "1.7.0",
+      "org.pac4j" % "pac4j-openid" % "1.7.0",
+      "org.pac4j" % "pac4j-oauth" % "1.7.0",
+      "org.pac4j" % "pac4j-saml" % "1.7.0",
+      "org.pac4j" % "pac4j-gae" % "1.7.0",
+      "org.pac4j" % "pac4j-oidc" % "1.7.0"
     )
 ```
 
