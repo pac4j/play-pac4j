@@ -40,10 +40,10 @@ public class JavaController extends CallbackController {
     protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The current requested url is saved into session to be restored after authentication.
      * 
-     * @param clientName
+     * @param clientName the client name
      * @return the url of the provider where to redirect the user
      */
     protected static RedirectAction getRedirectAction(final String clientName) {
@@ -51,12 +51,12 @@ public class JavaController extends CallbackController {
     }
 
     /**
-     * This method returns the url of the provider where the user must be redirected for authentication.<br />
+     * This method returns the url of the provider where the user must be redirected for authentication.
      * The input <code>targetUrl</code> (or the current requested url if <code>null</code>) is saved into session to be restored after
      * authentication.
      * 
-     * @param clientName
-     * @param targetUrl
+     * @param clientName the client name
+     * @param targetUrl the target url
      * @return the url of the provider where to redirect the user
      */
     protected static RedirectAction getRedirectAction(final String clientName, final String targetUrl) {

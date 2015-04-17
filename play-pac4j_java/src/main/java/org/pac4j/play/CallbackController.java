@@ -37,9 +37,8 @@ import play.mvc.Result;
 import play.mvc.Results;
 
 /**
- * This controller is the class to finish the authentication process and logout the user.
- * <p />
- * Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.
+ * <p>This controller is the class to finish the authentication process and logout the user.</p>
+ * <p>Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.</p>
  * 
  * @author Jerome Leleu
  * @since 1.0.0
@@ -142,7 +141,7 @@ public class CallbackController extends Controller {
     /**
      * This method logouts the authenticated user and send him to the url defined in the
      * {@link Constants#REDIRECT_URL_LOGOUT_PARAMETER_NAME} parameter name or to the <code>defaultLogoutUrl</code>.
-     * This parameter is matched against the {@link Config.getLogoutUrlPattern()}.
+     * This parameter is matched against the defined logout url pattern.
      * 
      * @return the redirection to the "logout url"
      */
@@ -165,8 +164,8 @@ public class CallbackController extends Controller {
     /**
      * This method returns the default url from a specified url compared with a default url.
      * 
-     * @param url
-     * @param defaultUrl
+     * @param url the requested url
+     * @param defaultUrl the default url
      * @return the default url
      */
     public static String defaultUrl(final String url, final String defaultUrl) {
