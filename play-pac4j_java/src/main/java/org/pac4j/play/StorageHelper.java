@@ -35,7 +35,7 @@ public final class StorageHelper {
     /**
      * Get a session identifier and generates it if no session exists.
      * 
-     * @param session
+     * @param session the web session
      * @return the session identifier
      */
     public static String getOrCreationSessionId(final Session session) {
@@ -65,7 +65,7 @@ public final class StorageHelper {
     /**
      * Get the profile from storage.
      * 
-     * @param sessionId
+     * @param sessionId the session identifier
      * @return the user profile
      */
     public static CommonProfile getProfile(final String sessionId) {
@@ -78,8 +78,8 @@ public final class StorageHelper {
     /**
      * Save a user profile in storage.
      * 
-     * @param sessionId
-     * @param profile
+     * @param sessionId the session identifier
+     * @param profile the user profile
      */
     public static void saveProfile(final String sessionId, final CommonProfile profile) {
         if (sessionId != null) {
@@ -90,7 +90,7 @@ public final class StorageHelper {
     /**
      * Remove a user profile from storage.
      * 
-     * @param sessionId
+     * @param sessionId the session identifier
      */
     public static void removeProfile(final String sessionId) {
         if (sessionId != null) {
@@ -101,8 +101,8 @@ public final class StorageHelper {
     /**
      * Get a requested url from storage.
      * 
-     * @param sessionId
-     * @param clientName
+     * @param sessionId the session identifier
+     * @param clientName the client name
      * @return the requested url
      */
     public static String getRequestedUrl(final String sessionId, final String clientName) {
@@ -112,9 +112,9 @@ public final class StorageHelper {
     /**
      * Save a requested url to storage.
      * 
-     * @param sessionId
-     * @param clientName
-     * @param requestedUrl
+     * @param sessionId the session identifier
+     * @param clientName the client name
+     * @param requestedUrl the originally requested url
      */
     public static void saveRequestedUrl(final String sessionId, final String clientName, final String requestedUrl) {
         save(sessionId, clientName + Constants.SEPARATOR + Constants.REQUESTED_URL, requestedUrl);
@@ -123,8 +123,8 @@ public final class StorageHelper {
     /**
      * Get an object from storage.
      * 
-     * @param sessionId
-     * @param key
+     * @param sessionId the session identifier
+     * @param key a key
      * @return the object
      */
     public static Object get(final String sessionId, final String key) {
@@ -137,9 +137,9 @@ public final class StorageHelper {
     /**
      * Save an object in storage.
      * 
-     * @param sessionId
-     * @param key
-     * @param value
+     * @param sessionId the session identifier
+     * @param key a key
+     * @param value the value to store
      */
     public static void save(final String sessionId, final String key, final Object value) {
         if (sessionId != null) {
@@ -150,8 +150,8 @@ public final class StorageHelper {
     /**
      * Remove an object in storage.
      * 
-     * @param sessionId
-     * @param key
+     * @param sessionId the session identifier
+     * @param key a key
      */
     public static void remove(final String sessionId, final String key) {
         remove(sessionId + Constants.SEPARATOR + key);
@@ -160,7 +160,7 @@ public final class StorageHelper {
     /**
      * Get an object from storage.
      * 
-     * @param key
+     * @param key a key
      * @return the object
      */
     public static Object get(final String key) {
@@ -170,9 +170,9 @@ public final class StorageHelper {
     /**
      * Save an object in storage.
      * 
-     * @param key
-     * @param value
-     * @param timeout
+     * @param key a key
+     * @param value the value to store
+     * @param timeout a timeout
      */
     public static void save(final String key, final Object value, final int timeout) {
         Cache.set(key, value, timeout);
@@ -181,7 +181,7 @@ public final class StorageHelper {
     /**
      * Remove an object from storage.
      * 
-     * @param key
+     * @param key a key
      */
     public static void remove(final String key) {
         save(key, null, 0);

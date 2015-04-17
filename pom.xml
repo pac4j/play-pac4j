@@ -40,9 +40,9 @@
 	</licenses>
 
 	<scm>
-		<url>http://github.com/leleuj/play-pac4j.git</url>
-		<connection>scm:git:git@github.com:leleuj/play-pac4j.git</connection>
-		<developerConnection>scm:git:git@github.com:leleuj/play-pac4j.git</developerConnection>
+		<url>http://github.com/pac4j/play-pac4j.git</url>
+		<connection>scm:git:git@github.com:pac4j/play-pac4j.git</connection>
+		<developerConnection>scm:git:git@github.com:pac4j/play-pac4j.git</developerConnection>
 	</scm>
 
 	<developers>
@@ -81,7 +81,7 @@
 	</modules>
 
 	<properties>
-		<pac4j.version>1.6.0</pac4j.version>
+		<pac4j.version>1.7.0</pac4j.version>
 	</properties>
 
 	<dependencyManagement>
