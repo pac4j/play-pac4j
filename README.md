@@ -1,4 +1,4 @@
-## What is the play-pac4j library ? [![Build Status](https://travis-ci.org/leleuj/play-pac4j.png?branch=1.2.x)](https://travis-ci.org/leleuj/play-pac4j)
+## What is the play-pac4j library ? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=1.2.x)](https://travis-ci.org/pac4j/play-pac4j)
 
 The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
@@ -12,7 +12,7 @@ It supports these 7 authentication mechanisms on client side:
 6. GAE UserService
 7. OpenID Connect (1.0).
 
-It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
+It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
 <table>
 <tr><th>Play framework/ Language</th><th>Java</th><th>Scala</th></tr>
@@ -231,8 +231,8 @@ Or for all the OAuth profiles, to get the access token:
 
 Demos with Facebook, Twitter, CAS, form authentication and basic auth authentication providers are available at:
 
-1. [play-pac4j-java-demo](https://github.com/leleuj/play-pac4j-java-demo) for Java applications
-2. [play-pac4j-scala-demo](https://github.com/leleuj/play-pac4j-scala-demo) for Scala applications.
+1. [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-java-demo) for Java applications
+2. [play-pac4j-scala-demo](https://github.com/pac4j/play-pac4j-scala-demo) for Scala applications.
 
 
 ## Versions
@@ -247,7 +247,7 @@ The latest release of the **play-pac4j** project is the **1.2.3** version:
         <version>1.2.3</version>
     </dependency>
 
-See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
 
 
 ## Contact
