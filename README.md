@@ -1,4 +1,4 @@
-<h2>What is the play-pac4j library ?  <a href="https://travis-ci.org/leleuj/play-pac4j"><img src="https://travis-ci.org/leleuj/play-pac4j.png?branch=1.1.x" /></a></h2>
+<h2>What is the play-pac4j library ?  <a href="https://travis-ci.org/pac4j/play-pac4j"><img src="https://travis-ci.org/pac4j/play-pac4j.png?branch=1.1.x" /></a></h2>
 
 The <b>play-pac4j</b> library is a <i>Java and Scala</i> multi-protocols client for Play framework 2.x.
 
@@ -12,7 +12,7 @@ It supports these 7 authentication mechanisms on client side:
 6. Google App Engine UserService
 7. OpenID Connect.
 
-It's available under the Apache 2 license and based on my [pac4j](https://github.com/leleuj/pac4j) library.
+It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
 
 <table>
 <tr><th>Play framework/ Language</th><th>Java</th><th>Scala</th></tr>
@@ -46,7 +46,6 @@ It's available under the Apache 2 license and based on my [pac4j](https://github
 <tr><td>Strava</td><td>OAuth 2.0</td><td>pac4j-oauth</td><td>StravaClient</td><td>StravaProfile</td></tr>
 <tr><td>Web sites with basic auth authentication</td><td>HTTP</td><td>pac4j-http</td><td>BasicAuthClient</td><td>HttpProfile</td></tr>
 <tr><td>Web sites with form authentication</td><td>HTTP</td><td>pac4j-http</td><td>FormClient</td><td>HttpProfile</td></tr>
-<tr><td>Google - Deprecated</td><td>OpenID</td><td>pac4j-openid</td><td>GoogleOpenIdClient</td><td>GoogleOpenIdProfile</td></tr>
 <tr><td>Yahoo</td><td>OpenID</td><td>pac4j-openid</td><td>YahooOpenIdClient</td><td>YahooOpenIdProfile</td></tr>
 <tr><td>SAML Identity Provider</td><td>SAML 2.0</td><td>pac4j-saml</td><td>Saml2Client</td><td>Saml2Profile</td></tr>
 <tr><td>Google App Engine User Service</td><td>Gae User Service Mechanism</td><td>pac4j-gae</td><td>GaeUserServiceClient</td><td>GaeUserServiceProfile</td></tr>
@@ -214,8 +213,8 @@ String accessToken = facebookProfile.getAccessToken();</code></pre>
 
 Demos with Facebook, Twitter, CAS, form authentication and basic auth authentication providers are available at:
 <ul>
-<li><a href="https://github.com/leleuj/play-pac4j-java-demo">play-pac4j-java-demo</a> for Java applications</li>
-<li><a href="https://github.com/leleuj/play-pac4j-scala-demo">play-pac4j-scala-demo</a> for Scala applications.</li>
+<li><a href="https://github.com/pac4j/play-pac4j-java-demo">play-pac4j-java-demo</a> for Java applications</li>
+<li><a href="https://github.com/pac4j/play-pac4j-scala-demo">play-pac4j-scala-demo</a> for Scala applications.</li>
 </ul>
 
 
@@ -231,7 +230,7 @@ The latest release of the **play-pac4j** project is the **1.1.5** version:
         <version>1.1.5</version>
     </dependency>
 
-See the [release notes](https://github.com/leleuj/play-pac4j/wiki/Release-notes).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
 
 
 ## Contact
