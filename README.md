@@ -12,7 +12,7 @@ It supports these 7 authentication mechanisms on client side:
 6. GAE UserService
 7. OpenID Connect (1.0).
 
-It's available under the Apache 2 license and based on my [pac4j](https://github.com/pac4j/pac4j) library.
+It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 <table>
 <tr><th>Play framework/ Language</th><th>Java</th><th>Scala</th></tr>
