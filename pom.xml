@@ -16,7 +16,7 @@
     <name>Play pac4j</name>
     <version>1.4.1-SNAPSHOT</version>
     <description>Java and Scala multi protocols (CAS, OAuth, OpenID, SAML, HTTP...) client for Play 2.3 framework</description>
-    <url>https://github.com/leleuj/play-pac4j</url>
+    <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
         <license>
