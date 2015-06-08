@@ -26,7 +26,6 @@ import org.pac4j.core.profile._
 import org.pac4j.core.util._
 import org.pac4j.play._
 import org.slf4j._
-import play.core.server.netty.RequestBodyHandler
 import org.pac4j.core.exception._
 
 /**

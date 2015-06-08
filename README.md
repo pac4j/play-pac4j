@@ -126,30 +126,47 @@ or from the ScalaController trait for a Scala application:
 
     object Application extends ScalaController {
 
-You must define all the clients you want to support in the *onStart* method of your Global class for your Java or Scala application:
- 
-    public void onStart(final Application app) {
-      // OAuth
-      final FacebookClient facebookClient = new FacebookClient("fb_key", "fb_secret");
-      final TwitterClient twitterClient = new TwitterClient("tw_key", "tw_secret");
-      // HTTP
-      final FormClient formClient = new FormClient("http://localhost:9000/theForm", new SimpleTestUsernamePasswordAuthenticator());
-      final BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
-      // CAS
-      final CasClient casClient = new CasClient();
-      // casClient.setLogoutHandler(new PlayLogoutHandler());
-      // casClient.setCasProtocol(CasProtocol.SAML);
-      // casClient.setGateway(true);
-      /*final CasProxyReceptor casProxyReceptor = new CasProxyReceptor();
-      casProxyReceptor.setCallbackUrl("http://localhost:9000/casProxyCallback");
-      casClient.setCasProxyReceptor(casProxyReceptor);*/
-      casClient.setCasLoginUrl("http://localhost:8080/cas/login");
-      
-      final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient); // , casProxyReceptor);
-      Config.setClients(clients);
+All the clients you want to support must be registered when the application starts. You can do this by defining an eager loaded bean. First define the trait:
+
+    package security
+
+    trait SecurityConfig
+
+Then create an implementing class:
+
+    package security.dummy
+
+    @Singleton
+    class DummyBasicAuthSecurityConfig @Inject() (val configuration: Configuration) extends SecurityConfig {
+
+
+      val logger = Logger("DummyBasicAuthSecurityConfig")
+
+      logger.info("Configuring basic authentication security")
+
+      val basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(), new UsernameProfileCreator())
+      basicAuthClient.setName("BasicAuthClient")
+
+      val baseUrl = configuration.getString("baseUrl").get
+
+      val clients = new Clients(baseUrl + "/callback", basicAuthClient)
+      Config.setClients(clients)
     }
 
 The */callback* url is the callback url where the providers (Facebook, Twitter, CAS...) redirects the user after successfull authentication (with the appropriate credentials).
+
+Then create a security module:
+
+    package modules
+
+    class SecurityModule extends AbstractModule {
+
+      override def configure() = {
+        bind(classOf[SecurityConfig]).to(classOf[DummyBasicAuthSecurityConfig]).asEagerSingleton()
+      }
+
+    }
+
 
 ### Get user profiles and protect actions
 
