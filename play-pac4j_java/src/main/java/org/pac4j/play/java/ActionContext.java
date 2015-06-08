@@ -149,8 +149,8 @@ public final class ActionContext {
     /**
      * Build the action context from the Play {@link Context} and the {@link RequiresAuthentication} annotation.
      * 
-     * @param ctx
-     * @param configuration
+     * @param ctx the Play context.
+     * @param configuration the configuration.
      * @return
      */
     public static ActionContext build(Context ctx, Object configuration) {
