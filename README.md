@@ -22,6 +22,7 @@ It's available under the Apache 2 license and based on the [pac4j](https://githu
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
 <tr><td>Play 2.3</td><td>play-pac4j_java v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.4.x</td></tr>
+<tr><td>Play 2.4</td><td>play-pac4j_java v1.5.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.5.x</td></tr>
 </table>
 
 
@@ -83,7 +84,7 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.4.0"
+      "org.pac4j" % "play-pac4j_java" % "1.5.0"
     )
 
 Or the **play-pac4j_scala2.10** or **play-pac4j_scala2.11** dependency for a Scala application.
