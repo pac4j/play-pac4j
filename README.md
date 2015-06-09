@@ -66,7 +66,7 @@ This library has **only 12 classes**:
 * the *JavaWebContext* class is a Java wrapper for the user request, response and session
 * the *JavaController* class is the Java controller to retrieve the user profile or the redirection url to start the authentication process
 * the *RequiresAuthentication* annotation is to protect an action if the user is not authenticated and starts the authentication process if necessary
-* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class) 
+* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class)
 * the *ScalaController* trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process
 * the *ScalaWebContext* class is a Scala wrapper for the user request, response and session
 * the *PlayLogoutHandler* class is dedicated to CAS support to handle CAS logout request.
@@ -126,7 +126,53 @@ or from the ScalaController trait for a Scala application:
 
     object Application extends ScalaController {
 
-All the clients you want to support must be registered when the application starts. You can do this by defining an eager loaded bean. First define the trait:
+All the clients you want to support must be registered when the application starts. You can do this by defining an eager loaded bean.
+
+*In Java:*
+
+First define an interface:
+
+    package security;
+
+    public interface SecurityConfig {
+    }
+
+Then create an implementing class:
+
+    package security.dummy;
+
+    @Singleton
+    public class DummyBasicAuthSecurityConfig implements SecurityConfig {
+
+        @Inject
+        public DummyBasicAuthSecurityConfig(Configuration configuration) {
+            BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(), new UsernameProfileCreator());
+            basicAuthClient.setName("BasicAuthClient");
+            String baseUrl = configuration.getString("baseUrl");
+
+            Clients clients = new Clients(baseUrl + "/callback", basicAuthClient);
+            Config.setClients(clients);
+        }
+    }
+
+The */callback* url is the callback url where the providers (Facebook, Twitter, CAS...) redirects the user after successfull authentication (with the appropriate credentials).
+
+Then create a security module:
+
+    package modules;
+
+    public class SecurityModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            bind(SecurityConfig.class).to(DummyBasicAuthSecurityConfig.class).asEagerSingleton();
+        }
+    }
+
+
+*In Scala:*
+
+First define the trait:
 
     package security
 
@@ -167,6 +213,12 @@ Then create a security module:
 
     }
 
+*Scala and Java*
+
+Add properties to your application.conf:
+
+    play.modules.enabled += "modules.SecurityModule"
+    baseUrl="http://localhost:9000"
 
 ### Get user profiles and protect actions
 
@@ -245,7 +297,7 @@ The callback url must be defined in the *routes* file as well as the logout:
 From the *CommonProfile*, you can retrieve the most common properties that all profiles share.
 But you can also cast the user profile to the appropriate profile according to the provider used for authentication.
 For example, after a Facebook authentication:
- 
+
     // facebook profile
     FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
