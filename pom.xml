@@ -63,7 +63,6 @@
 
     <modules>
         <module>play-pac4j_java</module>
-        <module>play-pac4j_scala2.10</module>
         <module>play-pac4j_scala2.11</module>
     </modules>
 
