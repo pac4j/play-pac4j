@@ -63,12 +63,12 @@
 
     <modules>
         <module>play-pac4j_java</module>
-        <module>play-pac4j_scala2.10</module>
         <module>play-pac4j_scala2.11</module>
     </modules>
 
     <properties>
         <pac4j.version>1.7.0</pac4j.version>
+        <play.version>2.4.0</play.version>
     </properties>
 
     <dependencyManagement>
@@ -89,6 +89,37 @@
                 <version>${pac4j.version}</version>
                 <scope>provided</scope>
             </dependency>
+            <dependency>
+                <groupId>com.typesafe.play</groupId>
+                <artifactId>play_2.11</artifactId>
+                <version>${play.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.play</groupId>
+                <artifactId>play-cache_2.11</artifactId>
+                <version>${play.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.play</groupId>
+                <artifactId>play_2.10</artifactId>
+                <version>${play.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.typesafe.play</groupId>
+                <artifactId>play-cache_2.10</artifactId>
+                <version>${play.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.10</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -100,8 +131,8 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>2.5.1</version>
                     <configuration>
-                        <source>1.6</source>
-                        <target>1.6</target>
+                        <source>1.8</source>
+                        <target>1.8</target>
                         <encoding>UTF-8</encoding>
                     </configuration>
                 </plugin>

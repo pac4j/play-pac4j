@@ -22,6 +22,7 @@ It's available under the Apache 2 license and based on the [pac4j](https://githu
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
 <tr><td>Play 2.3</td><td>play-pac4j_java v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.4.x</td></tr>
+<tr><td>Play 2.4</td><td>play-pac4j_java v1.5.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.5.x</td></tr>
 </table>
 
 
@@ -66,7 +67,7 @@ This library has **only 12 classes**:
 * the *JavaWebContext* class is a Java wrapper for the user request, response and session
 * the *JavaController* class is the Java controller to retrieve the user profile or the redirection url to start the authentication process
 * the *RequiresAuthentication* annotation is to protect an action if the user is not authenticated and starts the authentication process if necessary
-* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class) 
+* the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class)
 * the *ScalaController* trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process
 * the *ScalaWebContext* class is a Scala wrapper for the user request, response and session
 * the *PlayLogoutHandler* class is dedicated to CAS support to handle CAS logout request.
@@ -83,7 +84,7 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.4.0"
+      "org.pac4j" % "play-pac4j_java" % "1.5.0"
     )
 
 Or the **play-pac4j_scala2.10** or **play-pac4j_scala2.11** dependency for a Scala application.
@@ -126,30 +127,99 @@ or from the ScalaController trait for a Scala application:
 
     object Application extends ScalaController {
 
-You must define all the clients you want to support in the *onStart* method of your Global class for your Java or Scala application:
- 
-    public void onStart(final Application app) {
-      // OAuth
-      final FacebookClient facebookClient = new FacebookClient("fb_key", "fb_secret");
-      final TwitterClient twitterClient = new TwitterClient("tw_key", "tw_secret");
-      // HTTP
-      final FormClient formClient = new FormClient("http://localhost:9000/theForm", new SimpleTestUsernamePasswordAuthenticator());
-      final BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
-      // CAS
-      final CasClient casClient = new CasClient();
-      // casClient.setLogoutHandler(new PlayLogoutHandler());
-      // casClient.setCasProtocol(CasProtocol.SAML);
-      // casClient.setGateway(true);
-      /*final CasProxyReceptor casProxyReceptor = new CasProxyReceptor();
-      casProxyReceptor.setCallbackUrl("http://localhost:9000/casProxyCallback");
-      casClient.setCasProxyReceptor(casProxyReceptor);*/
-      casClient.setCasLoginUrl("http://localhost:8080/cas/login");
-      
-      final Clients clients = new Clients("http://localhost:9000/callback", facebookClient, twitterClient, formClient, basicAuthClient, casClient); // , casProxyReceptor);
-      Config.setClients(clients);
+All the clients you want to support must be registered when the application starts. You can do this by defining an eager loaded bean.
+
+*In Java:*
+
+First define an interface:
+
+    package security;
+
+    public interface SecurityConfig {
+    }
+
+Then create an implementing class:
+
+    package security.dummy;
+
+    @Singleton
+    public class DummyBasicAuthSecurityConfig implements SecurityConfig {
+
+        @Inject
+        public DummyBasicAuthSecurityConfig(Configuration configuration) {
+            BasicAuthClient basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(), new UsernameProfileCreator());
+            basicAuthClient.setName("BasicAuthClient");
+            String baseUrl = configuration.getString("baseUrl");
+
+            Clients clients = new Clients(baseUrl + "/callback", basicAuthClient);
+            Config.setClients(clients);
+        }
     }
 
 The */callback* url is the callback url where the providers (Facebook, Twitter, CAS...) redirects the user after successfull authentication (with the appropriate credentials).
+
+Then create a security module:
+
+    package modules;
+
+    public class SecurityModule extends AbstractModule {
+
+        @Override
+        protected void configure() {
+            bind(SecurityConfig.class).to(DummyBasicAuthSecurityConfig.class).asEagerSingleton();
+        }
+    }
+
+
+*In Scala:*
+
+First define the trait:
+
+    package security
+
+    trait SecurityConfig
+
+Then create an implementing class:
+
+    package security.dummy
+
+    @Singleton
+    class DummyBasicAuthSecurityConfig @Inject() (val configuration: Configuration) extends SecurityConfig {
+
+
+      val logger = Logger("DummyBasicAuthSecurityConfig")
+
+      logger.info("Configuring basic authentication security")
+
+      val basicAuthClient = new BasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(), new UsernameProfileCreator())
+      basicAuthClient.setName("BasicAuthClient")
+
+      val baseUrl = configuration.getString("baseUrl").get
+
+      val clients = new Clients(baseUrl + "/callback", basicAuthClient)
+      Config.setClients(clients)
+    }
+
+The */callback* url is the callback url where the providers (Facebook, Twitter, CAS...) redirects the user after successfull authentication (with the appropriate credentials).
+
+Then create a security module:
+
+    package modules
+
+    class SecurityModule extends AbstractModule {
+
+      override def configure() = {
+        bind(classOf[SecurityConfig]).to(classOf[DummyBasicAuthSecurityConfig]).asEagerSingleton()
+      }
+
+    }
+
+*Scala and Java*
+
+Add properties to your application.conf:
+
+    play.modules.enabled += "modules.SecurityModule"
+    baseUrl="http://localhost:9000"
 
 ### Get user profiles and protect actions
 
@@ -228,7 +298,7 @@ The callback url must be defined in the *routes* file as well as the logout:
 From the *CommonProfile*, you can retrieve the most common properties that all profiles share.
 But you can also cast the user profile to the appropriate profile according to the provider used for authentication.
 For example, after a Facebook authentication:
- 
+
     // facebook profile
     FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
