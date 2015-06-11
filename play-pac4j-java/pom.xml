@@ -23,7 +23,7 @@
 		<version>1.5.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>play-pac4j_java</artifactId>
+	<artifactId>play-pac4j-java</artifactId>
 	<packaging>jar</packaging>
 	<name>Play pac4j for Java</name>
 
