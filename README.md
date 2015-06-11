@@ -81,13 +81,19 @@ Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/pla
 
 ### Add the required dependencies
 
-First, the dependency on **play-pac4j_java** must be defined in the *build.sbt* file for a Java application:
+First, your project will need a dependency on the play-pac4j libraries. This can be defined in the *build.sbt* file.
+
+*Java:*
 
     libraryDependencies ++= Seq(
-      "org.pac4j" % "play-pac4j_java" % "1.5.0"
+      "org.pac4j" % "play-pac4j-java" % "1.5.0"
     )
 
-Or the **play-pac4j_scala2.10** or **play-pac4j_scala2.11** dependency for a Scala application.
+*Scala:* (note the double %%)
+
+    libraryDependencies ++= Seq(
+      "org.pac4j" %% "play-pac4j-scala" % "1.5.0"
+    )
 
 For snapshots that are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), the appropriate resolver must also be defined in the *build.sbt* file:
 
