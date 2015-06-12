@@ -33,10 +33,15 @@ import play.mvc.Result;
 /**
  * <p>This controller is the class to finish the authentication process and logout the user.</p>
  * <p>Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.</p>
- * 
+ *
+ * @deprecated From Play 2.4 onwards, the Play framework will move to a complete Dependency Injection based
+ * framework. It is highly recommended to upgrade your project in this way. You cna use the new {@link SecurityCallbackController} to
+ * in your routes file. This controller will no longer be supported from play-pac4j-java 1.6.x and higher.
+ *
  * @author Jerome Leleu
  * @since 1.0.0
  */
+@Deprecated
 public class CallbackController extends Controller {
 
     protected static final Logger logger = LoggerFactory.getLogger(CallbackController.class);

@@ -31,10 +31,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This controller is the Java controller to retrieve the user profile or the redirection url to start the authentication process.
- * 
+ *
+ * @deprecated From Play 2.4 onwards, the Play framework will move to a complete Dependency Injection based
+ * framework. It is highly recommended to upgrade your project in this way. You cna use the new {@link SecureController} to
+ * extend from. This controller will no longer be supported from play-pac4j-java 1.6.x and higher.
+ *
  * @author Jerome Leleu
  * @since 1.0.0
  */
+@Deprecated
 public class JavaController extends CallbackController {
 
     protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
