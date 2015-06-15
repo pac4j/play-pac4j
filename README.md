@@ -126,13 +126,27 @@ If you want to use a specific client support, you need to add the appropriate de
 
 ### Use client support in your Controller
 
-To use client support, your controllers must inherit from the JavaController class for a Java application:
+To use client support, your controllers must inherit from classes provided by the play-pac4j framework.
+
+**For old style routes generator:**
+
+Your controller must extend the JavaController class for a Java application:
 
     public class Application extends JavaController {
 
-or from the ScalaController trait for a Scala application:
+or inherit the ScalaController trait for a Scala application:
 
     object Application extends ScalaController {
+
+**For new dynamic style routes generator**
+
+Your controller must extend the SecureController class for a Java application:
+
+    public class Application extends SecureController {
+
+or inherit the Security trait for a Scala application:
+
+    class Application extends Controller with Security {
 
 
 ### Define the supported clients
