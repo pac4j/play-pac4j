@@ -63,13 +63,13 @@ This library has **only 12 classes**:
 
 * the *Config* class gathers all the configuration
 * the *Constants* class gathers all the constants
-* the *CallbackController* class is used to finish the authentication process and logout the user
+* the *SecurityCallbackController* class is used to finish the authentication process and logout the user
 * the *StorageHelper* class deals with storing/retrieving data from the cache
 * the *JavaWebContext* class is a Java wrapper for the user request, response and session
-* the *JavaController* class is the Java controller to retrieve the user profile or the redirection url to start the authentication process
+* the *SecureController* class is the Java controller to retrieve the user profile or the redirection url to start the authentication process
 * the *RequiresAuthentication* annotation is to protect an action if the user is not authenticated and starts the authentication process if necessary
 * the *RequiresAuthenticationAction* class is the action to check if the user is not authenticated and starts the authentication process if necessary (the associated context is stored in the *ActionContext* class)
-* the *ScalaController* trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process
+* the *Security* trait is the Scala controller to retrieve the user profile or the redirection url to start the authentication process
 * the *ScalaWebContext* class is a Scala wrapper for the user request, response and session
 * the *PlayLogoutHandler* class is dedicated to CAS support to handle CAS logout request.
 
