@@ -25,6 +25,7 @@ It's available under the Apache 2 license and based on the [pac4j](https://githu
 <tr><td>Play 2.4</td><td>play-pac4j_java v1.5.x</td><td>play-pac4j_scala2.11 v1.5.x</td></tr>
 </table>
 
+Check [below](#Migration instructions) for migration instructions to play-pac4j 1.5.0.
 
 ## Providers supported
 
@@ -123,15 +124,18 @@ If you want to use a specific client support, you need to add the appropriate de
     )
 ```
 
-### Define the supported clients
+### Use client support in your Controller
 
-To use client support, your application must inherit from the JavaController class for a Java application:
+To use client support, your controllers must inherit from the JavaController class for a Java application:
 
     public class Application extends JavaController {
 
 or from the ScalaController trait for a Scala application:
 
     object Application extends ScalaController {
+
+
+### Define the supported clients
 
 All the clients you want to support must be registered when the application starts. You can do this by defining an eager loaded bean.
 
@@ -337,6 +341,47 @@ The latest release of the **play-pac4j** project is the **1.4.0** version:
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
 
+## Migration instructions
+
+This section will contain migration instructions when necessary.
+
+### Migrating to play-pac4j 1.5.x
+
+Since Play 2.4, the Play framework is migrating to use dependency injection (by default implemented with Guice), so that we get rid of global objects and state. In order to keep play-pac4j in line with Play's strategy, there are a few changes which are outlined here.
+
+**Configuring the authentication clients**
+
+In earlier versions we made use of the Global object to configure the authentication clients. The code for play-pac4j can be moved to an eagerly loaded bean. See section [Define the supported clients](#Define the supported clients) to see how this is done now. At this point in time the configuration via the Global object will still work, but consider migrating to DI style.
+
+**Moving to dependency injection based routing**
+Play 2.4 advocates the use of dependency injection everywhere. They also made next to the static routes generator, a dynamic routes generator. This is enabled with the setting:
+
+    routesGenerator := InjectedRoutesGenerator
+
+in build.sbt.
+
+More details on the changes in Play 2.4 and the move to Dependency injection can be found in the [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
+
+The consequence of this is that for Scala you need class Controllers instead of objects and for Java that the methods of the controller cannot be static anymore.
+
+Therefore we have added new Controller classes to play-pac4j, containing the same functionality as the old ones, but these will support the dynamic routes generator. Also we used this opportunity to move to more specific names for these classes (JavaController and ScalaController are somewhat generic names).
+
+When your application moves to the dynamic routes generator, you need to use these new classes:
+
+<table>
+<tr><td>**old class**</td><td>**new class**</td></tr>
+<tr><td>org.pac4j.play.java.JavaController</td><td>org.pac4j.play.java.SecureController</td></tr>
+<tr><td>org.pac4j.play.scala.ScalaController</td><td>org.pac4j.play.scala.Security</td></tr>
+<tr><td>org.pac4j.play.CallbackController</td><td>org.pac4j.play.SecurityCallbackController</td></tr>
+</table>
+
+Note that for Scala the recommended way to use the trait is:
+
+    class MyController extends Controller with Security {
+      ... [your methods] ....
+    }
+
+The old classes will be supported for now, but are already deprecated to reflect our intentions that we want to follow the Play framework philosophy.
 
 ## Contact
 
