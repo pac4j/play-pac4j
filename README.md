@@ -25,7 +25,7 @@ It's available under the Apache 2 license and based on the [pac4j](https://githu
 <tr><td>Play 2.4</td><td>play-pac4j_java v1.5.x</td><td>play-pac4j_scala2.11 v1.5.x</td></tr>
 </table>
 
-Check [below](#Migration instructions) for migration instructions to play-pac4j 1.5.0.
+Check [below](#migration-instructions) for migration instructions to play-pac4j 1.5.0.
 
 ## Providers supported
 
@@ -365,7 +365,7 @@ Since Play 2.4, the Play framework is migrating to use dependency injection (by 
 
 **Configuring the authentication clients**
 
-In earlier versions we made use of the Global object to configure the authentication clients. The code for play-pac4j can be moved to an eagerly loaded bean. See section [Define the supported clients](#Define the supported clients) to see how this is done now. At this point in time the configuration via the Global object will still work, but consider migrating to DI style.
+In earlier versions we made use of the Global object to configure the authentication clients. The code for play-pac4j can be moved to an eagerly loaded bean. See section [Define the supported clients](#define-the-supported-clients) to see how this is done now. At this point in time the configuration via the Global object will still work, but consider migrating to DI style.
 
 **Moving to dependency injection based routing**
 Play 2.4 advocates the use of dependency injection everywhere. They also made next to the static routes generator, a dynamic routes generator. This is enabled with the setting:
