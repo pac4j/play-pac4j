@@ -33,8 +33,8 @@ import java.util.Map;
  * <p>This controller is the class to finish the authentication process and logout the user.</p>
  * <p>Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.</p>
  * 
- * @author Jerome Leleu
- * @since 1.0.0
+ * @author Hugo Valk
+ * @since 1.5.0
  */
 public class SecurityCallbackController extends Controller {
 

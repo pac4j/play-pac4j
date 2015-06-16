@@ -30,8 +30,8 @@ import org.slf4j._
  *
  * One can retrieve the user profile or the redirection url to start the authentication process.
  *
- * @author Jerome Leleu
- * @since 1.0.0
+ * @author Hugo Valk
+ * @since 1.5.0
  */
 trait Security[P<:CommonProfile] extends Controller {
 

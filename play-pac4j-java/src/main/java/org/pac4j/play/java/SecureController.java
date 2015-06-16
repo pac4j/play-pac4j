@@ -16,7 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by hv01016 on 11-6-2015.
+ * This controller is the Java controller to retrieve the user profile or the redirection url to start the authentication process.
+ *
+ * @author Hugo Valk
+ * @since 1.5.0
  */
 public class SecureController extends SecurityCallbackController {
 
