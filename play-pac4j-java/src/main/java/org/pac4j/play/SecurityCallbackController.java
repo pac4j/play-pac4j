@@ -15,8 +15,6 @@
  */
 package org.pac4j.play;
 
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.profile.CommonProfile;
@@ -24,29 +22,25 @@ import org.pac4j.play.java.ActionContext;
 import org.pac4j.play.java.RequiresAuthenticationAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import play.libs.F.Function0;
 import play.libs.F.Promise;
 import play.mvc.Controller;
 import play.mvc.Result;
 
+import java.util.Map;
+
 /**
  * <p>This controller is the class to finish the authentication process and logout the user.</p>
  * <p>Public methods : {@link #callback()}, {@link #logoutAndOk()} and {@link #logoutAndRedirect()} must be used in the routes file.</p>
- *
- * @deprecated From Play 2.4 onwards, the Play framework will move to a complete Dependency Injection based
- * framework. It is highly recommended to upgrade your project in this way. You cna use the new {@link SecurityCallbackController} to
- * in your routes file. This controller will no longer be supported from play-pac4j-java 1.6.x and higher.
- *
- * @author Jerome Leleu
- * @since 1.0.0
+ * 
+ * @author Hugo Valk
+ * @since 1.5.0
  */
-@Deprecated
-public class CallbackController extends Controller {
+public class SecurityCallbackController extends Controller {
 
-    protected static final Logger logger = LoggerFactory.getLogger(CallbackController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecurityCallbackController.class);
 
-    private static RequiresAuthenticationAction action = new RequiresAuthenticationAction() {
+    private RequiresAuthenticationAction action = new RequiresAuthenticationAction() {
 
         @Override
         protected Promise<CommonProfile> retrieveUserProfile(ActionContext actionContext) {
@@ -81,7 +75,7 @@ public class CallbackController extends Controller {
      * 
      * @return the redirection to the saved request
      */
-    public static Promise<Result> callback() {
+    public Promise<Result> callback() {
 
         return action.call(ctx());
 
@@ -90,14 +84,14 @@ public class CallbackController extends Controller {
     /**
      * This method logouts the authenticated user.
      */
-    private static void logout() {
+    private void logout() {
         // get the session id
         final String sessionId = session(Pac4jConstants.SESSION_ID);
-        logger.debug("sessionId for logout : {}", sessionId);
+        LOGGER.debug("sessionId for logout : {}", sessionId);
         if (StringUtils.isNotBlank(sessionId)) {
             // remove user profile from cache
             StorageHelper.removeProfile(sessionId);
-            logger.debug("remove user profile for sessionId : {}", sessionId);
+            LOGGER.debug("remove user profile for sessionId : {}", sessionId);
         }
         session().remove(Pac4jConstants.SESSION_ID);
     }
@@ -107,7 +101,7 @@ public class CallbackController extends Controller {
      * 
      * @return the redirection to the blank page
      */
-    public static Result logoutAndOk() {
+    public Result logoutAndOk() {
         logout();
         return ok();
     }
@@ -119,7 +113,7 @@ public class CallbackController extends Controller {
      * 
      * @return the redirection to the "logout url"
      */
-    public static Result logoutAndRedirect() {
+    public Result logoutAndRedirect() {
         logout();
         // parameters in url
         final Map<String, String[]> parameters = request().queryString();
@@ -142,12 +136,12 @@ public class CallbackController extends Controller {
      * @param defaultUrl
      * @return the default url
      */
-    public static String defaultUrl(final String url, final String defaultUrl) {
+    public String defaultUrl(final String url, final String defaultUrl) {
         String redirectUrl = defaultUrl;
         if (StringUtils.isNotBlank(url)) {
             redirectUrl = url;
         }
-        logger.debug("defaultUrl : {}", redirectUrl);
+        LOGGER.debug("defaultUrl : {}", redirectUrl);
         return redirectUrl;
     }
 }

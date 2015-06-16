@@ -1,18 +1,3 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.play.java;
 
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +10,7 @@ import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.CallbackController;
 import org.pac4j.play.Config;
+import org.pac4j.play.SecurityCallbackController;
 import org.pac4j.play.StorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,26 +18,21 @@ import org.slf4j.LoggerFactory;
 /**
  * This controller is the Java controller to retrieve the user profile or the redirection url to start the authentication process.
  *
- * @deprecated From Play 2.4 onwards, the Play framework will move to a complete Dependency Injection based
- * framework. It is highly recommended to upgrade your project in this way. You cna use the new {@link SecureController} to
- * extend from. This controller will no longer be supported from play-pac4j-java 1.6.x and higher.
- *
- * @author Jerome Leleu
- * @since 1.0.0
+ * @author Hugo Valk
+ * @since 1.5.0
  */
-@Deprecated
-public class JavaController extends CallbackController {
+public class SecureController extends SecurityCallbackController {
 
-    protected static final Logger logger = LoggerFactory.getLogger(JavaController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavaController.class);
 
     /**
      * This method returns the url of the provider where the user must be redirected for authentication.
      * The current requested url is saved into session to be restored after authentication.
-     * 
+     *
      * @param clientName
      * @return the url of the provider where to redirect the user
      */
-    protected static RedirectAction getRedirectAction(final String clientName) {
+    protected RedirectAction getRedirectAction(final String clientName) {
         return getRedirectAction(clientName, null);
     }
 
@@ -59,17 +40,17 @@ public class JavaController extends CallbackController {
      * This method returns the url of the provider where the user must be redirected for authentication.
      * The input <code>targetUrl</code> (or the current requested url if <code>null</code>) is saved into session to be restored after
      * authentication.
-     * 
+     *
      * @param clientName
      * @param targetUrl
      * @return the url of the provider where to redirect the user
      */
-    protected static RedirectAction getRedirectAction(final String clientName, final String targetUrl) {
+    protected RedirectAction getRedirectAction(final String clientName, final String targetUrl) {
         // get or create session id
         String sessionId = StorageHelper.getOrCreationSessionId(session());
         // requested url to save
         final String requestedUrlToSave = CallbackController.defaultUrl(targetUrl, request().uri());
-        logger.debug("requestedUrlToSave : {}", requestedUrlToSave);
+        LOGGER.debug("requestedUrlToSave : {}", requestedUrlToSave);
         StorageHelper.saveRequestedUrl(sessionId, clientName, requestedUrlToSave);
         // clients
         Clients clients = Config.getClients();
@@ -85,19 +66,19 @@ public class JavaController extends CallbackController {
         } catch (RequiresHttpAction e) {
             // should not happen
         }
-        logger.debug("redirectAction : {}", action);
+        LOGGER.debug("redirectAction : {}", action);
         return action;
     }
 
     /**
      * This method returns the user profile if the user is authenticated or <code>null</code> otherwise.
-     * 
+     *
      * @return the user profile if the user is authenticated or <code>null</code> otherwise
      */
-    protected static CommonProfile getUserProfile() {
+    protected CommonProfile getUserProfile() {
         // get the session id
         final String sessionId = session(Pac4jConstants.SESSION_ID);
-        logger.debug("sessionId for profile : {}", sessionId);
+        LOGGER.debug("sessionId for profile : {}", sessionId);
         CommonProfile profile = null;
         if (StringUtils.isNotBlank(sessionId)) {
             // get the user profile

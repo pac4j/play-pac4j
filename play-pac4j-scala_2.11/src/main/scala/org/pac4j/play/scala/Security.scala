@@ -15,33 +15,27 @@
  */
 package org.pac4j.play.scala
 
-import scala.concurrent.Future
-
-import play.api._
-import play.api.mvc._
 import org.pac4j.core.client._
 import org.pac4j.core.context._
-import org.pac4j.core.credentials._
+import org.pac4j.core.exception._
 import org.pac4j.core.profile._
-import org.pac4j.core.util._
+import play.api.mvc._
+
+import scala.concurrent.Future
 import org.pac4j.play._
 import org.slf4j._
-import org.pac4j.core.exception._
 
 /**
- * This controller is the Scala controller to retrieve the user profile or the redirection url to start the authentication process.
+ * This trait adds security features to your Scala controllers.
  *
- * @deprecated From Play 2.4 onwards, the Play framework will move to a complete Dependency Injection based
- * framework. It is highly recommended to upgrade your project in this way. You cna use the new {@link Security} trait to
- * to mix the security capabilities in your controllers. This controller will no longer be supported from play-pac4j-java 1.6.x and higher. 
+ * One can retrieve the user profile or the redirection url to start the authentication process.
  *
- * @author Jerome Leleu
- * @since 1.0.0
+ * @author Hugo Valk
+ * @since 1.5.0
  */
-@Deprecated
-trait ScalaController[P<:CommonProfile] extends Controller {
+trait Security[P<:CommonProfile] extends Controller {
 
-  protected val logger = LoggerFactory.getLogger("org.pac4j.play.scala.ScalaController")
+  private val logger = LoggerFactory.getLogger("org.pac4j.play.scala.Security")
 
   /**
    * Get or create a new sessionId.
