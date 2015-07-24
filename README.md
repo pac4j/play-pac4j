@@ -1,4 +1,4 @@
-## What is the play-pac4j library ? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j)
+## What is the play-pac4j library ? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=1.4.x)](https://travis-ci.org/pac4j/play-pac4j)
 
 The **play-pac4j** library is a *Java and Scala* multi-protocols client for Play framework 2.x.
 
