@@ -343,14 +343,14 @@ Demos with Facebook, Twitter, CAS, form authentication and basic auth authentica
 
 ## Versions
 
-The current version **1.5.0-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
+The current version **1.5.1-SNAPSHOT** is under development. It's available on the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j) as a Maven dependency:
 
-The latest release of the **play-pac4j** project is the **1.4.0** version:
+The latest release of the **play-pac4j** project is the **1.5.0** version:
 
     <dependency>
         <groupId>org.pac4j</groupId>
-        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.10</artifactId> or <artifactId>play-pac4j_scala2.11</artifactId>
-        <version>1.4.0</version>
+        <artifactId>play-pac4j_java</artifactId> or <artifactId>play-pac4j_scala2.11</artifactId>
+        <version>1.5.0</version>
     </dependency>
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
