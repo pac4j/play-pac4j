@@ -22,7 +22,7 @@ It's available under the Apache 2 license and based on the [pac4j](https://githu
 <tr><td>Play 2.1</td><td>play-pac4j_java v1.1.x</td><td>play-pac4j_scala2.10 v1.1.x</td></tr>
 <tr><td>Play 2.2</td><td>play-pac4j_java v1.2.x</td><td>play-pac4j_scala v1.2.x</td></tr>
 <tr><td>Play 2.3</td><td>play-pac4j_java v1.4.x</td><td>play-pac4j_scala2.10 and play-pac4j_scala2.11 v1.4.x</td></tr>
-<tr><td>Play 2.4</td><td>play-pac4j_java v1.5.x</td><td>play-pac4j_scala2.11 v1.5.x</td></tr>
+<tr><td>Play 2.4</td><td>play-pac4j-java v1.5.x</td><td>play-pac4j-scala_2.11 v1.5.x</td></tr>
 </table>
 
 Check [below](#migration-instructions) for migration instructions to play-pac4j 1.5.0.
