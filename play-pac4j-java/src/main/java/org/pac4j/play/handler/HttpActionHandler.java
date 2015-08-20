@@ -13,17 +13,34 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package org.pac4j.play;
+package org.pac4j.play.handler;
+
+import org.pac4j.core.client.RedirectAction;
+import org.pac4j.play.PlayWebContext;
+import play.mvc.Result;
 
 /**
- * This class gathers all the constants.
- * 
+ * Handle HTTP action for Play.
+ *
  * @author Jerome Leleu
- * @since 1.0.0
+ * @since 2.0.0
  */
-public interface Constants {
+public interface HttpActionHandler {
 
-    public final static String REDIRECT_URL_LOGOUT_PARAMETER_NAME = "url";
+    /**
+     * Handle HTTP action.
+     *
+     * @param code
+     * @param context
+     * @return
+     */
+    Result handle(int code, PlayWebContext context);
 
-    public final static String SEPARATOR = "$";
+    /**
+     * Handle HTTP action for redirection use cases.
+     *
+     * @param action
+     * @return
+     */
+    Result handleRedirect(RedirectAction action);
 }
