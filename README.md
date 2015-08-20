@@ -363,7 +363,7 @@ The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebC
 
 The `StorageHelper` has been removed, replaced by the `CacheStore` implementation where you can set the timeouts.
 
-The static specific `Config` has been replacde by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s (in Java only).
+The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s (for Java only).
   
 Custom 401 / 403 HTTP error pages must be now defined by overriding the `DefaultHttpActionHandler`.
 
