@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * <p>The logout url pattern can be defined via the {@link #setLogoutUrlPattern(String)} method.</p>
  *
  * @author Jerome Leleu
- * @since 1.2.0
+ * @since 2.0.0
  */
 public class ApplicationLogoutController extends Controller {
 
