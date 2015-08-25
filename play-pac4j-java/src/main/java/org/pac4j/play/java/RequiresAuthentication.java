@@ -30,21 +30,24 @@ import play.mvc.With;
 @Inherited
 @Documented
 /**
- * This annotation protects an action if the user is not authenticated and starts the authentication process if necessary.
+ * Annotation to protect a resource. Implemented by {@link RequiresAuthenticationAction}.
  * 
  * @author Jerome Leleu
  * @since 1.0.0
  */
 public @interface RequiresAuthentication {
+
     String clientName();
-
-    String targetUrl() default "";
-
-    boolean stateless() default false;
 
     boolean isAjax() default false;
 
     String requireAnyRole() default "";
 
     String requireAllRoles() default "";
+
+    boolean useSessionForDirectClient() default false;
+
+    boolean allowDynamicClientSelection() default false;
+
+    String authorizerName() default "";
 }
