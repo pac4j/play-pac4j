@@ -58,21 +58,11 @@ You need to add a dependency on the:
 
 as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...  
 
-As snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), this repository must be added in the Maven *pom.xml* file for example:
+As snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), this repository must be added in the `resolvers` of your `build.sbt` file:
 
-    <repositories>
-      <repository>
-        <id>sonatype-nexus-snapshots</id>
-        <name>Sonatype Nexus Snapshots</name>
-        <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        <releases>
-          <enabled>false</enabled>
-        </releases>
-        <snapshots>
-          <enabled>true</enabled>
-        </snapshots>
-      </repository>
-    </repositories>
+    resolvers ++= Seq( Resolver.mavenLocal,
+        "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/",
+        "Pablo repo" at "https://raw.github.com/fernandezpablo85/scribe-java/mvn-repo/")
 
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
