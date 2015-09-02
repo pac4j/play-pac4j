@@ -231,7 +231,6 @@ The following parameters can be defined:
 - `authorizerName` (optional): the authorizer name which will protect the resource (must exist in the authorizers configuration)
 - `requireAnyRole` (optional): if one of the provided roles is necessary to access the resource
 - `requireAllRoles` (optional): if all roles are necessary
-- `isAjax` (optional): if this url is called in an AJAX way
 - `allowDynamicClientSelection` (optional): if other clients can be used on this url (providing a *client_name* parameter in the url)
 - `useSessionForDirectClient` (optional): if the session must be used (for REST client).
 
@@ -354,8 +353,10 @@ The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebC
 The `StorageHelper` has been removed, replaced by the `CacheStore` implementation where you can set the timeouts.
 
 The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s (for Java only).
-  
+
 Custom 401 / 403 HTTP error pages must be now defined by overriding the `DefaultHttpActionHandler`.
+
+The `isAjax` parameter is no longer available as AJAX requests are now automatically detected.
 
 
 ## Demo

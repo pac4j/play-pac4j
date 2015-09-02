@@ -49,8 +49,8 @@ import java.util.Map;
  *  <li>If stateless, it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
  * </ul>
  * <p>Authorizations are also handled by this action.</p>
- * <p>The configuration can be provided via annotation parameters: <code>clientName</code>, <code>isAjax</code>, <code>requireAnyRole</code>,
- * <code>requireAllRoles</code>, <code>authorizerName</code>, <code>useSessionForDirectClient</code> and <code>allowDynamicClientSelection</code>.</p>
+ * <p>The configuration can be provided via annotation parameters: <code>clientName</code>, <code>requireAnyRole</code>, <code>requireAllRoles</code>,
+ * <code>authorizerName</code>, <code>useSessionForDirectClient</code> and <code>allowDynamicClientSelection</code>.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -86,22 +86,20 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         final String requireAnyRole = getStringParam(invocationHandler, REQUIRE_ANY_ROLE_METHOD, null);
         final String requireAllRoles = getStringParam(invocationHandler, REQUIRE_ALL_ROLES_METHOD, null);
 
-        final Boolean isAjax = getBooleanParam(invocationHandler, IS_AJAX_METHOD, false);
         final Boolean useSessionForDirectClient = getBooleanParam(invocationHandler, USE_SESSION_FOR_DIRECT_CLIENT_METHOD, false);
         final Boolean allowDynamicClientSelection = getBooleanParam(invocationHandler, ALLOW_DYNAMIC_CLIENT_SELECTION_METHOD, false);
 
-        return internalCall(ctx, clientName, null, authorizerName, requireAnyRole, requireAllRoles, isAjax, useSessionForDirectClient, allowDynamicClientSelection);
+        return internalCall(ctx, clientName, null, authorizerName, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection);
     }
 
     public Promise<Result> internalCall(final Context ctx, final String clientName, final Authorizer authorizer, final String authorizerName, final String requireAnyRole,
-                                final String requireAllRoles, final boolean isAjax, final boolean useSessionForDirectClient, final boolean  allowDynamicClientSelection) throws Throwable {
+                                final String requireAllRoles, final boolean useSessionForDirectClient, final boolean  allowDynamicClientSelection) throws Throwable {
 
         logger.debug("clientName: {}", clientName);
         logger.debug("authorizer: {}", authorizer);
         logger.debug("authorizerName: {}", authorizerName);
         logger.debug("requireAnyRole: {}", requireAnyRole);
         logger.debug("requireAllRoles: {}", requireAllRoles);
-        logger.debug("isAjax: {}", isAjax);
         logger.debug("useSessionForDirectClient: {}", useSessionForDirectClient);
         logger.debug("allowDynamicClientSelection: {}", allowDynamicClientSelection);
 
@@ -164,8 +162,8 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                     if (isDirectClient) {
                         return Promise.pure(httpActionHandler.handle(HttpConstants.UNAUTHORIZED, context));
                     } else {
-                        saveRequestedUrl(context, isAjax);
-                        return Promise.promise(() -> redirectToIdentityProvider(client, context, isAjax));
+                        saveRequestedUrl(context);
+                        return Promise.promise(() -> redirectToIdentityProvider(client, context));
                     }
                 }
             }
@@ -184,17 +182,15 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         return client;
     }
 
-    protected void saveRequestedUrl(final WebContext context, final boolean isAjax) {
-        if (!isAjax) {
-            final String requestedUrl = context.getFullRequestURL();
-            logger.debug("requestedUrl: {}", requestedUrl);
-            context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
-        }
+    protected void saveRequestedUrl(final WebContext context) {
+        final String requestedUrl = context.getFullRequestURL();
+        logger.debug("requestedUrl: {}", requestedUrl);
+        context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
     }
 
-    protected Result redirectToIdentityProvider(final Client client, final PlayWebContext context, final boolean isAjax) {
+    protected Result redirectToIdentityProvider(final Client client, final PlayWebContext context) {
         try {
-            final RedirectAction action = ((IndirectClient) client).getRedirectAction(context, true, isAjax);
+            final RedirectAction action = ((IndirectClient) client).getRedirectAction(context, true);
             logger.debug("redirectAction: {}", action);
             return httpActionHandler.handleRedirect(action);
         } catch (final RequiresHttpAction e) {

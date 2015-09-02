@@ -30,17 +30,17 @@ public interface HttpActionHandler {
     /**
      * Handle HTTP action.
      *
-     * @param code
-     * @param context
-     * @return
+     * @param code the HTTP status code
+     * @param context the web context
+     * @return the Play result
      */
     Result handle(int code, PlayWebContext context);
 
     /**
      * Handle HTTP action for redirection use cases.
      *
-     * @param action
-     * @return
+     * @param action the pac4j action to perform
+     * @return the Play result
      */
     Result handleRedirect(RedirectAction action);
 }

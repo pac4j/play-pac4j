@@ -39,8 +39,6 @@ public @interface RequiresAuthentication {
 
     String clientName();
 
-    boolean isAjax() default false;
-
     String requireAnyRole() default "";
 
     String requireAllRoles() default "";
