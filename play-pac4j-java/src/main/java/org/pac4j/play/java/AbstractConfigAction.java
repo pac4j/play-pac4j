@@ -37,8 +37,6 @@ public abstract class AbstractConfigAction extends Action<Result> {
 
     protected final static Method CLIENT_NAME_METHOD;
 
-    protected final static Method IS_AJAX_METHOD;
-
     protected final static Method REQUIRE_ANY_ROLE_METHOD;
 
     protected final static Method REQUIRE_ALL_ROLES_METHOD;
@@ -52,7 +50,6 @@ public abstract class AbstractConfigAction extends Action<Result> {
     static {
         try {
             CLIENT_NAME_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.CLIENT_NAME);
-            IS_AJAX_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.IS_AJAX);
             REQUIRE_ANY_ROLE_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.REQUIRE_ANY_ROLE);
             REQUIRE_ALL_ROLES_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.REQUIRE_ALL_ROLES);
             USE_SESSION_FOR_DIRECT_CLIENT_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.USE_SESSION_FOR_DIRECT_CLIENT);

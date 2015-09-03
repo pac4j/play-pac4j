@@ -28,7 +28,7 @@ public interface DataStore {
     /**
      * Get or create the session identifier and initialize the session with it if necessary.
      *
-     * @param context
+     * @param context the web context
      * @return the session identifier
      */
     String getOrCreateSessionId(PlayWebContext context);
@@ -36,25 +36,25 @@ public interface DataStore {
     /**
      * Get the object from its key in store.
      *
-     * @param context
-     * @param key
-     * @return
+     * @param context the web context
+     * @param key the key of the object
+     * @return the object in store
      */
     Object get(PlayWebContext context, String key);
 
     /**
      * Save an object in the store by its key.
      *
-     * @param context
-     * @param key
-     * @param value
+     * @param context the web context
+     * @param key the key of the object
+     * @param value the value to save in store
      */
     void set(PlayWebContext context, String key, Object value);
 
     /**
      * Invalidate the current store.
      *
-     * @param context
+     * @param context the web context
      */
     void invalidate(PlayWebContext context);
 }

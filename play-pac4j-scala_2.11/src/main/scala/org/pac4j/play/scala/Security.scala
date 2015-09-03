@@ -76,15 +76,15 @@ trait Security[P<:CommonProfile] extends Controller {
   }
 
   protected def RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P])(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, authorizer, null, null, false, false, false)(action)
+    RequiresAuthentication(parse.anyContent, clientName, authorizer, null, null, false, false)(action)
   }
 
   protected def RequiresAuthentication[A](clientName: String, requireAnyRole: String, requireAllRoles: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, null, requireAnyRole, requireAllRoles, false, false, false)(action)
+    RequiresAuthentication(parse.anyContent, clientName, null, requireAnyRole, requireAllRoles, false, false)(action)
   }
 
-  protected def RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, isAjax: Boolean, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, authorizer, requireAnyRole, requireAllRoles, isAjax, useSessionForDirectClient, allowDynamicClientSelection)(action)
+  protected def RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[AnyContent]): Action[AnyContent] = {
+    RequiresAuthentication(parse.anyContent, clientName, authorizer, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection)(action)
   }
 
   /**
@@ -95,18 +95,17 @@ trait Security[P<:CommonProfile] extends Controller {
    * @param authorizer
    * @param requireAnyRole
    * @param requireAllRoles
-   * @param isAjax
    * @param useSessionForDirectClient
    * @param allowDynamicClientSelection
    * @param action
    * @tparam A
    * @return
    */
-  protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, isAjax: Boolean, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[A]) = Action.async(parser) { request =>
+  protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, dataStore)
     val requiresAuthenticationAction = new RequiresAuthenticationAction(config, dataStore, httpActionHandler)
     val javaContext = webContext.getJavaContext
-    requiresAuthenticationAction.internalCall(javaContext, clientName, authorizer, null, requireAnyRole, requireAllRoles, isAjax, useSessionForDirectClient, allowDynamicClientSelection).wrapped().flatMap[play.api.mvc.Result](r =>
+    requiresAuthenticationAction.internalCall(javaContext, clientName, authorizer, null, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         var profile = javaContext.args.get(Pac4jConstants.USER_PROFILE).asInstanceOf[P]
         if (profile == null) {
