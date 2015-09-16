@@ -37,23 +37,11 @@ public abstract class AbstractConfigAction extends Action<Result> {
 
     protected final static Method CLIENT_NAME_METHOD;
 
-    protected final static Method REQUIRE_ANY_ROLE_METHOD;
-
-    protected final static Method REQUIRE_ALL_ROLES_METHOD;
-
-    protected final static Method USE_SESSION_FOR_DIRECT_CLIENT_METHOD;
-
-    protected final static Method ALLOW_DYNAMIC_CLIENT_SELECTION_METHOD;
-
     protected final static Method AUTHORIZER_NAME_METHOD;
 
     static {
         try {
             CLIENT_NAME_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.CLIENT_NAME);
-            REQUIRE_ANY_ROLE_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.REQUIRE_ANY_ROLE);
-            REQUIRE_ALL_ROLES_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.REQUIRE_ALL_ROLES);
-            USE_SESSION_FOR_DIRECT_CLIENT_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.USE_SESSION_FOR_DIRECT_CLIENT);
-            ALLOW_DYNAMIC_CLIENT_SELECTION_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.ALLOW_DYNAMIC_CLIENT_SELECTION);
             AUTHORIZER_NAME_METHOD = RequiresAuthentication.class.getDeclaredMethod(Pac4jConstants.AUTHORIZER_NAME);
         } catch (final SecurityException | NoSuchMethodException e) {
             throw new TechnicalException(e);

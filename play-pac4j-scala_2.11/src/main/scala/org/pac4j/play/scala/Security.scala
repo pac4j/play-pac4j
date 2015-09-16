@@ -17,11 +17,10 @@ package org.pac4j.play.scala
 
 import javax.inject.Inject
 
-import org.pac4j.core.authorization.Authorizer
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile._
-import org.pac4j.play.handler.HttpActionHandler
+import org.pac4j.play.http.HttpActionAdapter
 import org.pac4j.play.java.RequiresAuthenticationAction
 import org.pac4j.play.store.DataStore
 import play.api.mvc._
@@ -56,7 +55,7 @@ trait Security[P<:CommonProfile] extends Controller {
   protected var dataStore: DataStore = null
 
   @Inject
-  protected var httpActionHandler: HttpActionHandler = null
+  protected var httpActionHandler: HttpActionAdapter = null
 
   /**
    * Get or create a new sessionId.
@@ -71,20 +70,16 @@ trait Security[P<:CommonProfile] extends Controller {
     new Session(map)
   }
 
+  protected def RequiresAuthentication[A](action: P => Action[AnyContent]): Action[AnyContent] = {
+    RequiresAuthentication(null, null)(action)
+  }
+
   protected def RequiresAuthentication[A](clientName: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
     RequiresAuthentication(clientName, null)(action)
   }
 
-  protected def RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P])(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, authorizer, null, null, false, false)(action)
-  }
-
-  protected def RequiresAuthentication[A](clientName: String, requireAnyRole: String, requireAllRoles: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, null, requireAnyRole, requireAllRoles, false, false)(action)
-  }
-
-  protected def RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, authorizer, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection)(action)
+  protected def RequiresAuthentication[A](clientName: String, authorizerName: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
+    RequiresAuthentication(parse.anyContent, clientName, authorizerName)(action)
   }
 
   /**
@@ -92,20 +87,16 @@ trait Security[P<:CommonProfile] extends Controller {
    *
    * @param parser
    * @param clientName
-   * @param authorizer
-   * @param requireAnyRole
-   * @param requireAllRoles
-   * @param useSessionForDirectClient
-   * @param allowDynamicClientSelection
+   * @param authorizerName
    * @param action
    * @tparam A
    * @return
    */
-  protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)(action: P => Action[A]) = Action.async(parser) { request =>
+  protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)(action: P => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, dataStore)
     val requiresAuthenticationAction = new RequiresAuthenticationAction(config, dataStore, httpActionHandler)
     val javaContext = webContext.getJavaContext
-    requiresAuthenticationAction.internalCall(javaContext, clientName, authorizer, null, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection).wrapped().flatMap[play.api.mvc.Result](r =>
+    requiresAuthenticationAction.internalCall(javaContext, clientName, authorizerName).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         var profile = javaContext.args.get(Pac4jConstants.USER_PROFILE).asInstanceOf[P]
         if (profile == null) {

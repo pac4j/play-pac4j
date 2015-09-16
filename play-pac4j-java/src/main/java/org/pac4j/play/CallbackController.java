@@ -17,14 +17,15 @@ package org.pac4j.play;
 
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.IndirectClient;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.handler.HttpActionHandler;
+import org.pac4j.play.http.HttpActionAdapter;
 import org.pac4j.play.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,41 +53,43 @@ public class CallbackController extends Controller {
     protected Config config;
 
     @Inject
-    protected HttpActionHandler httpActionHandler;
+    protected HttpActionAdapter httpActionAdapter;
 
     @Inject
     protected DataStore dataStore;
 
     public Result callback() {
 
+        final PlayWebContext context = new PlayWebContext(ctx(), dataStore);
+
         CommonHelper.assertNotNull("config", config);
         final Clients clients = config.getClients();
         CommonHelper.assertNotNull("clients", clients);
-        CommonHelper.assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
-
-        final PlayWebContext context = new PlayWebContext(ctx(), dataStore);
-        final ProfileManager manager = new ProfileManager(context);
         final Client client = clients.findClient(context);
         logger.debug("client: {}", client);
         CommonHelper.assertNotNull("client", client);
+        CommonHelper.assertTrue(client instanceof IndirectClient, "only indirect clients are allowed on the callback url");
 
         final Credentials credentials;
         try {
             credentials = client.getCredentials(context);
         } catch (final RequiresHttpAction e) {
-            return httpActionHandler.handle(e.getCode(), context);
+            return httpActionAdapter.handle(e.getCode(), context);
         }
         logger.debug("credentials: {}", credentials);
 
-        final CommonProfile profile = (CommonProfile) client.getUserProfile(credentials, context);
+        final UserProfile profile = client.getUserProfile(credentials, context);
         logger.debug("profile: {}", profile);
-        if (profile != null) {
-            manager.save(true, profile);
-        }
-
+        saveUserProfile(context, profile);
         return redirectToOriginallyRequestedUrl(context);
     }
 
+    protected void saveUserProfile(final WebContext context, final UserProfile profile) {
+        final ProfileManager manager = new ProfileManager(context);
+        if (profile != null) {
+            manager.save(true, profile);
+        }
+    }
     protected Result redirectToOriginallyRequestedUrl(final WebContext context) {
         final String requestedUrl = (String) context.getSessionAttribute(Pac4jConstants.REQUESTED_URL);
         logger.debug("requestedUrl: {}", requestedUrl);

@@ -15,29 +15,15 @@
  */
 package org.pac4j.play.java;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import org.pac4j.core.profile.CommonProfile;
 
-import play.mvc.With;
-
-@With(RequiresAuthenticationAction.class)
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.METHOD, ElementType.TYPE })
-@Inherited
-@Documented
 /**
- * Annotation to protect a resource. Implemented by {@link RequiresAuthenticationAction}.
- * 
+ * Will be removed. Use {@link UserProfileController} instead.
+ *
+ * @deprecated
  * @author Jerome Leleu
  * @since 1.0.0
  */
-public @interface RequiresAuthentication {
-
-    String clientName() default "";
-
-    String authorizerName() default "";
+@Deprecated
+public class JavaController<P extends CommonProfile> extends UserProfileController<P> {
 }

@@ -13,19 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package org.pac4j.play.handler;
+package org.pac4j.play.http;
 
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.play.PlayWebContext;
 import play.mvc.Result;
 
 /**
- * Handle HTTP action for Play.
+ * Adapt the HTTP action to Play.
  *
  * @author Jerome Leleu
  * @since 2.0.0
  */
-public interface HttpActionHandler {
+public interface HttpActionAdapter {
 
     /**
      * Handle HTTP action.
