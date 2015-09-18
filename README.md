@@ -224,7 +224,7 @@ You can protect an url and require the user to be authenticated by a client (and
 
 The following parameters can be defined:
 
-- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct client are tried successively. If the user is still not authenticated and if the first client is an indirect one, it is used to start the authentication. If the *client_name* request parameter is provided, only the matching client is selected
+- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively. If the user is still not authenticated and if the first client is an indirect one, it is used to start the authentication. If the *client_name* request parameter is provided, only the matching client is selected
 - `authorizerName` (optional): the authorizer name (or a list of authorizer names separated by commas) which will protect the resource (they must exist in the authorizers configuration). By default (if blank), the user only requires to be authenticated to access the resource.
 
 #### In Scala:
