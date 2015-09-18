@@ -40,6 +40,7 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.List;
 
 /**
  * <p>This filter protects a resource (authentication + authorization).</p>
@@ -92,15 +93,16 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     public Promise<Result> internalCall(final Context ctx, final String clientName, final String authorizerName) throws Throwable {
 
         final PlayWebContext context =  new PlayWebContext(ctx, dataStore);
+        logger.debug("url: {}", context.getFullRequestURL());
 
         CommonHelper.assertNotNull("config", config);
-        final Clients clients = config.getClients();
-        CommonHelper.assertNotNull("clients", clients);
+        final Clients configClients = config.getClients();
+        CommonHelper.assertNotNull("configClients", configClients);
         logger.debug("clientName: {}", clientName);
-        final Client client = clientFinder.find(clients, context, clientName);
-        logger.debug("client: {}", client);
+        final List<Client> currentClients = clientFinder.find(configClients, context, clientName);
+        logger.debug("currentClients: {}", currentClients);
 
-        final boolean useSession = useSession(context, client);
+        final boolean useSession = useSession(context, currentClients);
         logger.debug("useSession: {}", useSession);
 
         final Promise<UserProfile> promiseProfile = Promise.promise(() -> {
@@ -109,18 +111,26 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
             UserProfile profile = manager.get(useSession);
             logger.debug("profile: {}", profile);
 
-            if (profile == null && client instanceof DirectClient) {
-                final Credentials credentials;
-                try {
-                    credentials = client.getCredentials(context);
-                    logger.debug("credentials: {}", credentials);
-                } catch (final RequiresHttpAction e) {
-                    throw new TechnicalException("Unexpected HTTP action", e);
-                }
-                profile = client.getUserProfile(credentials, context);
-                logger.debug("profile: {}", profile);
-                if (profile != null) {
-                    manager.save(useSession, profile);
+            // no profile and some current clients
+            if (profile == null && currentClients != null && currentClients.size() > 0) {
+                // loop on all clients searching direct ones to perform authentication
+                for (final Client currentClient : currentClients) {
+                    if (currentClient instanceof DirectClient) {
+                        logger.debug("Performing authentication for client: {}", currentClient);
+                        final Credentials credentials;
+                        try {
+                            credentials = currentClient.getCredentials(context);
+                            logger.debug("credentials: {}", credentials);
+                        } catch (final RequiresHttpAction e) {
+                            throw new TechnicalException("Unexpected HTTP action", e);
+                        }
+                        profile = currentClient.getUserProfile(credentials, context);
+                        logger.debug("profile: {}", profile);
+                        if (profile != null) {
+                            manager.save(useSession, profile);
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -134,6 +144,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                 if (profile != null) {
                     logger.debug("authorizerName: {}", authorizerName);
                     if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+                        logger.debug("grant access");
                         // when called from Scala
                         if (delegate == null) {
                             return Promise.pure(null);
@@ -141,13 +152,17 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                             return delegate.call(ctx);
                         }
                     } else {
-                        return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
+                        logger.debug("forbidden");
+                        return forbidden(context, currentClients);
                     }
                 } else {
-                    if (client instanceof IndirectClient) {
+                    if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
+                        final Client currentClient = currentClients.get(0);
+                        logger.debug("Starting authentication for client: {}", currentClient);
                         saveRequestedUrl(context);
-                        return Promise.promise(() -> redirectToIdentityProvider(client, context));
+                        return Promise.promise(() -> redirectToIdentityProvider(currentClient, context));
                     } else {
+                        logger.debug("unauthorized");
                         return Promise.pure(httpActionAdapter.handle(HttpConstants.UNAUTHORIZED, context));
                     }
                 }
@@ -155,8 +170,12 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         });
     }
 
-    protected boolean useSession(final WebContext context, final Client client) {
-        return client == null || client instanceof IndirectClient;
+    protected boolean useSession(final WebContext context, final List<Client> currentClients) {
+        return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
+    }
+
+    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients) {
+        return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
     }
 
     protected void saveRequestedUrl(final WebContext context) {
