@@ -1,8 +1,8 @@
 ## What is the play-pac4j library? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j)
 
-The `play-pac4j` project is an authentication/authorization security library for Play framework. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `play-pac4j` project is an easy and powerful security library for Play web applications which supports authentication and authorization, but also application logout. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
-Several libraries are available for the different versions of the Play framework and for the different languages:
+Several versions of the library are available for the different versions of the Play framework and for the different languages:
 
 | Play framework | Java library             | Scala library
 |----------------|--------------------------|-----------------------------
@@ -12,7 +12,7 @@ Several libraries are available for the different versions of the Play framework
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
-It supports stateful and stateless [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or direct internal credentials authenticator and user profile creator:
+It supports stateful / indirect and stateless / direct [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or internal credentials authenticators and user profile creators:
 
 1. **OAuth** (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... using the `pac4j-oauth` module
 2. **CAS** (1.0, 2.0, SAML, logout & proxy) + REST API support using the `pac4j-cas` module
@@ -24,9 +24,8 @@ It supports stateful and stateless [authentication flows](https://github.com/pac
 8. **JWT** using the `pac4j-jwt` module
 9. **LDAP** using the `pac4j-ldap` module
 10. **relational DB** using the `pac4j-sql` module
-11. **MongoDB** using the `pac4j-mongo` module.
-
-See [all authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Clients).
+11. **MongoDB** using the `pac4j-mongo` module
+12. **Stormpath** using the `pac4j-stormpath` module.
 
 
 ## Technical description
@@ -34,12 +33,12 @@ See [all authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Clients)
 This project has **12 classes**:
 
 1. the `PlayLogoutHandler` is the specific handler to support CAS logout
-2. the `HttpActionHandler` interface and its `DefaultHttpActionHandler` implementation manage client HTTP actions in Play
+2. the `HttpActionAdapter` interface and its `DefaultHttpActionAdapter` implementation adapt client HTTP actions in Play
 3. the `AbstractConfigAction` is an abstract action to manage configuration
 4. the `RequiresAuthentication` annotation is an action to be used to protect a resource
 5. the `RequiresAuthenticationAction` handles the resource protection defined by the previous annotation
 6. the `UserProfileController` is a controller to get the user profile
-7. the `DataStore` interface and its `CacheStore` implementation manages the data to be saved in the store
+7. the `DataStore` interface and its `CacheStore` implementation manages the data to be persisted
 8. the `ApplicationLogoutController` class handles the logout process
 9. the `CallbackController` class is used to finish the authentication process
 10. the `PlayWebContext` is the specific web context for Play
@@ -68,7 +67,7 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
-All `Clients` must be defined in a `org.pac4j.core.config.Config` object which is itself bound for injection in a `SecurityModule`(or whatever you call it).
+All `Clients` must be defined in a `org.pac4j.core.config.Config` object which is itself bound for injection in a `SecurityModule` (or whatever the name you call it).
 
 #### In Java:
 
@@ -81,10 +80,8 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object which i
             FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
             TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
 
-            FormClient formClient = new FormClient(baseUrl + "/theForm",
-                    new SimpleTestUsernamePasswordAuthenticator(), new SimpleTestUsernameProfileCreator());
-            IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(),
-                    new SimpleTestUsernameProfileCreator());
+            FormClient formClient = new FormClient(baseUrl + "/theForm", new SimpleTestUsernamePasswordAuthenticator());
+            IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
     
             CasClient casClient = new CasClient();
             casClient.setCasLoginUrl("http://mycasserver/login");
@@ -102,14 +99,14 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object which i
             oidcClient.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration");
             oidcClient.addCustomParam("prompt", "consent");
     
-            ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"), new AuthenticatorProfileCreator<>());
+            ParameterClient parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"));
     
             Clients clients = new Clients("http://localhost:8080/callback", facebookClient, twitterClient, formClient,
                     basicAuthClient, casClient, saml2Client, oidcClient, parameterClient);
     
-            Config config = new Config();
-            config.setClients(clients);
-            config.getAuthorizers().put("customAuthorizer", new CustomAuthorizer());
+            Config config = new Config(clients);
+            config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
+            config.addAuthorizer("custom", new CustomAuthorizer());
             bind(Config.class).toInstance(config);
         }
     }
@@ -123,9 +120,8 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object which i
         val facebookClient = new FacebookClient("fbId", "fbSecret")
         val twitterClient = new TwitterClient("twId", "twSecret")
 
-        val formClient = new FormClient(baseUrl + "/theForm",
-          new SimpleTestUsernamePasswordAuthenticator(), new SimpleTestUsernameProfileCreator())
-        val basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator(), new SimpleTestUsernameProfileCreator())
+        val formClient = new FormClient(baseUrl + "/theForm", new SimpleTestUsernamePasswordAuthenticator())
+        val basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
     
         val casClient = new CasClient()
         casClient.setCasLoginUrl("http://mycasserver/login")
@@ -142,20 +138,21 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object which i
         oidcClient.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration")
         oidcClient.addCustomParam("prompt", "consent")
     
-        val parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"), new AuthenticatorProfileCreator[HttpCredentials, UserProfile])
+        val parameterClient = new ParameterClient("token", new JwtAuthenticator("salt"))
     
         val clients = new Clients("http://localhost:8080/callback", facebookClient, twitterClient, formClient,
           basicAuthClient, casClient, saml2Client, oidcClient, parameterClient)
     
-        val config = new Config()
-        config.setClients(clients)
+        val config = new Config(clients)
+        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))
+        config.addAuthorizer("custom", new CustomAuthorizer())
         bind(classOf[Config]).toInstance(config)
       }
     }
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
-You must notice that no authorizer is defined in Scala in the `Config` object as an `Authorizer` can be passed to the `RequiresAuthentication` function while only an `authorizerName` (`String`) can be passed to the `RequiresAuthentication` annotation (and thus requires to find the right `Authorizer` in the configuration).
+See all available [`Client`s and `Authenticator`s](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`s](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the data store (`CacheStore`)
@@ -216,7 +213,7 @@ The `defaultUrl` parameter defines where the user will be redirected after login
 
 ### Protect an url (authentication + authorization)
 
-You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate roles / permissions) by using the `RequiresAuthentication` annotation or function.
+You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate authorizations) by using the `RequiresAuthentication` annotation or function.
 
 #### In Java:
 
@@ -227,12 +224,8 @@ You can protect an url and require the user to be authenticated by a client (and
 
 The following parameters can be defined:
 
-- `clientName`: the chosen authentication mechanism (like `FacebookClient` for example)
-- `authorizerName` (optional): the authorizer name which will protect the resource (must exist in the authorizers configuration)
-- `requireAnyRole` (optional): if one of the provided roles is necessary to access the resource
-- `requireAllRoles` (optional): if all roles are necessary
-- `allowDynamicClientSelection` (optional): if other clients can be used on this url (providing a *client_name* parameter in the url)
-- `useSessionForDirectClient` (optional): if the session must be used (for REST client).
+- `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively. If the user is still not authenticated and if the first client is an indirect one, it is used to start the authentication. If the *client_name* request parameter is provided, only the matching client is selected
+- `authorizerName` (optional): the authorizer name (or a list of authorizer names separated by commas) which will protect the resource (they must exist in the authorizers configuration). By default (if blank), the user only requires to be authenticated to access the resource.
 
 #### In Scala:
 
@@ -246,13 +239,10 @@ This function is available by using the `org.pac4j.play.scala.Security` trait. Y
 
 The following functions are available:
 
+- `RequiresAuthentication[A]`
 - `RequiresAuthentication[A](clientName: String)`
-- `RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P])`
-- `RequiresAuthentication[A](clientName: String, requireAnyRole: String, requireAllRoles: String)`
-- `RequiresAuthentication[A](clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, isAjax: Boolean, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)`
-- `RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizer: Authorizer[P], requireAnyRole: String, requireAllRoles: String, isAjax: Boolean, useSessionForDirectClient: Boolean, allowDynamicClientSelection: Boolean)`
-
-where the `authorizer` parameter is an `Authorizer` object and the `parser` a body parser.
+- `RequiresAuthentication[A](clientName: String, authorizerName: String)`
+- `RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)`
 
 Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
 
@@ -268,7 +258,7 @@ Either you inject the `Config` and `DataStore` in your controller or inherit fro
     public Result index() throws Exception {
         Clients clients = config.getClients();
         PlayWebContext context = new PlayWebContext(ctx(), dataStore);
-        String urlFacebook = ((FacebookClient) clients.findClient("FacebookClient")).getRedirectAction(context, false, false).getLocation();
+        String urlFacebook = ((FacebookClient) clients.findClient("FacebookClient")).getRedirectAction(context, false).getLocation();
         return ok(views.html.index.render(urlFacebook));
     }
 
@@ -280,11 +270,11 @@ You need to use the `Security` trait:
       val newSession = getOrCreateSessionId(request)
       val webContext = new PlayWebContext(request, dataStore)
       val clients = config.getClients()
-      val urlFacebook = (clients.findClient("FacebookClient").asInstanceOf[FacebookClient]).getRedirectAction(webContext, false, false).getLocation;
+      val urlFacebook = (clients.findClient("FacebookClient").asInstanceOf[FacebookClient]).getRedirectAction(webContext, false).getLocation;
       Ok(views.html.index(urlFacebook)).withSession(newSession)
     }
 
-Notice you need to explictly call the `getOrCreateSessionId()` to force the initialization of the data store and attach the returned session to your result.
+Notice you need to explicitly call the `getOrCreateSessionId()` in Scala to force the initialization of the data store and attach the returned session to your result.
 
 
 ### Get the user profile
@@ -297,7 +287,7 @@ You need to inherit from the `UserProfileController` and call the `getUserProfil
 
 You need to extend from the `Security` trait and call the `getUserProfile(request: RequestHeader)` function. 
 
-You can also use directly the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request) and the `ProfileManager.isAuthenticated()` method. 
+You can also directly use the `ProfileManager.get(true)` method (`false` not to use the session, but only the current HTTP request) and the `ProfileManager.isAuthenticated()` method. 
 
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common properties that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
  
@@ -332,36 +322,37 @@ And using it in the `routes` file:
 
 The following parameters can be defined:
 
-- `defaultUrl`: the default logout url if the provided *url* parameter does not match the `logoutUrlPattern`
-- `logoutUrlPattern`: the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
+- `defaultUrl` (optional): the default logout url if the provided *url* parameter does not match the `logoutUrlPattern`
+- `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
 
 ## Migration guide
 
-`play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...)
+`play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...) and is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
 
-It is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
-
-The `SecurityJavaController` and `JavaController` have been removed. You now need to use the `UserProfileController` in Java to get the user profile (you can also use the `ProfileManager` object directly).
+In Java, the `SecurityController` and `JavaController` are deprecated and you need to use the `UserProfileController` to get the user profile (you can also use the `ProfileManager` object directly).
 
 The "target url" concept has disappeared as it was too complicated, it could be simulated though.
 
-The `SecurityCallbackController` has been renamed as `CallbackController` (its original name) and the logout support has been moved to the `ApplicationLogoutController`.
+The `SecurityCallbackController` is deprecated and you must use the `CallbackController`. The logout support has been moved to the `ApplicationLogoutController`.
 
 The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebContext`.
 
 The `StorageHelper` has been removed, replaced by the `CacheStore` implementation where you can set the timeouts.
 
-The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s (for Java only).
+The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package.
 
-Custom 401 / 403 HTTP error pages must be now defined by overriding the `DefaultHttpActionHandler`.
+The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s.
 
-The `isAjax` parameter is no longer available as AJAX requests are now automatically detected.
+Custom 401 / 403 HTTP error pages must be now defined by overriding the `DefaultHttpActionAdapter`.
+
+The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
+The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead.
 
 
 ## Demo
 
-The [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-java-demo) & [play-pac4j-scala-demo](https://github.com/pac4j/play-pac4j-scala-demo) are available with various authentication mechanisms: Facebook, Twitter, CAS, form, basic auth...
+Two demo webapps: [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-java-demo) & [play-pac4j-scala-demo](https://github.com/pac4j/play-pac4j-scala-demo) are available for tests and implement many authentication mechanisms: Facebook, Twitter, form, basic auth, CAS, SAML, OpenID Connect, JWT...
 
 
 ## Release notes
@@ -375,4 +366,3 @@ If you have any question, please use the following mailing lists:
 
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
-

@@ -15,8 +15,8 @@
  */
 package org.pac4j.play.java;
 
-import org.pac4j.core.authorization.Authorizer;
-import org.pac4j.core.authorization.DefaultAuthorizerBuilder;
+import org.pac4j.core.authorization.AuthorizationChecker;
+import org.pac4j.core.authorization.DefaultAuthorizationChecker;
 import org.pac4j.core.client.*;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.HttpConstants;
@@ -30,7 +30,7 @@ import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.handler.HttpActionHandler;
+import org.pac4j.play.http.HttpActionAdapter;
 import org.pac4j.play.store.DataStore;
 import play.libs.F.Function;
 import play.libs.F.Promise;
@@ -40,17 +40,17 @@ import play.mvc.Result;
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
-import java.util.Map;
+import java.util.List;
 
 /**
- * <p>This action aims to protect a (stateful or stateless) resource.</p>
+ * <p>This filter protects a resource (authentication + authorization).</p>
  * <ul>
- *  <li>If statefull, it relies on the web session and on the {@link org.pac4j.play.CallbackController} to terminate the authentication process</li>
- *  <li>If stateless, it validates the provided credentials and forward the request to the underlying resource if the authentication succeeds.</li>
+ *  <li>If a stateful / indirect client is used, it relies on the session to get the user profile (after the {@link org.pac4j.play.CallbackController} has terminated the authentication process)</li>
+ *  <li>If a stateless / direct client is used, it validates the provided credentials from the request and retrieves the user profile if the authentication succeeds.</li>
  * </ul>
- * <p>Authorizations are also handled by this action.</p>
- * <p>The configuration can be provided via annotation parameters: <code>clientName</code>, <code>requireAnyRole</code>, <code>requireAllRoles</code>,
- * <code>authorizerName</code>, <code>useSessionForDirectClient</code> and <code>allowDynamicClientSelection</code>.</p>
+ * <p>Then, authorizations are checked before accessing the resource.</p>
+ * <p>Forbidden or unauthorized errors can be returned. An authentication process can be started (redirection to the identity provider) in case of an indirect client.</p>
+ * <p>The configuration can be provided via annotation parameters: <code>clientName</code> and <code>authorizerName</code>.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -65,15 +65,19 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     protected DataStore dataStore;
 
     @Inject
-    protected HttpActionHandler httpActionHandler;
+    protected HttpActionAdapter httpActionAdapter;
+
+    protected ClientFinder clientFinder = new DefaultClientFinder();
+
+    protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
 
     public RequiresAuthenticationAction() {
     }
 
-    public RequiresAuthenticationAction(final Config config, final DataStore dataStore, final HttpActionHandler httpActionHandler) {
+    public RequiresAuthenticationAction(final Config config, final DataStore dataStore, final HttpActionAdapter httpActionAdapter) {
         this.config = config;
         this.dataStore = dataStore;
-        this.httpActionHandler = httpActionHandler;
+        this.httpActionAdapter = httpActionAdapter;
     }
 
     @Override
@@ -81,62 +85,52 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
 
         final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
         final String clientName = getStringParam(invocationHandler, CLIENT_NAME_METHOD, null);
-
         final String authorizerName = getStringParam(invocationHandler, AUTHORIZER_NAME_METHOD, null);
-        final String requireAnyRole = getStringParam(invocationHandler, REQUIRE_ANY_ROLE_METHOD, null);
-        final String requireAllRoles = getStringParam(invocationHandler, REQUIRE_ALL_ROLES_METHOD, null);
 
-        final Boolean useSessionForDirectClient = getBooleanParam(invocationHandler, USE_SESSION_FOR_DIRECT_CLIENT_METHOD, false);
-        final Boolean allowDynamicClientSelection = getBooleanParam(invocationHandler, ALLOW_DYNAMIC_CLIENT_SELECTION_METHOD, false);
-
-        return internalCall(ctx, clientName, null, authorizerName, requireAnyRole, requireAllRoles, useSessionForDirectClient, allowDynamicClientSelection);
+        return internalCall(ctx, clientName, authorizerName);
     }
 
-    public Promise<Result> internalCall(final Context ctx, final String clientName, final Authorizer authorizer, final String authorizerName, final String requireAnyRole,
-                                final String requireAllRoles, final boolean useSessionForDirectClient, final boolean  allowDynamicClientSelection) throws Throwable {
+    public Promise<Result> internalCall(final Context ctx, final String clientName, final String authorizerName) throws Throwable {
 
-        logger.debug("clientName: {}", clientName);
-        logger.debug("authorizer: {}", authorizer);
-        logger.debug("authorizerName: {}", authorizerName);
-        logger.debug("requireAnyRole: {}", requireAnyRole);
-        logger.debug("requireAllRoles: {}", requireAllRoles);
-        logger.debug("useSessionForDirectClient: {}", useSessionForDirectClient);
-        logger.debug("allowDynamicClientSelection: {}", allowDynamicClientSelection);
-
-        CommonHelper.assertNotNull(Pac4jConstants.CLIENT_NAME, clientName);
+        final PlayWebContext context =  new PlayWebContext(ctx, dataStore);
+        logger.debug("url: {}", context.getFullRequestURL());
 
         CommonHelper.assertNotNull("config", config);
-        final Clients clients = config.getClients();
-        CommonHelper.assertNotNull("clients", clients);
-        final Map<String, Authorizer> authorizers = config.getAuthorizers();
-        CommonHelper.assertNotNull("authorizers", authorizers);
-        final Authorizer computedAuthorizer = DefaultAuthorizerBuilder.build(authorizer, authorizerName, authorizers, requireAnyRole, requireAllRoles);
-        CommonHelper.assertNotNull("authorizer", computedAuthorizer);
+        final Clients configClients = config.getClients();
+        CommonHelper.assertNotNull("configClients", configClients);
+        logger.debug("clientName: {}", clientName);
+        final List<Client> currentClients = clientFinder.find(configClients, context, clientName);
+        logger.debug("currentClients: {}", currentClients);
 
-        final PlayWebContext context = new PlayWebContext(ctx, dataStore);
-        final ProfileManager manager = new ProfileManager(context);
-        final Client client = findClient(context, clientName, allowDynamicClientSelection);
-        logger.debug("client: {}", client);
-        final boolean isDirectClient = client instanceof DirectClient;
+        final boolean useSession = useSession(context, currentClients);
+        logger.debug("useSession: {}", useSession);
 
         final Promise<UserProfile> promiseProfile = Promise.promise(() -> {
 
-            UserProfile profile = manager.get(!isDirectClient || useSessionForDirectClient);
+            final ProfileManager manager = new ProfileManager(context);
+            UserProfile profile = manager.get(useSession);
             logger.debug("profile: {}", profile);
 
-            if (profile == null && isDirectClient) {
-                final Credentials credentials;
-                try {
-                    credentials = client.getCredentials(context);
-                } catch (final RequiresHttpAction e) {
-                    throw new TechnicalException("Unexpected HTTP action", e);
-                }
-                logger.debug("credentials: {}", credentials);
-
-                profile = client.getUserProfile(credentials, context);
-                logger.debug("profile: {}", profile);
-                if (profile != null) {
-                    manager.save(useSessionForDirectClient, profile);
+            // no profile and some current clients
+            if (profile == null && currentClients != null && currentClients.size() > 0) {
+                // loop on all clients searching direct ones to perform authentication
+                for (final Client currentClient : currentClients) {
+                    if (currentClient instanceof DirectClient) {
+                        logger.debug("Performing authentication for client: {}", currentClient);
+                        final Credentials credentials;
+                        try {
+                            credentials = currentClient.getCredentials(context);
+                            logger.debug("credentials: {}", credentials);
+                        } catch (final RequiresHttpAction e) {
+                            throw new TechnicalException("Unexpected HTTP action", e);
+                        }
+                        profile = currentClient.getUserProfile(credentials, context);
+                        logger.debug("profile: {}", profile);
+                        if (profile != null) {
+                            manager.save(useSession, profile);
+                            break;
+                        }
+                    }
                 }
             }
 
@@ -148,7 +142,9 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
             @Override
             public Promise<Result> apply(UserProfile profile) throws Throwable {
                 if (profile != null) {
-                    if (computedAuthorizer.isAuthorized(context, profile)) {
+                    logger.debug("authorizerName: {}", authorizerName);
+                    if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+                        logger.debug("grant access");
                         // when called from Scala
                         if (delegate == null) {
                             return Promise.pure(null);
@@ -156,30 +152,30 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                             return delegate.call(ctx);
                         }
                     } else {
-                        return Promise.pure(httpActionHandler.handle(HttpConstants.FORBIDDEN, context));
+                        logger.debug("forbidden");
+                        return forbidden(context, currentClients);
                     }
                 } else {
-                    if (isDirectClient) {
-                        return Promise.pure(httpActionHandler.handle(HttpConstants.UNAUTHORIZED, context));
-                    } else {
+                    if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
+                        final Client currentClient = currentClients.get(0);
+                        logger.debug("Starting authentication for client: {}", currentClient);
                         saveRequestedUrl(context);
-                        return Promise.promise(() -> redirectToIdentityProvider(client, context));
+                        return Promise.promise(() -> redirectToIdentityProvider(currentClient, context));
+                    } else {
+                        logger.debug("unauthorized");
+                        return Promise.pure(httpActionAdapter.handle(HttpConstants.UNAUTHORIZED, context));
                     }
                 }
             }
         });
     }
 
-    protected Client findClient(final WebContext context, final String clientName, final boolean allowDynamicClientSelection) {
-        final Clients clients = config.getClients();
-        Client client = null;
-        if (allowDynamicClientSelection) {
-            client = clients.findClient(context);
-        }
-        if (client == null) {
-            client = clients.findClient(clientName);
-        }
-        return client;
+    protected boolean useSession(final WebContext context, final List<Client> currentClients) {
+        return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
+    }
+
+    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients) {
+        return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
     }
 
     protected void saveRequestedUrl(final WebContext context) {
@@ -192,9 +188,9 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         try {
             final RedirectAction action = ((IndirectClient) client).getRedirectAction(context, true);
             logger.debug("redirectAction: {}", action);
-            return httpActionHandler.handleRedirect(action);
+            return httpActionAdapter.handleRedirect(action);
         } catch (final RequiresHttpAction e) {
-            return httpActionHandler.handle(e.getCode(), context);
+            return httpActionAdapter.handle(e.getCode(), context);
         }
     }
 }

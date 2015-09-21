@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package org.pac4j.play.handler;
+package org.pac4j.play.http;
 
 import org.pac4j.core.client.RedirectAction;
 import org.pac4j.core.context.HttpConstants;
@@ -34,7 +34,7 @@ import static play.mvc.Results.*;
  * @since 2.0.0
  */
 @Singleton
-public class DefaultHttpActionHandler implements HttpActionHandler {
+public class DefaultHttpActionAdapter implements HttpActionAdapter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 

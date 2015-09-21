@@ -153,6 +153,14 @@ public class PlayWebContext extends BaseResponseContext {
      * {@inheritDoc}
      */
     @Override
+    public Object getSessionIdentifier() {
+        return dataStore.getOrCreateSessionId(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public Object getSessionAttribute(final String key) {
         return dataStore.get(this, key);
     }
