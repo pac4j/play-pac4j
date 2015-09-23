@@ -1,6 +1,6 @@
 ## What is the play-pac4j library? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j)
 
-The `play-pac4j` project is an easy and powerful security library for Play web applications which supports authentication and authorization, but also application logout. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `play-pac4j` project is an easy and powerful security library for Play web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 Several versions of the library are available for the different versions of the Play framework and for the different languages:
 
@@ -243,8 +243,6 @@ The following functions are available:
 - `RequiresAuthentication[A](clientName: String)`
 - `RequiresAuthentication[A](clientName: String, authorizerName: String)`
 - `RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)`
-
-Define the appropriate `org.pac4j.core.authorization.AuthorizationGenerator` and attach it to the client (using the `addAuthorizationGenerator` method) to compute the roles / permissions of the authenticated user.
 
 
 ### Get redirection urls
