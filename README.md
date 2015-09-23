@@ -64,7 +64,7 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
         "Pablo repo" at "https://raw.github.com/fernandezpablo85/scribe-java/mvn-repo/")
 
 
-### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
+### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
 All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well as the authorizers which will be used by the application. The `Config` is bound for injection in a `SecurityModule` (or whatever the name you call it).
@@ -152,7 +152,7 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
-See all available [`Client`s and `Authenticator`s](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`s](https://github.com/pac4j/pac4j/wiki/Authorizers).
+See all available [`Client` and `Authenticator`](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the data store (`CacheStore`)
