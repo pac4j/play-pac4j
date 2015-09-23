@@ -15,11 +15,11 @@
  */
 package org.pac4j.play;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 import org.pac4j.core.context.BaseResponseContext;
 
+import org.pac4j.core.context.Cookie;
 import org.pac4j.play.store.DataStore;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
@@ -246,5 +246,23 @@ public class PlayWebContext extends BaseResponseContext {
      */
     public void invalidateSession() {
         dataStore.invalidate(this);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Collection<Cookie> getRequestCookies() {
+        final List<Cookie> cookies = new ArrayList<>();
+        final Http.Cookies httpCookies = request.cookies();
+        httpCookies.forEach(httpCookie -> {
+            final Cookie cookie = new Cookie(httpCookie.name(), httpCookie.value());
+            cookie.setDomain(httpCookie.domain());
+            cookie.setHttpOnly(httpCookie.httpOnly());
+            cookie.setMaxAge(httpCookie.maxAge());
+            cookie.setPath(httpCookie.path());
+            cookie.setSecure(httpCookie.secure());
+            cookies.add(cookie);
+        });
+        return cookies;
     }
 }
