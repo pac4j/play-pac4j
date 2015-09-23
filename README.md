@@ -67,7 +67,7 @@ As snapshot dependencies are only available in the [Sonatype snapshots repositor
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`s)
 
 Each authentication mechanism (Facebook, Twitter, a CAS server...) is defined by a client (implementing the `org.pac4j.core.client.Client` interface). All clients must be gathered in a `org.pac4j.core.client.Clients` class.  
-All `Clients` must be defined in a `org.pac4j.core.config.Config` object which is itself bound for injection in a `SecurityModule` (or whatever the name you call it).
+All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well as the authorizers which will be used by the application. The `Config` is bound for injection in a `SecurityModule` (or whatever the name you call it).
 
 #### In Java:
 
