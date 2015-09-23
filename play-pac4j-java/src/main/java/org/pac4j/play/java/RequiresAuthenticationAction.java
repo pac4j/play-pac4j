@@ -156,9 +156,9 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                         return forbidden(context, currentClients, profile);
                     }
                 } else {
-                    if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
-                        logger.debug("Starting authentication for client: {}", currentClients.get(0));
-                        saveRequestedUrl(context);
+                    if (startAuthentication(context, currentClients)) {
+                        logger.debug("Starting authentication");
+                        saveRequestedUrl(context, currentClients);
                         return Promise.promise(() -> redirectToIdentityProvider(context, currentClients));
                     } else {
                         logger.debug("unauthorized");
@@ -177,7 +177,11 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
     }
 
-    protected void saveRequestedUrl(final WebContext context) {
+    protected boolean startAuthentication(final PlayWebContext context, final List<Client> currentClients) {
+        return currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient;
+    }
+
+    protected void saveRequestedUrl(final WebContext context, final List<Client> currentClients) {
         final String requestedUrl = context.getFullRequestURL();
         logger.debug("requestedUrl: {}", requestedUrl);
         context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
@@ -190,6 +194,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
             logger.debug("redirectAction: {}", action);
             return httpActionAdapter.handleRedirect(action);
         } catch (final RequiresHttpAction e) {
+            logger.debug("extra HTTP action required: {}", e.getCode());
             return httpActionAdapter.handle(e.getCode(), context);
         }
     }
