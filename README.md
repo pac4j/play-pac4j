@@ -169,21 +169,21 @@ The only existing implementation is currently the `CacheStore` (where all data a
     bind(classOf[DataStore]).to(classOf[CacheStore])
 
 
-### Define the HTTP action handler (`DefaultHttpActionHandler`)
+### Define the HTTP action adapter (`DefaultHttpActionAdapter`)
 
-To handle specific HTTP actions (like redirections, forbidden / unauthorized pages), you need to define the appropriate `HttpActionHandler`. The only available implementation is currently the `DefaultHttpActionHandler`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+To handle specific HTTP actions (like redirections, forbidden / unauthorized pages), you need to define the appropriate `HttpActionAdapter`. The only available implementation is currently the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 Its binding must be defined in the `SecurityModule`.
 
 #### In Java:
 
-    bind(HttpActionHandler.class).to(DefaultHttpActionHandler.class);
+    bind(HttpActionAdapter.class).to(DefaultHttpActionAdapter.class);
 
 #### In Scala:
 
-    bind(classOf[HttpActionHandler]).to(classOf[DefaultHttpActionHandler])
+    bind(classOf[HttpActionAdapter]).to(classOf[DefaultHttpActionAdapter])
 
 
-### Define the callback endpoint (only for stateful authentication mechanisms)
+### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
 
 Some authentication mechanisms rely on external identity providers (like Facebook) and thus require to define a callback endpoint where the user will be redirected after login at the identity provider. For REST support only, this callback endpoint is not necessary.  
 It must be defined in the `routes` file:
