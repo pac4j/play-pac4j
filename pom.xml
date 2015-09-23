@@ -25,7 +25,7 @@
     <packaging>pom</packaging>
     <name>pac4j implementation for Play framework</name>
     <version>2.0.0-SNAPSHOT</version>
-    <description>Authentication/authorization library for Play framework based on pac4j</description>
+    <description>Security library for Play framework based on pac4j</description>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
