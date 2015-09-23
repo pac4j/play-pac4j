@@ -152,7 +152,7 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
-See all available [`Client` and `Authenticator`](https://github.com/pac4j/pac4j/wiki/Clients) and all available [`Authorizer`](https://github.com/pac4j/pac4j/wiki/Authorizers).
+See all available [**clients and authenticators**](https://github.com/pac4j/pac4j/wiki/Clients) and all available [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the data store (`CacheStore`)
