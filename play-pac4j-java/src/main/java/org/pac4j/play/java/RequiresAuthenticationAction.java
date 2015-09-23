@@ -153,17 +153,16 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                         }
                     } else {
                         logger.debug("forbidden");
-                        return forbidden(context, currentClients);
+                        return forbidden(context, currentClients, profile);
                     }
                 } else {
                     if (currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient) {
-                        final Client currentClient = currentClients.get(0);
-                        logger.debug("Starting authentication for client: {}", currentClient);
+                        logger.debug("Starting authentication for client: {}", currentClients.get(0));
                         saveRequestedUrl(context);
-                        return Promise.promise(() -> redirectToIdentityProvider(currentClient, context));
+                        return Promise.promise(() -> redirectToIdentityProvider(context, currentClients));
                     } else {
                         logger.debug("unauthorized");
-                        return Promise.pure(httpActionAdapter.handle(HttpConstants.UNAUTHORIZED, context));
+                        return unauthorized(context, currentClients);
                     }
                 }
             }
@@ -174,7 +173,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
     }
 
-    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients) {
+    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final UserProfile profile) {
         return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
     }
 
@@ -184,13 +183,18 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, requestedUrl);
     }
 
-    protected Result redirectToIdentityProvider(final Client client, final PlayWebContext context) {
+    protected Result redirectToIdentityProvider(final PlayWebContext context, final List<Client> currentClients) {
         try {
-            final RedirectAction action = ((IndirectClient) client).getRedirectAction(context, true);
+            final IndirectClient currentClient = (IndirectClient) currentClients.get(0);
+            final RedirectAction action = currentClient.getRedirectAction(context, true);
             logger.debug("redirectAction: {}", action);
             return httpActionAdapter.handleRedirect(action);
         } catch (final RequiresHttpAction e) {
             return httpActionAdapter.handle(e.getCode(), context);
         }
+    }
+
+    protected Promise<Result> unauthorized(final PlayWebContext context, final List<Client> currentClients) {
+        return Promise.pure(httpActionAdapter.handle(HttpConstants.UNAUTHORIZED, context));
     }
 }
