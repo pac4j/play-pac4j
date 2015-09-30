@@ -1,6 +1,8 @@
-## What is the play-pac4j library? [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j)
+<p align="center">
+  <img src="https://pac4j.github.io/pac4j/img/logo-play.png" width="50%" height="50%" />
+</p>
 
-The `play-pac4j` project is an easy and powerful security library for Play web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `play-pac4j` project is an **easy and powerful security library for Play framework** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 Several versions of the library are available for the different versions of the Play framework and for the different languages:
 
@@ -12,56 +14,41 @@ Several versions of the library are available for the different versions of the 
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
-It supports stateful / indirect and stateless / direct [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows) using external identity providers or internal credentials authenticators and user profile creators:
+It supports the main [authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Authentication-flows) (via stateful / indirect clients for UI based on external identity providers and stateless / direct clients for web services using internal credentials authenticators and user profile creators):
 
 1. **OAuth** (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... using the `pac4j-oauth` module
-2. **CAS** (1.0, 2.0, SAML, logout & proxy) + REST API support using the `pac4j-cas` module
-3. **HTTP** (form, basic auth, IP, header, GET/POST parameter authentications) using the `pac4j-http` module
+2. **CAS** (1.0, 2.0, 3.0, SAML, logout, proxy, REST) using the `pac4j-cas` module
+3. **HTTP** (form, basic auth, IP, header, cookie, GET/POST parameter) using the `pac4j-http` module
 4. **OpenID** using the `pac4j-openid` module
 5. **SAML** (2.0) using the `pac4j-saml` module
 6. **Google App Engine** UserService using the `pac4j-gae` module
-7. **OpenID Connect** 1.0 using the `pac4j-oidc` module
+7. **OpenID Connect** (1.0) using the `pac4j-oidc` module
 8. **JWT** using the `pac4j-jwt` module
 9. **LDAP** using the `pac4j-ldap` module
-10. **relational DB** using the `pac4j-sql` module
+10. **Relational DB** using the `pac4j-sql` module
 11. **MongoDB** using the `pac4j-mongo` module
 12. **Stormpath** using the `pac4j-stormpath` module.
 
 
-## Technical description
-
-This project has **12 classes**:
-
-1. the `PlayLogoutHandler` is the specific handler to support CAS logout
-2. the `HttpActionAdapter` interface and its `DefaultHttpActionAdapter` implementation adapt client HTTP actions in Play
-3. the `AbstractConfigAction` is an abstract action to manage configuration
-4. the `RequiresAuthentication` annotation is an action to be used to protect a resource
-5. the `RequiresAuthenticationAction` handles the resource protection defined by the previous annotation
-6. the `UserProfileController` is a controller to get the user profile
-7. the `DataStore` interface and its `CacheStore` implementation manages the data to be persisted
-8. the `ApplicationLogoutController` class handles the logout process
-9. the `CallbackController` class is used to finish the authentication process
-10. the `PlayWebContext` is the specific web context for Play
-
-and is based on the `pac4j-core` library. Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
-
-
 ## How to use it?
+
+First, you need to add a dependency on this library as well as on the appropriate `pac4j` modules. Then, you must define the authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) and [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
+
+Define the `CallbackController` to finish authentication processes for indirect clients (like Facebook).
+
+Use the `RequiresAuthentication` annotation (in Java) or function (in Scala) to secure the urls of your web application (authentication + authorizations).
+
 
 ### Add the required dependencies (`play-pac4j-java` or `play-pac4j-scala_2.11` + `pac4j-*` libraries)
 
 You need to add a dependency on the:
 
-- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *latest version*: **2.0.0-SNAPSHOT**) if you code in Java
-- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *latest version*: **2.0.0-SNAPSHOT**) if you use Scala
+- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-SNAPSHOT**) if you code in Java
+- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-SNAPSHOT**) if you use Scala
 
-as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-RC1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...  
+as well as on the appropriate `pac4j` modules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0-RC1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
-As snapshot dependencies are only available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j/), this repository must be added in the `resolvers` of your `build.sbt` file:
-
-    resolvers ++= Seq( Resolver.mavenLocal,
-        "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/",
-        "Pablo repo" at "https://raw.github.com/fernandezpablo85/scribe-java/mvn-repo/")
+Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/index.html).
 
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
@@ -151,8 +138,6 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
     }
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
-
-See all available [**clients and authenticators**](https://github.com/pac4j/pac4j/wiki/Clients) and all available [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers).
 
 
 ### Define the data store (`CacheStore`)
@@ -364,3 +349,14 @@ If you have any question, please use the following mailing lists:
 
 - [pac4j users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
 - [pac4j developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
+
+
+## Development
+
+The current version 2.0.0-SNAPSHOT is under development.
+
+Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
+
+    resolvers ++= Seq( Resolver.mavenLocal,
+        "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/",
+        "Pablo repo" at "https://raw.github.com/fernandezpablo85/scribe-java/mvn-repo/")
