@@ -32,7 +32,7 @@ import javax.inject.Singleton;
  * @since 2.0.0
  */
 @Singleton
-public class CacheStore implements DataStore {
+public final class CacheStore implements DataStore {
 
     private static final Logger logger = LoggerFactory.getLogger(CacheStore.class);
 

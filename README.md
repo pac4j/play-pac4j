@@ -321,7 +321,7 @@ The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebC
 
 The `StorageHelper` has been removed, replaced by the `CacheStore` implementation where you can set the timeouts.
 
-The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package.
+The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler`.
 
 The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s.
 
