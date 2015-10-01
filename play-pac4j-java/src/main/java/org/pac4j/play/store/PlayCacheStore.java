@@ -32,9 +32,9 @@ import javax.inject.Singleton;
  * @since 2.0.0
  */
 @Singleton
-public final class CacheStore implements DataStore {
+public final class PlayCacheStore implements DataStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(CacheStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);
 
     private final static String SEPARATOR = "$";
 

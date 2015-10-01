@@ -83,11 +83,11 @@ trait Security[P<:CommonProfile] extends Controller {
   }
 
   /**
-   * Protect a resource: perform/start authentication and check authorizations
+   * This function is used to protect a resource.
    *
    * @param parser
-   * @param clientName
-   * @param authorizerName
+   * @param clientName the list of clients (separated by commas) to use for authentication
+   * @param authorizerName the list of authorizers (separated by commas) to use to check authorizations
    * @param action
    * @tparam A
    * @return

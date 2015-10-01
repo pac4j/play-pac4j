@@ -30,7 +30,10 @@ import play.mvc.With;
 @Inherited
 @Documented
 /**
- * Annotation to protect a resource. Implemented by {@link RequiresAuthenticationAction}.
+ * <p>This annotation is used to protect a resource.</p>
+ * <p>The <code>clientName</code> is a list of clients (separated by commas) to use for authentication.</p>
+ * <p>The <code>authorizerName</code> is a list of authorizers (separated by commas) to use to check authorizations.</p>
+ * <p>It is implemented by the {@link RequiresAuthenticationAction}.</p>
  * 
  * @author Jerome Leleu
  * @since 1.0.0

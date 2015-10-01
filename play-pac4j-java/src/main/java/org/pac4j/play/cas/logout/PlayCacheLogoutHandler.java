@@ -21,7 +21,7 @@ import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.store.CacheStore;
+import org.pac4j.play.store.PlayCacheStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.cache.Cache;
@@ -36,10 +36,10 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected final CacheStore cacheStore;
+    protected final PlayCacheStore playCacheStore;
 
-    public PlayCacheLogoutHandler(final CacheStore cacheStore) {
-        this.cacheStore = cacheStore;
+    public PlayCacheLogoutHandler(final PlayCacheStore playCacheStore) {
+        this.playCacheStore = playCacheStore;
     }
 
     public void destroySession(WebContext context) {
@@ -60,6 +60,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         final PlayWebContext webContext = (PlayWebContext) context;
         final String sessionId = webContext.getDataStore().getOrCreateSessionId(webContext);
         logger.debug("save sessionId: {}", sessionId);
-        Cache.set(ticket, sessionId, cacheStore.getProfileTimeout());
+        Cache.set(ticket, sessionId, playCacheStore.getProfileTimeout());
     }
 }

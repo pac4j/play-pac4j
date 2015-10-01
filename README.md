@@ -138,18 +138,18 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support only.
 
 
-### Define the data store (`CacheStore`)
+### Define the data store (`PlayCacheStore`)
 
 Some of the data used by `play-pac4j` (user profile, tokens...) must be saved somewhere. Thus, a datastore must be defined in the `SecurityModule`.  
-The only existing implementation is currently the `CacheStore` (where all data are saved into the `Cache`). <font color="red">If you have multiple Play nodes, you need a shared `Cache` between all your nodes.</font>
+The only existing implementation is currently the `PlayCacheStore` (where all data are saved into the `Cache`). <font color="red">If you have multiple Play nodes, you need a shared `Cache` between all your nodes.</font>
 
 #### In Java:
 
-    bind(DataStore.class).to(CacheStore.class);
+    bind(DataStore.class).to(PlayCacheStore.class);
 
 #### In Scala:
 
-    bind(classOf[DataStore]).to(classOf[CacheStore])
+    bind(classOf[DataStore]).to(classOf[PlayCacheStore])
 
 
 ### Define the HTTP action adapter (`DefaultHttpActionAdapter`)
@@ -319,7 +319,7 @@ The `SecurityCallbackController` is deprecated and you must use the `CallbackCon
 
 The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebContext`.
 
-The `StorageHelper` has been removed, replaced by the `CacheStore` implementation where you can set the timeouts.
+The `StorageHelper` has been removed, replaced by the `PlayCacheStore` implementation where you can set the timeouts.
 
 The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler`.
 
