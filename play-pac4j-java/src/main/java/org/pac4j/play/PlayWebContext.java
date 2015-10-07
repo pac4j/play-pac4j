@@ -244,13 +244,6 @@ public class PlayWebContext extends BaseResponseContext {
     /**
      * {@inheritDoc}
      */
-    public void invalidateSession() {
-        dataStore.invalidate(this);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public Collection<Cookie> getRequestCookies() {
         final List<Cookie> cookies = new ArrayList<>();
         final Http.Cookies httpCookies = request.cookies();

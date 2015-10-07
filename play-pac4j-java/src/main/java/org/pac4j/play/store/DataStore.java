@@ -50,11 +50,4 @@ public interface DataStore {
      * @param value the value to save in store
      */
     void set(PlayWebContext context, String key, Object value);
-
-    /**
-     * Invalidate the current store.
-     *
-     * @param context the web context
-     */
-    void invalidate(PlayWebContext context);
 }

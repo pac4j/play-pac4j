@@ -92,13 +92,6 @@ public final class PlayCacheStore implements DataStore {
         Cache.set(getKey(sessionId, key), value, timeout);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void invalidate(final PlayWebContext context) {
-        context.getJavaSession().remove(Pac4jConstants.SESSION_ID);
-    }
-
     public String getPrefix() {
         return prefix;
     }
