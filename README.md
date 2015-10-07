@@ -2,7 +2,7 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-play.png" width="50%" height="50%" />
 </p>
 
-The `play-pac4j` project is an **easy and powerful security library for Play framework** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
+The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It's available under the Apache 2 license and based on the [pac4j](https://github.com/pac4j/pac4j) library.
 
 Several versions of the library are available for the different versions of the Play framework and for the different languages:
 
@@ -321,16 +321,16 @@ The `SecurityCallbackController` is deprecated and you must use the `CallbackCon
 
 The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebContext`.
 
-The `StorageHelper` has been removed, replaced by the `PlayCacheStore` implementation where you can set the timeouts.
+The `StorageHelper` has been removed, replaced by the `PlayCacheStore` implementation where you can set the timeouts. You can provide your own implementation of the `CacheStore` if necessary.
 
-The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler`.
+The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler` (it relies on the Play Cache).
 
-The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the `Clients` and the `Authorizer`s.
+The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the clients (authentication) and the authorizers (authorizations).
 
-Custom 401 / 403 HTTP error pages must be now defined by overriding the `DefaultHttpActionAdapter`.
+Custom 401 / 403 HTTP error pages must now be defined by overriding the `DefaultHttpActionAdapter`.
 
 The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
-The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead.
+The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead (with the `authorizerName` parameter).
 
 
 ## Demo

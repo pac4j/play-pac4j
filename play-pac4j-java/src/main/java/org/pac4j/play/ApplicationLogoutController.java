@@ -52,6 +52,7 @@ public class ApplicationLogoutController extends Controller {
         final WebContext context = new PlayWebContext(ctx(), dataStore);
         final ProfileManager manager = new ProfileManager(context);
         manager.logout();
+        ctx().session().remove(Pac4jConstants.SESSION_ID);
 
         final String url = context.getRequestParameter(Pac4jConstants.URL);
         if (url == null) {
