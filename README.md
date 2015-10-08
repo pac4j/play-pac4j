@@ -14,25 +14,34 @@ Several versions of the library are available for the different versions of the 
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
-It supports the main [authentication mechanisms](https://github.com/pac4j/pac4j/wiki/Authentication-flows) (via stateful / indirect clients for UI based on external identity providers and stateless / direct clients for web services using internal credentials authenticators and user profile creators):
+It supports most authentication mechanisms, called ["clients"](https://github.com/pac4j/pac4j/wiki/Clients):
 
-1. **OAuth** (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... using the `pac4j-oauth` module
-2. **CAS** (1.0, 2.0, 3.0, SAML, logout, proxy, REST) using the `pac4j-cas` module
-3. **HTTP** (form, basic auth, IP, header, cookie, GET/POST parameter) using the `pac4j-http` module
-4. **OpenID** using the `pac4j-openid` module
-5. **SAML** (2.0) using the `pac4j-saml` module
-6. **Google App Engine** UserService using the `pac4j-gae` module
-7. **OpenID Connect** (1.0) using the `pac4j-oidc` module
-8. **JWT** using the `pac4j-jwt` module
-9. **LDAP** using the `pac4j-ldap` module
-10. **Relational DB** using the `pac4j-sql` module
-11. **MongoDB** using the `pac4j-mongo` module
-12. **Stormpath** using the `pac4j-stormpath` module.
+- **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
+- **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
+
+See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows).
+
+| The authentication mechanism you want | The `pac4j-*` submodule you must use
+|---------------------------------------|-------------------------------------
+| OAuth (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... | `pac4j-oauth`
+| CAS (1.0, 2.0, 3.0, SAML, logout, proxy, REST) | `pac4j-cas`
+| HTTP (form, basic auth, IP, header, cookie, GET/POST parameter) | `pac4j-http`
+| OpenID | `pac4j-openid`
+| SAML (2.0) | `pac4j-saml`
+| Google App Engine UserService | `pac4j-gae`
+| OpenID Connect (1.0) | `pac4j-oidc`
+| JWT | `pac4j-jwt`
+| LDAP | `pac4j-ldap`
+| Relational DB | `pac4j-sql`
+| MongoDB | `pac4j-mongo`
+| Stormpath | `pac4j-stormpath`
+
+It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` and `pac4j-http` submodules: role / permission checks, CSRF token validation...
 
 
 ## How to use it?
 
-First, you need to add a dependency on this library as well as on the appropriate `pac4j` modules. Then, you must define the authentication mechanisms = [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) and [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
+First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) for authentication and the [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
 
 Define the `CallbackController` to finish authentication processes if you use indirect clients (like Facebook).
 
