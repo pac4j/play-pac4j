@@ -14,7 +14,7 @@ Several versions of the library are available for the different versions of the 
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
-It supports most authentication mechanisms, called ["clients"](https://github.com/pac4j/pac4j/wiki/Clients):
+It supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
 
 - **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
 - **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
