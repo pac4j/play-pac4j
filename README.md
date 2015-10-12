@@ -318,7 +318,7 @@ The following parameters can be defined:
 - `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
 
-## Migration guide
+## Migration guide (1.5 -> 2.0)
 
 `play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...) and is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
 

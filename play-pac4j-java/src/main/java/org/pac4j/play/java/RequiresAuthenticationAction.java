@@ -144,7 +144,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
                 if (profile != null) {
                     logger.debug("authorizerName: {}", authorizerName);
                     if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
-                        logger.debug("grant access");
+                        logger.debug("authenticated and authorized -> grant access");
                         // when called from Scala
                         if (delegate == null) {
                             return Promise.pure(null);
