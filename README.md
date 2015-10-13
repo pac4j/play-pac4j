@@ -59,6 +59,8 @@ You need to add a dependency on the:
 
 as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
+All artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
+
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
 
