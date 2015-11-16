@@ -177,7 +177,7 @@ Its binding must be defined in the `SecurityModule`.
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
 
-Indirect clients rely on external identity providers (like Facebook) and thus require to define a callback endpoint where the user will be redirected after login at the identity provider. For REST support / direct clients only, this callback endpoint is not necessary.  
+Indirect clients rely on external identity providers (like Facebook) and thus require to define a callback endpoint in the application where the user will be redirected after login at the identity provider. For REST support / direct clients only, this callback endpoint is not necessary.  
 It must be defined in the `routes` file:
 
     GET    /callback   org.pac4j.play.CallbackController.callback()
