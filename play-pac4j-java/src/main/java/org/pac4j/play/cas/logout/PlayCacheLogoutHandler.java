@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
 import play.cache.Cache;
 
 /**
- * This class handles logout requests from a CAS server using the Play Cache.
+ * This class handles logout requests from a CAS server using the Play Cache and the {@link PlayCacheStore}.
  * 
  * @author Jerome Leleu
  * @since 1.1.0
@@ -36,10 +36,11 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    protected final PlayCacheStore playCacheStore;
+    public PlayCacheLogoutHandler() {}
 
+    @Deprecated
     public PlayCacheLogoutHandler(final PlayCacheStore playCacheStore) {
-        this.playCacheStore = playCacheStore;
+        logger.warn("It is no longer necessary to provide the playCacheStore to initialize the PlayCacheLogoutHandler");
     }
 
     public void destroySession(WebContext context) {
@@ -58,7 +59,8 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
     public void recordSession(WebContext context, String ticket) {
         logger.debug("ticket: {}", ticket);
         final PlayWebContext webContext = (PlayWebContext) context;
-        final String sessionId = webContext.getDataStore().getOrCreateSessionId(webContext);
+        final PlayCacheStore playCacheStore = (PlayCacheStore) webContext.getSessionStore();
+        final String sessionId = playCacheStore.getOrCreateSessionId(webContext);
         logger.debug("save sessionId: {}", sessionId);
         Cache.set(ticket, sessionId, playCacheStore.getProfileTimeout());
     }

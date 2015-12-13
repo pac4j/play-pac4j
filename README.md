@@ -31,7 +31,7 @@ See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authenticatio
 | Google App Engine UserService | `pac4j-gae`
 | OpenID | `pac4j-openid`
 
-It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` and `pac4j-http` submodules: role / permission checks, CSRF token validation...
+It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` (and `pac4j-http`) submodules: role / permission checks, IP check, profile type verification, HTTP method verification... as well as regular security protections for CSRF, XSS, cache control, Xframe...
 
 
 ## How to use it?
@@ -49,12 +49,12 @@ Just follow these easy steps:
 
 You need to add a dependency on the:
 
-- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0**) if you code in Java
-- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0**) if you use Scala
+- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you code in Java
+- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you use Scala
 
-as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.0**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
-All artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
+All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
 
 ### Define the configuration (`Config` + `Clients` + `XXXClient` + `Authorizer`)
@@ -147,20 +147,6 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support / direct clients only.
 
 
-### Define the data store (`PlayCacheStore`)
-
-Some of the data used by `play-pac4j` (user profile, tokens...) must be saved somewhere. Thus, a datastore must be defined in the `SecurityModule`.  
-The only existing implementation is currently the `PlayCacheStore` (where all data are saved into the `Cache`). <font color="red">If you have multiple Play nodes, you need a shared `Cache` between all your nodes.</font>
-
-#### In Java:
-
-    bind(DataStore.class).to(PlayCacheStore.class);
-
-#### In Scala:
-
-    bind(classOf[DataStore]).to(classOf[PlayCacheStore])
-
-
 ### Define the HTTP action adapter (`DefaultHttpActionAdapter`)
 
 To handle specific HTTP actions (like redirections, forbidden / unauthorized pages), you need to define the appropriate `HttpActionAdapter`. The only available implementation is currently the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
@@ -217,7 +203,10 @@ You can protect an url and require the user to be authenticated by a client (and
 The following parameters can be defined:
 
 - `clientName` (optional): the list of client names (separated by commas) used for authentication. If the user is not authenticated, direct clients are tried successively then if the user is still not authenticated and if the first client is an indirect one, this client is used to start the authentication. Otherwise, a 401 HTTP error is returned. If the *client_name* request parameter is provided, only the matching client is selected
-- `authorizerName` (optional): the list of authorizer names (separated by commas) used to check authorizations. If the user is not authorized, a 403 HTTP error is returned. By default (if blank), the user only requires to be authenticated to access the resource.
+- `authorizerName` (optional): the list of authorizer names (separated by commas) used to check authorizations. If the user is not authorized, a 403 HTTP error is returned. By default (if blank), the user only requires to be authenticated to access the resource. The following authorizers are available by default:
+  * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
+  * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and adds it to the request and save it in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
+
 
 #### In Scala:
 
@@ -315,8 +304,14 @@ The following parameters can be defined:
 - `defaultUrl` (optional): the default logout url if the provided *url* parameter does not match the `logoutUrlPattern` (by default: /)
 - `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
-<a name="migrationguide"></a>
-## Migration guide (1.5 -> 2.0)
+## Migration guide
+
+### 2.0.0 -> 2.0.1
+
+The `DataStore` concept is replaced by the pac4j `SessionStore` concept. The `PlayCacheStore` does no longer need to be bound in the security module. A new session store could be defined using the `config.setSessionStore` method.
+
+
+### 1.5.x -> 2.0.0
 
 `play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...) and is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
 
@@ -361,7 +356,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The next version 2.0.1-SNAPSHOT is under development.
+The current version 2.0.1-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
