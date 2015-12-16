@@ -15,11 +15,11 @@
  */
 package org.pac4j.play;
 
+import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.store.DataStore;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -42,14 +42,14 @@ public class ApplicationLogoutController extends Controller {
     protected String logoutUrlPattern = Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE;
 
     @Inject
-    protected DataStore dataStore;
+    protected Config config;
 
     public Result logout() {
 
         CommonHelper.assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
         CommonHelper.assertNotBlank(Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
 
-        final WebContext context = new PlayWebContext(ctx(), dataStore);
+        final WebContext context = new PlayWebContext(ctx(), config.getSessionStore());
         final ProfileManager manager = new ProfileManager(context);
         manager.logout();
         ctx().session().remove(Pac4jConstants.SESSION_ID);

@@ -16,7 +16,10 @@
 package org.pac4j.play.store;
 
 import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.UserProfile;
+import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +35,7 @@ import javax.inject.Singleton;
  * @since 2.0.0
  */
 @Singleton
-public final class PlayCacheStore implements DataStore {
+public final class PlayCacheStore implements SessionStore {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);
 
@@ -51,11 +54,15 @@ public final class PlayCacheStore implements DataStore {
         return prefix + SEPARATOR + sessionId + SEPARATOR + key;
     }
 
+    private PlayWebContext getPlayWebContext(final WebContext context) {
+        CommonHelper.assertTrue(context instanceof PlayWebContext, "context must be a PlayWebContext");
+        return (PlayWebContext) context;
+    }
     /**
      * {@inheritDoc}
      */
-    public String getOrCreateSessionId(final PlayWebContext context) {
-        final Http.Session session = context.getJavaSession();
+    public String getOrCreateSessionId(final WebContext context) {
+        final Http.Session session = getPlayWebContext(context).getJavaSession();
         // get current sessionId
         String sessionId = session.get(Pac4jConstants.SESSION_ID);
         logger.trace("retrieved sessionId: {}", sessionId);
@@ -73,7 +80,7 @@ public final class PlayCacheStore implements DataStore {
     /**
      * {@inheritDoc}
      */
-    public Object get(final PlayWebContext context, final String key) {
+    public Object get(final WebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
         return Cache.get(getKey(sessionId, key));
     }
@@ -81,7 +88,7 @@ public final class PlayCacheStore implements DataStore {
     /**
      * {@inheritDoc}
      */
-    public void set(final PlayWebContext context, final String key, final Object value) {
+    public void set(final WebContext context, final String key, final Object value) {
         int timeout;
         if (value instanceof UserProfile) {
             timeout = profileTimeout;

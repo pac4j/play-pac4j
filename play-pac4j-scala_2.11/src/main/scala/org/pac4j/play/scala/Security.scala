@@ -22,7 +22,6 @@ import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile._
 import org.pac4j.play.http.HttpActionAdapter
 import org.pac4j.play.java.RequiresAuthenticationAction
-import org.pac4j.play.store.DataStore
 import play.api.mvc._
 import play.core.j.JavaHelpers
 
@@ -52,9 +51,6 @@ trait Security[P<:CommonProfile] extends Controller {
   protected var config: Config = null
 
   @Inject
-  protected var dataStore: DataStore = null
-
-  @Inject
   protected var httpActionHandler: HttpActionAdapter = null
 
   /**
@@ -64,8 +60,8 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return the (updated) session
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
-    val webContext = new PlayWebContext(request, dataStore)
-    dataStore.getOrCreateSessionId(webContext)
+    val webContext = new PlayWebContext(request, config.getSessionStore)
+    webContext.getSessionStore.getOrCreateSessionId(webContext)
     val map = JavaConverters.mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
     new Session(map)
   }
@@ -93,8 +89,8 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return
    */
   protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)(action: P => Action[A]) = Action.async(parser) { request =>
-    val webContext = new PlayWebContext(request, dataStore)
-    val requiresAuthenticationAction = new RequiresAuthenticationAction(config, dataStore, httpActionHandler)
+    val webContext = new PlayWebContext(request, config.getSessionStore)
+    val requiresAuthenticationAction = new RequiresAuthenticationAction(config, httpActionHandler)
     val javaContext = webContext.getJavaContext
     requiresAuthenticationAction.internalCall(javaContext, clientName, authorizerName).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
@@ -118,7 +114,7 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return the user profile
    */
   protected def getUserProfile(request: RequestHeader): P = {
-    val webContext = new PlayWebContext(request, dataStore)
+    val webContext = new PlayWebContext(request, config.getSessionStore)
     val profileManager = new ProfileManager[P](webContext)
     profileManager.get(true)
   }

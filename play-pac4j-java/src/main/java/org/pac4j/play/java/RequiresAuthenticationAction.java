@@ -31,7 +31,6 @@ import org.pac4j.core.util.CommonHelper;
 
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.http.HttpActionAdapter;
-import org.pac4j.play.store.DataStore;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.mvc.Http.Context;
@@ -62,9 +61,6 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     protected Config config;
 
     @Inject
-    protected DataStore dataStore;
-
-    @Inject
     protected HttpActionAdapter httpActionAdapter;
 
     protected ClientFinder clientFinder = new DefaultClientFinder();
@@ -74,9 +70,8 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     public RequiresAuthenticationAction() {
     }
 
-    public RequiresAuthenticationAction(final Config config, final DataStore dataStore, final HttpActionAdapter httpActionAdapter) {
+    public RequiresAuthenticationAction(final Config config, final HttpActionAdapter httpActionAdapter) {
         this.config = config;
-        this.dataStore = dataStore;
         this.httpActionAdapter = httpActionAdapter;
     }
 
@@ -92,7 +87,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
 
     public Promise<Result> internalCall(final Context ctx, final String clientName, final String authorizerName) throws Throwable {
 
-        final PlayWebContext context =  new PlayWebContext(ctx, dataStore);
+        final PlayWebContext context =  new PlayWebContext(ctx, config.getSessionStore());
         logger.debug("url: {}", context.getFullRequestURL());
 
         CommonHelper.assertNotNull("config", config);

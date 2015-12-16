@@ -20,7 +20,8 @@ import java.util.*;
 import org.pac4j.core.context.BaseResponseContext;
 
 import org.pac4j.core.context.Cookie;
-import org.pac4j.play.store.DataStore;
+import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.play.store.PlayCacheStore;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
 import play.mvc.Http;
@@ -31,7 +32,7 @@ import play.mvc.Http.Context;
 
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
- * <p>"Session objects" are managed by the defined {@link DataStore}.</p>
+ * <p>"Session objects" are managed by the defined {@link SessionStore}.</p>
  * <p>"Request attributes" are saved/restored to/from the context.</p>
  * 
  * @author Jerome Leleu
@@ -47,18 +48,22 @@ public class PlayWebContext extends BaseResponseContext {
 
     protected final Session session;
 
-    protected final DataStore dataStore;
+    protected final SessionStore sessionStore;
 
-    public PlayWebContext(final Context context, final DataStore dataStore) {
+    public PlayWebContext(final Context context, final SessionStore sessionStore) {
         this.context = context;
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        this.dataStore = dataStore;
+        if (sessionStore == null) {
+            this.sessionStore = new PlayCacheStore();
+        } else {
+            this.sessionStore = sessionStore;
+        }
     }
 
-    public PlayWebContext(final RequestHeader requestHeader, final DataStore dataStore) {
-        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), dataStore);
+    public PlayWebContext(final RequestHeader requestHeader, final SessionStore sessionStore) {
+        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), sessionStore);
     }
 
     /**
@@ -89,33 +94,22 @@ public class PlayWebContext extends BaseResponseContext {
     }
 
     /**
-     * Return the session storage.
+     * Return the session store.
      *
-     * @return the session storage
+     * @return the session store
      */
-    public DataStore getDataStore() {
-        return this.dataStore;
-    }
+    public SessionStore getSessionStore() { return this.sessionStore; }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getRequestHeader(final String name) {
         return request.getHeader(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getRequestMethod() {
         return request.method();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getRequestParameter(final String name) {
         final Map<String, String[]> parameters = getRequestParameters();
@@ -126,9 +120,6 @@ public class PlayWebContext extends BaseResponseContext {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Map<String, String[]> getRequestParameters() {
         final Http.RequestBody body = request.body();
@@ -149,50 +140,32 @@ public class PlayWebContext extends BaseResponseContext {
         return parameters;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getSessionIdentifier() {
-        return dataStore.getOrCreateSessionId(this);
+        return sessionStore.getOrCreateSessionId(this);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object getSessionAttribute(final String key) {
-        return dataStore.get(this, key);
+        return sessionStore.get(this, key);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setSessionAttribute(final String key, final Object value) {
-        dataStore.set(this, key, value);
+        sessionStore.set(this, key, value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void setResponseHeader(final String name, final String value) {
         response.setHeader(name, value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getServerName() {
         String[] split = request.host().split(":");
         return split[0];
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public int getServerPort() {
         String[] split = request.host().split(":");
@@ -200,9 +173,6 @@ public class PlayWebContext extends BaseResponseContext {
         return Integer.valueOf(portStr);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getScheme() {
         if (request.secure()) {
@@ -212,38 +182,30 @@ public class PlayWebContext extends BaseResponseContext {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
+    public boolean isSecure() { return request.secure(); }
+
     @Override
     public String getFullRequestURL() {
         return getScheme() + "://" + request.host() + request.uri();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public String getRemoteAddr() {
         return request.remoteAddress();
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Object getRequestAttribute(String name) {
         return context.args.get(name);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void setRequestAttribute(String name, Object value) {
         context.args.put(name, value);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Collection<Cookie> getRequestCookies() {
         final List<Cookie> cookies = new ArrayList<>();
         final Http.Cookies httpCookies = request.cookies();
@@ -257,5 +219,10 @@ public class PlayWebContext extends BaseResponseContext {
             cookies.add(cookie);
         });
         return cookies;
+    }
+
+    @Override
+    public String getPath() {
+        return request.path();
     }
 }

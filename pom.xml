@@ -77,7 +77,7 @@
     </modules>
 
     <properties>
-        <pac4j.version>1.8.0</pac4j.version>
+        <pac4j.version>1.8.1</pac4j.version>
         <play.version>2.4.0</play.version>
     </properties>
 

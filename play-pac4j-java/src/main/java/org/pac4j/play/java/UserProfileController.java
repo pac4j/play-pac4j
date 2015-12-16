@@ -5,7 +5,6 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.store.DataStore;
 import play.mvc.Controller;
 
 /**
@@ -19,16 +18,13 @@ public class UserProfileController<P extends CommonProfile> extends Controller {
     @Inject
     protected Config config;
 
-    @Inject
-    protected DataStore dataStore;
-
     /**
      * Get the current user profile.
      *
      * @return the user profile
      */
     protected P getUserProfile() {
-        final PlayWebContext context = new PlayWebContext(ctx(), dataStore);
+        final PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
         final ProfileManager manager = new ProfileManager(context);
         return (P) manager.get(true);
     }

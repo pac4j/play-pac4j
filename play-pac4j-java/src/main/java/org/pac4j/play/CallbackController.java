@@ -26,7 +26,6 @@ import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.http.HttpActionAdapter;
-import org.pac4j.play.store.DataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
@@ -55,12 +54,9 @@ public class CallbackController extends Controller {
     @Inject
     protected HttpActionAdapter httpActionAdapter;
 
-    @Inject
-    protected DataStore dataStore;
-
     public Result callback() {
 
-        final PlayWebContext context = new PlayWebContext(ctx(), dataStore);
+        final PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
 
         CommonHelper.assertNotNull("config", config);
         final Clients clients = config.getClients();
