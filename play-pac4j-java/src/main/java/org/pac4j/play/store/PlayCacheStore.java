@@ -26,15 +26,12 @@ import org.slf4j.LoggerFactory;
 import play.cache.Cache;
 import play.mvc.Http;
 
-import javax.inject.Singleton;
-
 /**
  * The cache storage uses the Play Cache, only an identifier is saved into the Play session.
  *
  * @author Jerome Leleu
  * @since 2.0.0
  */
-@Singleton
 public final class PlayCacheStore implements SessionStore {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);

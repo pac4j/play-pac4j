@@ -25,7 +25,6 @@ import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.http.HttpActionAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
@@ -51,14 +50,12 @@ public class CallbackController extends Controller {
     @Inject
     protected Config config;
 
-    @Inject
-    protected HttpActionAdapter httpActionAdapter;
-
     public Result callback() {
 
         final PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
 
         CommonHelper.assertNotNull("config", config);
+        CommonHelper.assertNotNull("config.httpActionAdapter", config.getHttpActionAdapter());
         final Clients clients = config.getClients();
         CommonHelper.assertNotNull("clients", clients);
         final Client client = clients.findClient(context);
@@ -70,7 +67,7 @@ public class CallbackController extends Controller {
         try {
             credentials = client.getCredentials(context);
         } catch (final RequiresHttpAction e) {
-            return httpActionAdapter.handle(e.getCode(), context);
+            return (Result) config.getHttpActionAdapter().adapt(e.getCode(), context);
         }
         logger.debug("credentials: {}", credentials);
 
@@ -86,6 +83,7 @@ public class CallbackController extends Controller {
             manager.save(true, profile);
         }
     }
+
     protected Result redirectToOriginallyRequestedUrl(final WebContext context) {
         final String requestedUrl = (String) context.getSessionAttribute(Pac4jConstants.REQUESTED_URL);
         logger.debug("requestedUrl: {}", requestedUrl);

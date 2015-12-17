@@ -52,7 +52,7 @@ You need to add a dependency on the:
 - `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you code in Java
 - `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you use Scala
 
-as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.1**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.2-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -101,6 +101,7 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
             Config config = new Config(clients);
             config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"));
             config.addAuthorizer("custom", new CustomAuthorizer());
+            config.setHttpActionAdapter(new DemoHttpActionAdapter());
             bind(Config.class).toInstance(config);
         }
     }
@@ -140,25 +141,14 @@ All `Clients` must be defined in a `org.pac4j.core.config.Config` object as well
         val config = new Config(clients)
         config.addAuthorizer("admin", new RequireAnyRoleAuthorizer("ROLE_ADMIN"))
         config.addAuthorizer("custom", new CustomAuthorizer())
+        config.setHttpActionAdapter(new DemoHttpActionAdapter())
         bind(classOf[Config]).toInstance(config)
       }
     }
 
 "http://localhost:8080/callback" is the url of the callback endpoint (see below). It may not be defined for REST support / direct clients only.
 
-
-### Define the HTTP action adapter (`DefaultHttpActionAdapter`)
-
-To handle specific HTTP actions (like redirections, forbidden / unauthorized pages), you need to define the appropriate `HttpActionAdapter`. The only available implementation is currently the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
-Its binding must be defined in the `SecurityModule`.
-
-#### In Java:
-
-    bind(HttpActionAdapter.class).to(DefaultHttpActionAdapter.class);
-
-#### In Scala:
-
-    bind(classOf[HttpActionAdapter]).to(classOf[DefaultHttpActionAdapter])
+Notice the `config.setHttpActionAdapter` call to define the way to handle specific HTTP actions (like redirections, forbidden / unauthorized pages). The only available implementation is currently the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 
 
 ### Define the callback endpoint (only for stateful / indirect authentication mechanisms)
@@ -309,6 +299,8 @@ The following parameters can be defined:
 ### 2.0.0 -> 2.0.1
 
 The `DataStore` concept is replaced by the pac4j `SessionStore` concept. The `PlayCacheStore` does no longer need to be bound in the security module. A new session store could be defined using the `config.setSessionStore` method.
+
+The `DefaultHttpActionAdapter` does not need to be bound in the security module, but must to be set using the `config.setHttpActionAdapter` method.
 
 
 ### 1.5.x -> 2.0.0
