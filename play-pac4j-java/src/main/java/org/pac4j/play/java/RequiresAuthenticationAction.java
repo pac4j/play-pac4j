@@ -30,7 +30,6 @@ import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.http.HttpActionAdapter;
 import play.libs.F.Function;
 import play.libs.F.Promise;
 import play.mvc.Http.Context;
@@ -60,9 +59,6 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     @Inject
     protected Config config;
 
-    @Inject
-    protected HttpActionAdapter httpActionAdapter;
-
     protected ClientFinder clientFinder = new DefaultClientFinder();
 
     protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
@@ -70,9 +66,8 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     public RequiresAuthenticationAction() {
     }
 
-    public RequiresAuthenticationAction(final Config config, final HttpActionAdapter httpActionAdapter) {
+    public RequiresAuthenticationAction(final Config config) {
         this.config = config;
-        this.httpActionAdapter = httpActionAdapter;
     }
 
     @Override
@@ -91,6 +86,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         logger.debug("url: {}", context.getFullRequestURL());
 
         CommonHelper.assertNotNull("config", config);
+        CommonHelper.assertNotNull("config.httpActionAdapter", config.getHttpActionAdapter());
         final Clients configClients = config.getClients();
         CommonHelper.assertNotNull("configClients", configClients);
         logger.debug("clientName: {}", clientName);
@@ -169,7 +165,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     }
 
     protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final UserProfile profile) {
-        return Promise.pure(httpActionAdapter.handle(HttpConstants.FORBIDDEN, context));
+        return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.FORBIDDEN, context));
     }
 
     protected boolean startAuthentication(final PlayWebContext context, final List<Client> currentClients) {
@@ -185,16 +181,15 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     protected Result redirectToIdentityProvider(final PlayWebContext context, final List<Client> currentClients) {
         try {
             final IndirectClient currentClient = (IndirectClient) currentClients.get(0);
-            final RedirectAction action = currentClient.getRedirectAction(context, true);
-            logger.debug("redirectAction: {}", action);
-            return httpActionAdapter.handleRedirect(action);
+            currentClient.redirect(context, true);
+            return (Result) config.getHttpActionAdapter().adapt(context.getResponseStatus(), context);
         } catch (final RequiresHttpAction e) {
             logger.debug("extra HTTP action required: {}", e.getCode());
-            return httpActionAdapter.handle(e.getCode(), context);
+            return (Result) config.getHttpActionAdapter().adapt(e.getCode(), context);
         }
     }
 
     protected Promise<Result> unauthorized(final PlayWebContext context, final List<Client> currentClients) {
-        return Promise.pure(httpActionAdapter.handle(HttpConstants.UNAUTHORIZED, context));
+        return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.UNAUTHORIZED, context));
     }
 }

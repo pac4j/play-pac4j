@@ -20,7 +20,6 @@ import javax.inject.Inject
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile._
-import org.pac4j.play.http.HttpActionAdapter
 import org.pac4j.play.java.RequiresAuthenticationAction
 import play.api.mvc._
 import play.core.j.JavaHelpers
@@ -49,9 +48,6 @@ trait Security[P<:CommonProfile] extends Controller {
 
   @Inject
   protected var config: Config = null
-
-  @Inject
-  protected var httpActionHandler: HttpActionAdapter = null
 
   /**
    * Get or create a new sessionId.
@@ -90,7 +86,7 @@ trait Security[P<:CommonProfile] extends Controller {
    */
   protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)(action: P => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, config.getSessionStore)
-    val requiresAuthenticationAction = new RequiresAuthenticationAction(config, httpActionHandler)
+    val requiresAuthenticationAction = new RequiresAuthenticationAction(config)
     val javaContext = webContext.getJavaContext
     requiresAuthenticationAction.internalCall(javaContext, clientName, authorizerName).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
