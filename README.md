@@ -335,7 +335,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/2.0.0/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.0/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/2.0.1/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.2/index.html).
 
 
 ## Need help?
