@@ -52,7 +52,7 @@ You need to add a dependency on the:
 - `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you code in Java
 - `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you use Scala
 
-as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.2-SNAPSHOT**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.2**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
