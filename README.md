@@ -216,36 +216,6 @@ The following functions are available:
 - `RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)`
 
 
-### Get redirection urls
-
-You can also explicitly compute a redirection url to a provider by using the `getRedirectAction` method, in order to create an explicit link for login. For example with Facebook:
-
-#### In Java:
-
-Either you inject the `Config` and `DataStore` in your controller or inherit from the `org.pac4j.play.java.UserProfileController`:
-
-    public Result index() throws Exception {
-        Clients clients = config.getClients();
-        PlayWebContext context = new PlayWebContext(ctx(), dataStore);
-        String urlFacebook = ((FacebookClient) clients.findClient("FacebookClient")).getRedirectAction(context, false).getLocation();
-        return ok(views.html.index.render(urlFacebook));
-    }
-
-#### In Scala:
-
-You need to use the `Security` trait:
-
-    def index = Action { request =>
-      val newSession = getOrCreateSessionId(request)
-      val webContext = new PlayWebContext(request, dataStore)
-      val clients = config.getClients()
-      val urlFacebook = (clients.findClient("FacebookClient").asInstanceOf[FacebookClient]).getRedirectAction(webContext, false).getLocation;
-      Ok(views.html.index(urlFacebook)).withSession(newSession)
-    }
-
-Notice you need to explicitly call the `getOrCreateSessionId()` in Scala to force the initialization of the data store and attach the returned session to your result.
-
-
 ### Get the user profile
 
 #### In Java:
