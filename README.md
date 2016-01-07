@@ -49,10 +49,10 @@ Just follow these easy steps:
 
 You need to add a dependency on the:
 
-- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you code in Java
-- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1-SNAPSHOT**) if you use Scala
+- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1**) if you code in Java
+- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1**) if you use Scala
 
-as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.2**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.3**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -305,7 +305,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/2.0.1/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.2/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.pac4j.org/apidocs/play-pac4j/2.0.1/index.html) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.3/index.html).
 
 
 ## Need help?
@@ -318,7 +318,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 2.0.1-SNAPSHOT is under development.
+The version 2.0.2-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
