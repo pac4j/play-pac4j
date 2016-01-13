@@ -72,6 +72,7 @@
     </pluginRepositories>
 
     <modules>
+        <module>play-pac4j-all</module>
         <module>play-pac4j-java</module>
         <module>play-pac4j-scala_2.11</module>
     </modules>
