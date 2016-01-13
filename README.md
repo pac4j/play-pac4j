@@ -45,12 +45,11 @@ Use the `RequiresAuthentication` annotation (in Java) or function (in Scala) to 
 Just follow these easy steps:
 
 
-### Add the required dependencies (`play-pac4j-java` or `play-pac4j-scala_2.11` + `pac4j-*` libraries)
+### Add the required dependencies (`play-pac4j` + `pac4j-*` libraries)
 
 You need to add a dependency on the:
 
-- `play-pac4j-java` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1**) if you code in Java
-- `play-pac4j-scala_2.11` library (<em>groupId</em>: **org.pac4j**, *version*: **2.0.1**) if you use Scala
+- `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.1.0**)
 
 as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.3**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
@@ -265,6 +264,9 @@ The following parameters can be defined:
 - `logoutUrlPattern` (optional): the logout url pattern that the logout url must match (it's a security check, only relative urls are allowed by default).
 
 ## Migration guide
+
+### 2.0.1 -> 2.1.0
+The separate Scala and Java projects have been merged. You need to change the dependency `play-pac4j-java` or `play-pac4j-scala` to simply `play-pac4j`.
 
 ### 2.0.0 -> 2.0.1
 
