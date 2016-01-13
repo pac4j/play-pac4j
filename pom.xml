@@ -22,7 +22,7 @@
 
     <groupId>org.pac4j</groupId>
     <artifactId>play-pac4j</artifactId>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <name>pac4j implementation for Play framework</name>
     <version>2.1.0-SNAPSHOT</version>
     <description>Security library for Play framework based on pac4j</description>
@@ -71,23 +71,12 @@
         </pluginRepository>
     </pluginRepositories>
 
-    <modules>
-        <module>play-pac4j-java</module>
-        <module>play-pac4j-scala_2.11</module>
-    </modules>
-
     <properties>
         <pac4j.version>1.8.3</pac4j.version>
         <play.version>2.4.0</play.version>
     </properties>
 
-    <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.pac4j</groupId>
-                <artifactId>play-pac4j-java</artifactId>
-                <version>${project.version}</version>
-            </dependency>
             <dependency>
                 <groupId>org.pac4j</groupId>
                 <artifactId>pac4j-core</artifactId>
@@ -131,10 +120,8 @@
                 <scope>test</scope>
             </dependency>
         </dependencies>
-    </dependencyManagement>
 
     <build>
-        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -195,7 +182,6 @@
                     </executions>
                 </plugin>
             </plugins>
-        </pluginManagement>
     </build>
 
     <profiles>
