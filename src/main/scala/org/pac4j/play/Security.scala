@@ -75,7 +75,10 @@ trait Security[P<:CommonProfile] extends Controller {
       if (r == null) {
         var profile = javaContext.args.get(Pac4jConstants.USER_PROFILE).asInstanceOf[P]
         if (profile == null) {
-          profile = getUserProfile(request)
+          getUserProfile(request) match {
+            case Some(p) => profile = p
+            case _ =>  // do nothing
+          }
         }
         action(profile)(request)
       } else {
@@ -92,9 +95,9 @@ trait Security[P<:CommonProfile] extends Controller {
    * @param request
    * @return the user profile
    */
-  protected def getUserProfile(request: RequestHeader): P = {
+  protected def getUserProfile(request: RequestHeader): Option[P] = {
     val webContext = new PlayWebContext(request, config.getSessionStore)
     val profileManager = new ProfileManager[P](webContext)
-    profileManager.get(true)
+    Option(profileManager.get(true))
   }
 }
