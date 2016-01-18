@@ -1,35 +1,18 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
-package org.pac4j.play.scala
+package org.pac4j.play
 
 import javax.inject.Inject
 
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.core.profile._
+import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.java.RequiresAuthenticationAction
+import org.slf4j.LoggerFactory
 import play.api.mvc._
 import play.core.j.JavaHelpers
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
-import scala.collection.JavaConverters
+import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future
-import org.pac4j.play._
-import org.slf4j._
-
-import play.api.libs.concurrent.Execution.Implicits._
 
 /**
  * <p>This trait adds security features to your Scala controllers.</p>

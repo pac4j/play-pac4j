@@ -268,6 +268,8 @@ The following parameters can be defined:
 ### 2.0.1 -> 2.1.0
 The separate Scala and Java projects have been merged. You need to change the dependency `play-pac4j-java` or `play-pac4j-scala` to simply `play-pac4j`.
 
+The `Security` trait for use in Scala project has moved to package `org.pac4j.play`.
+
 ### 2.0.0 -> 2.0.1
 
 The `DataStore` concept is replaced by the pac4j `SessionStore` concept. The `PlayCacheStore` does no longer need to be bound in the security module. A new session store could be defined using the `config.setSessionStore` method.
