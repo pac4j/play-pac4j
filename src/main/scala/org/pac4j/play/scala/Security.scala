@@ -13,18 +13,19 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package org.pac4j.play
+package org.pac4j.play.scala
 
 import javax.inject.Inject
 
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.RequiresAuthenticationAction
 import org.slf4j.LoggerFactory
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.core.j.JavaHelpers
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 
 import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future

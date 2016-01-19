@@ -19,8 +19,9 @@ import java.util.Collections
 import javax.inject.{Inject, Singleton}
 
 import org.pac4j.core.profile.CommonProfile
-import org.pac4j.play.{Security, PlayWebContext}
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.RequiresAuthenticationAction
+import org.pac4j.play.scala.Security
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.api.{Configuration, Logger}
