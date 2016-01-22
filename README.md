@@ -15,8 +15,8 @@ Several versions of the library are available for the different versions of the 
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
 It supports most mechanisms for:
-- [authentication](https://github.com/pac4j/pac4j/wiki/Clients): CAS, OAuth, SAML, OpenID Connect, LDAP, RDBMS, etc.
-- [authorization](https://github.com/pac4j/pac4j/wiki/Authorizers): role / permission checks, IP check, CSRF, ...
+- [**authentication**](https://github.com/pac4j/pac4j/wiki/Clients): CAS, OAuth, SAML, OpenID Connect, LDAP, RDBMS, etc.
+- [**authorization**](https://github.com/pac4j/pac4j/wiki/Authorizers): role / permission checks, IP check, CSRF, ...
 
 **Main concepts:**
 
