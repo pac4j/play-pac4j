@@ -19,17 +19,16 @@ import javax.inject.Inject
 
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.core.profile._
+import org.pac4j.core.profile.{CommonProfile, ProfileManager}
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.RequiresAuthenticationAction
+import org.slf4j.LoggerFactory
+import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.core.j.JavaHelpers
 
-import scala.collection.JavaConverters
+import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future
-import org.pac4j.play._
-import org.slf4j._
-
-import play.api.libs.concurrent.Execution.Implicits._
 
 /**
  * <p>This trait adds security features to your Scala controllers.</p>
@@ -92,7 +91,10 @@ trait Security[P<:CommonProfile] extends Controller {
       if (r == null) {
         var profile = javaContext.args.get(Pac4jConstants.USER_PROFILE).asInstanceOf[P]
         if (profile == null) {
-          profile = getUserProfile(request)
+          getUserProfile(request) match {
+            case Some(p) => profile = p
+            case _ =>  // do nothing
+          }
         }
         action(profile)(request)
       } else {
@@ -109,9 +111,9 @@ trait Security[P<:CommonProfile] extends Controller {
    * @param request
    * @return the user profile
    */
-  protected def getUserProfile(request: RequestHeader): P = {
+  protected def getUserProfile(request: RequestHeader): Option[P] = {
     val webContext = new PlayWebContext(request, config.getSessionStore)
     val profileManager = new ProfileManager[P](webContext)
-    profileManager.get(true)
+    Option(profileManager.get(true))
   }
 }
