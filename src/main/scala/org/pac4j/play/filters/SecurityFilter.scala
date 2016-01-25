@@ -80,7 +80,7 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
 
   val log = Logger(this.getClass)
 
-  val rules = configuration.getConfigList("security.rules")
+  val rules = configuration.getConfigList("pac4j.security.rules")
     .getOrElse(Collections.emptyList())
 
   override def apply(nextFilter: (RequestHeader) => Future[Result])

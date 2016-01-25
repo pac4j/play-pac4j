@@ -229,7 +229,28 @@ First define a `Filters` class in your application (if you have not yet done so)
 
 In Java:
 
-    //TODO:
+    package filters;
+
+    import org.pac4j.play.filters.SecurityFilter;
+    import play.http.HttpFilters;
+    import play.api.mvc.EssentialFilter;
+
+    import javax.inject.Inject;
+
+    public class Filters implements HttpFilters {
+
+        private final SecurityFilter securityFilter;
+
+        @Inject
+        public Filters(SecurityFilter securityFilter) {
+            this.securityFilter = securityFilter;
+        }
+
+        @Override
+        public EssentialFilter[] filters() {
+            return new EssentialFilter[] {securityFilter};
+        }
+    }
 
 In Scals:
 
@@ -268,7 +289,7 @@ two exceptions: `authorizers` can have two special values: `_authenticated_` and
 Rules are applied top to bottom. The first matching rule will define which clients and authorizers
 are used. When not provided, the value will be `null`.
 
-    security.rules = [
+    pac4j.security.rules = [
       # Admin pages need a special authorizer and do not support login via Twitter.
       {"/admin/.*" = {
         authorizers = "admin"
