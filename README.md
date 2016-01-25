@@ -26,16 +26,25 @@ It supports most mechanisms for:
 * The `CallbackController` finishes the authentication process for an indirect client
 
 
-## How to use it?
+## How to use Play-Pac4j?
 
-First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) for authentication and the [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
+Using `play-pac4j` is very straightforward. First you need to configure your application:
 
-Define the `CallbackController` to finish authentication processes if you use indirect clients (like Facebook).
+ - First, you need to add a dependency on this library as well as on the appropriate `pac4j` submodules. Then, you must define the [**clients**](https://github.com/pac4j/pac4j/wiki/Clients) for authentication and the [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) to check authorizations.
 
-Use the `RequiresAuthentication` annotation (in Java) or function (in Scala) to secure the urls of your web application (using the `clientName` parameter for authentication and the `authorizerName` parameter for authorizations).
+ - Define the `CallbackController` to finish authentication processes if you use indirect clients (like Facebook).
+
+Then you are ready to secure (part of) your application:
+
+ - Use the `RequiresAuthentication` annotation (in Java) or function (in Scala) to secure the urls of your web application (using the `clientName` parameter for authentication and the `authorizerName` parameter for authorizations).
+
+ - Alternatively, you can protect multiple URLs by using the `SecurityFilter`.
 
 Just follow these easy steps:
 
+## Configuring your application
+
+Before you can protect your application, you need to add the necessary libraries and configure your application to use `play-pac4j`.
 
 ### Add the required dependencies (`play-pac4j` + `pac4j-*` libraries)
 
@@ -169,8 +178,14 @@ And using it in the `routes` file:
 
 The `defaultUrl` parameter defines where the user will be redirected after login if no url was originally requested.
 
+## Protect your application
 
-### Protect an url (authentication + authorization)
+At this moment `play-pac4j` allows you to secure your application in two ways:
+
+1. Configure security per Action.
+2. Use the `SecurityFilter`.
+
+### Protect an url (authentication + authorization) per Action
 
 You can protect an url and require the user to be authenticated by a client (and optionally have the appropriate authorizations) by using the `RequiresAuthentication` annotation or function.
 
@@ -206,6 +221,74 @@ The following functions are available:
 - `RequiresAuthentication[A](clientName: String, authorizerName: String)`
 - `RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)`
 
+### Protect urls via the SecurityFilter
+
+In order to protect multiple urls at the same tine, you can configure the `SecurityFilter`. You need to configure your application to include the `SecurityFilter` as follows:
+
+First define a `Filters` class in your application (if you have not yet done so).
+
+In Java:
+
+    //TODO:
+
+In Scals:
+
+    package filters
+
+    import javax.inject.Inject
+    import org.pac4j.play.filters.SecurityFilter
+    import play.api.http.HttpFilters
+
+    /**
+     * Configuration of all the Play filters that are used in the application.
+     */
+    class Filters @Inject()(securityFilter: SecurityFilter) extends HttpFilters {
+
+      def filters = Seq(securityFilter)
+
+    }
+
+Then tell your application to use the filters in `application.conf`:
+
+    play.http.filters = "filters.Filters"
+
+See for more information on the use of filters in Play the [Play documentation on Filters](https://www.playframework.com/documentation/2.4.x/ScalaHttpFilters).
+
+Rules for the security filter can be supplied in application.conf. An example is shown below. It
+consists of a list of filter rules, where the key is a regular expression that will be used to
+match the url. Make sure that the / is escaped by \\ to make a valid regular expression.
+
+For each regex key, there are two subkeys: `authorizers` and `clients`. Here you can define the
+correct values, like you would supply to the `RequireAuthentication` method in controllers. There
+two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
+
+`_anonymous_` will disable authentication and authorization for urls matching the regex.
+`_authenticated_` will require authentication, but will set clients and authorizers both to `null`.
+
+Rules are applied top to bottom. The first matching rule will define which clients and authorizers
+are used. When not provided, the value will be `null`.
+
+    security.rules = [
+      # Admin pages need a special authorizer and do not support login via Twitter.
+      {"/admin/.*" = {
+        authorizers = "admin"
+        clients = "FormClient"
+      }}
+      # Rules for the REST services. These don't specify a client and will return 401
+      # when not authenticated.
+      {"/restservices/.*" = {
+        authorizers = "_authenticated_"
+      }}
+      # The login page needs to be publicly accessible.
+      {"/login.html" = {
+        authorizers = "_anonymous_"
+      }}
+      # 'Catch all' rule to make sure the whole application stays secure.
+      {".*" = {
+        authorizers = "_authenticated_"
+        clients = "FormClient,TwitterClient"
+      }}
+    ]
 
 ### Get the user profile
 
