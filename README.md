@@ -14,24 +14,16 @@ Several versions of the library are available for the different versions of the 
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
 | Play 2.4       | play-pac4j-java v2.0.x   | play-pac4j-scala_2.11 v2.0.x
 
-It supports most authentication mechanisms, called [**clients**](https://github.com/pac4j/pac4j/wiki/Clients):
+It supports most mechanisms for:
+- [**authentication**](https://github.com/pac4j/pac4j/wiki/Clients): CAS, OAuth, SAML, OpenID Connect, LDAP, RDBMS, etc.
+- [**authorization**](https://github.com/pac4j/pac4j/wiki/Authorizers): role / permission checks, IP check, CSRF, ...
 
-- **indirect / stateful clients** are for UI when the user authenticates once at an external provider (like Facebook, a CAS server...) or via a local form (or basic auth popup)  
-- **direct / stateless clients** are for web services when credentials (like basic auth, tokens...) are passed for each HTTP request.
+**Main concepts:**
 
-See the [authentication flows](https://github.com/pac4j/pac4j/wiki/Authentication-flows).
-
-| The authentication mechanism you want | The `pac4j-*` submodule(s) you must use
-|---------------------------------------|----------------------------------------
-| OAuth (1.0 & 2.0): Facebook, Twitter, Google, Yahoo, LinkedIn, Github... | `pac4j-oauth`
-| CAS (1.0, 2.0, 3.0, SAML, logout, proxy) | `pac4j-cas`
-| SAML (2.0) | `pac4j-saml`
-| OpenID Connect (1.0) | `pac4j-oidc`
-| HTTP (form, basic auth, IP, header, cookie, GET/POST parameter)<br />+<br />JWT<br />or LDAP<br />or Relational DB<br />or MongoDB<br />or Stormpath<br />or CAS REST API| `pac4j-http`<br />+<br />`pac4j-jwt`<br />or `pac4j-ldap`<br />or `pac4j-sql`<br />or `pac4j-mongo`<br />or `pac4j-stormpath`<br />or `pac4j-cas`
-| Google App Engine UserService | `pac4j-gae`
-| OpenID | `pac4j-openid`
-
-It also supports many authorization checks, called [**authorizers**](https://github.com/pac4j/pac4j/wiki/Authorizers) available in the `pac4j-core` (and `pac4j-http`) submodules: role / permission checks, IP check, profile type verification, HTTP method verification... as well as regular security protections for CSRF, XSS, cache control, Xframe...
+* A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services
+* An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile or on the current web context
+* The  `RequiresAuthentication` annotation or function protects an url by checking that:<ul><li>the user is authenticated or starts / performs the login process (according to the clients configuration)</li><li>the authorizations are valid (according to the authorizers configuration)</li></ul>
+* The `CallbackController` finishes the authentication process for an indirect client
 
 
 ## How to use it?
