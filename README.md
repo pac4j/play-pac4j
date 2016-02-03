@@ -20,10 +20,13 @@ It supports most mechanisms for:
 
 **Main concepts:**
 
-* A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services
-* An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile or on the current web context
-* The  `RequiresAuthentication` annotation or function protects an url by checking that:<ul><li>the user is authenticated or starts / performs the login process (according to the clients configuration)</li><li>the authorizations are valid (according to the authorizers configuration)</li></ul>
-* The `CallbackController` finishes the authentication process for an indirect client
+1) A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services
+
+2) An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile or on the current web context
+
+3) The `RequiresAuthentication` annotation / function protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration. If the user is not authenticated, it starts / performs the login process
+
+4) The `CallbackController` finishes the authentication process for an indirect client
 
 
 ## How to use Play-Pac4j?
