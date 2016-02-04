@@ -91,7 +91,7 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
         val webContext = new PlayWebContext(request, config.getSessionStore)
         val requiresAuthenticationAction = new RequiresAuthenticationAction(config)
         val javaContext = webContext.getJavaContext
-        requiresAuthenticationAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames).wrapped().flatMap[play.api.mvc.Result](r =>
+        val authenticationResult = requiresAuthenticationAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames).wrapped().flatMap[play.api.mvc.Result](r =>
           if (r == null) {
             nextFilter(request)
           } else {
@@ -101,6 +101,8 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
             }
           }
         )
+        authenticationResult.onFailure{case x => log.error("Exception during authentication procedure", x)}
+        authenticationResult
       case None =>
         log.debug(s"No authentication needed for ${request.uri}")
         nextFilter(request)
