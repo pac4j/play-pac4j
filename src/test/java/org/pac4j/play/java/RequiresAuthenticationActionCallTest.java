@@ -128,7 +128,7 @@ public class RequiresAuthenticationActionCallTest {
 		requiresAuthenticationAction.forbidden(playWebContextMock, null, null);
 
 		// then
-		verifyStatic();
+		verifyStatic(atLeastOnce());
         Promise.pure((Result) configMock.getHttpActionAdapter().adapt(HttpConstants.FORBIDDEN, playWebContextMock));
 	}
 
