@@ -127,10 +127,10 @@ public class PlayWebContext extends BaseResponseContext {
         if (body != null) {
             formParameters = body.asFormUrlEncoded();
         } else {
-            formParameters = new HashMap<String, String[]>();
+            formParameters = new HashMap<>();
         }
         final Map<String, String[]> urlParameters = request.queryString();
-        final Map<String, String[]> parameters = new HashMap<String, String[]>();
+        final Map<String, String[]> parameters = new HashMap<>();
         if (formParameters != null) {
             parameters.putAll(formParameters);
         }

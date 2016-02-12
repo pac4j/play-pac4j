@@ -103,7 +103,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
             logger.debug("profile: {}", profile);
 
             // no profile and some current clients
-            if (profile == null && currentClients != null && currentClients.size() > 0) {
+            if (profile == null && currentClients != null && !currentClients.isEmpty()) {
                 // loop on all clients searching direct ones to perform authentication
                 for (final Client currentClient : currentClients) {
                     if (currentClient instanceof DirectClient) {
@@ -161,7 +161,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     }
 
     protected boolean useSession(final WebContext context, final List<Client> currentClients) {
-        return currentClients == null || currentClients.size() == 0 || currentClients.get(0) instanceof IndirectClient;
+        return currentClients == null || currentClients.isEmpty() || currentClients.get(0) instanceof IndirectClient;
     }
 
     protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final UserProfile profile) {
@@ -169,7 +169,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     }
 
     protected boolean startAuthentication(final PlayWebContext context, final List<Client> currentClients) {
-        return currentClients != null && currentClients.size() > 0 && currentClients.get(0) instanceof IndirectClient;
+        return currentClients != null && !currentClients.isEmpty() && currentClients.get(0) instanceof IndirectClient;
     }
 
     protected void saveRequestedUrl(final WebContext context, final List<Client> currentClients) {
