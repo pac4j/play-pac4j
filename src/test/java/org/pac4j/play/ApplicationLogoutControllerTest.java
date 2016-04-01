@@ -1,18 +1,3 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.play;
 
 import static org.junit.Assert.assertEquals;
@@ -48,7 +33,6 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Session;
 
 /**
- * 
  * @author furkan yavuz
  * @since 2.1.0
  */
@@ -85,7 +69,7 @@ public class ApplicationLogoutControllerTest {
 		when(Http.Context.current()).thenReturn(contextMock);
 		setInternalState(applicationLogoutController, "config", config);
 		
-		contextMock.args = new HashMap<String, Object>();
+		contextMock.args = new HashMap<>();
 		String key = "KEY";
 		Object value = mock(Object.class);
 		contextMock.args.put(key, value);
@@ -107,7 +91,7 @@ public class ApplicationLogoutControllerTest {
 		urlParameters.put("url", new String[]{"url"});
 		doReturn(urlParameters).when(requestMock).queryString();
 		
-		contextMock.args = new HashMap<String, Object>();
+		contextMock.args = new HashMap<>();
 		String key = "KEY";
 		Object value = mock(Object.class);
 		contextMock.args.put(key, value);
@@ -130,7 +114,7 @@ public class ApplicationLogoutControllerTest {
 		urlParameters.put("url", new String[]{Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE});
 		doReturn(urlParameters).when(requestMock).queryString();
 		
-		contextMock.args = new HashMap<String, Object>();
+		contextMock.args = new HashMap<>();
 		String key = "KEY";
 		Object value = mock(Object.class);
 		contextMock.args.put(key, value);
@@ -148,5 +132,4 @@ public class ApplicationLogoutControllerTest {
 		Validator validator = ValidatorBuilder.create().with(new SetterTester()).with(new GetterTester()).build();
 		validator.validate(PojoClassFactory.getPojoClass(ApplicationLogoutController.class));
 	}
-
 }
