@@ -66,7 +66,7 @@ public class ApplicationLogoutControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		applicationLogoutController = new ApplicationLogoutController();
-  
+		
 		config = mock(Config.class);
 		contextMock = mock(Context.class);
 		requestMock = mock(Request.class);
