@@ -127,7 +127,7 @@
                 <version>${powermock.version}</version>
                 <scope>test</scope>
             </dependency>
-
+  
             <!-- Open Pojo Library User For Getter Setter Tests -->
             <dependency>
                 <groupId>com.openpojo</groupId>
