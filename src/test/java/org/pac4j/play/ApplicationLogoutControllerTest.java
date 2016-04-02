@@ -66,7 +66,7 @@ public class ApplicationLogoutControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		applicationLogoutController = new ApplicationLogoutController();
-		
+
 		config = mock(Config.class);
 		contextMock = mock(Context.class);
 		requestMock = mock(Request.class);
@@ -137,7 +137,7 @@ public class ApplicationLogoutControllerTest {
 
 		// when
 		Result result = applicationLogoutController.logout();
-
+		
 		// then
 		assertEquals("Request have url parameter therefore logout must return result with 303 code", 303, result.status());
 		assertEquals("Location must be " + Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, result.header("LOCATION").get());
