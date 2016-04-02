@@ -60,14 +60,14 @@ import play.mvc.Result;
 
 /**
  * Unit test cases for CallbackController.java class
- * 
+ *
  * @author furkan yavuz
  * @since 2.1.0
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ CallbackController.class, PlayWebContext.class, Http.Context.class})
 public class CallbackControllerTest {
-	
+
 	private CallbackController callbackController;
 	private Config config;
 	private Context contextMock;
@@ -81,14 +81,14 @@ public class CallbackControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		callbackController = new CallbackController();
-		
+
 		config = mock(Config.class);
 		contextMock = mock(Context.class);
 		requestMock = mock(Request.class);
 		sessionMock = mock(Session.class);
 		responseMock = mock(Response.class);
 		sessionStoreMock = mock(SessionStore.class);
-		
+
 		doReturn(sessionMock).when(contextMock).session();
 		doReturn(requestMock).when(contextMock).request();
 		doReturn(responseMock).when(contextMock).response();
@@ -105,27 +105,27 @@ public class CallbackControllerTest {
 		HttpActionAdapter httpActionAdapter = mock(HttpActionAdapter.class);
 		IndirectClient clientMock = mock(IndirectClient.class);
 		setInternalState(clientMock, "logger", LoggerFactory.getLogger(getClass()));
-		
+
 		Clients clients = new Clients();
 		clients.setClientsList(Arrays.asList(clientMock));
-		
+
 		setInternalState(clients, "initialized", true);
 		setInternalState(callbackController, "config", config);
-		
+
 		doReturn(clientName).when(clientMock).getName();
 		doReturn(httpActionAdapter).when(config).getHttpActionAdapter();
 		doReturn(clients).when(config).getClients();
 		doReturn(urlParameters).when(requestMock).queryString();
-		
+
 		mockStatic(Http.Context.class);
 		when(Http.Context.current()).thenReturn(contextMock);
 		String expected = "/";
 
 		// when
 		Result result = callbackController.callback();
-		
+
 		// then
-		assertEquals("Location must be equal to /", expected, result.header("Location"));
+		assertEquals("Location must be equal to /", expected, result.header("Location").get());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,10 +135,10 @@ public class CallbackControllerTest {
 		UserProfile profile = mock(UserProfile.class);
 		ProfileManager<UserProfile> profileManager = mock(ProfileManager.class);
 		whenNew(ProfileManager.class).withAnyArguments().thenReturn(profileManager);
-		
+
 		// when
 		callbackController.saveUserProfile(null, profile);
-		
+
 		// then
 		verify(profileManager).save(true, profile);
 	}
@@ -148,12 +148,12 @@ public class CallbackControllerTest {
 		// given
 		WebContext context = mock(WebContext.class);
 		String expected = "/";
-		
+
 		// when
 		Result result = callbackController.redirectToOriginallyRequestedUrl(context);
-		
+
 		// then
-		assertEquals("Location must be equal to /", expected, result.header("Location"));
+		assertEquals("Location must be equal to /", expected, result.header("Location").get());
 	}
 
 	@Test
@@ -162,12 +162,12 @@ public class CallbackControllerTest {
 		WebContext context = mock(WebContext.class);
 		String expected = "/test";
 		doReturn(expected).when(context).getSessionAttribute(Pac4jConstants.REQUESTED_URL);
-		
+
 		// when
 		Result result = callbackController.redirectToOriginallyRequestedUrl(context);
-		
+
 		// then
-		assertEquals("Location must be equal to " + expected, expected, result.header("Location"));
+		assertEquals("Location must be equal to " + expected, expected, result.header("Location").get());
 	}
 
 	@Test

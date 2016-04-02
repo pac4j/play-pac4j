@@ -73,7 +73,7 @@
 
     <properties>
         <pac4j.version>1.8.6</pac4j.version>
-        <play.version>2.4.0</play.version>
+        <play.version>2.5.1</play.version>
         <powermock.version>1.6.4</powermock.version>
     </properties>
 
@@ -102,25 +102,12 @@
                 <scope>provided</scope>
             </dependency>
             <dependency>
-                <groupId>com.typesafe.play</groupId>
-                <artifactId>play_2.10</artifactId>
-                <version>${play.version}</version>
-                <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.typesafe.play</groupId>
-                <artifactId>play-cache_2.10</artifactId>
-                <version>${play.version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
                 <version>4.10</version>
                 <scope>test</scope>
             </dependency>
-            
+
             <!-- Powermock Mocking Library -->
             <dependency>
                 <groupId>org.powermock</groupId>
@@ -139,8 +126,8 @@
                 <artifactId>powermock-module-junit4</artifactId>
                 <version>${powermock.version}</version>
                 <scope>test</scope>
-            </dependency>            
-            
+            </dependency>
+  
             <!-- Open Pojo Library User For Getter Setter Tests -->
             <dependency>
                 <groupId>com.openpojo</groupId>

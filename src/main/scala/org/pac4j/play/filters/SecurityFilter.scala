@@ -28,7 +28,10 @@ import play.api.{Configuration, Logger}
 import play.core.j.JavaHelpers
 
 import scala.collection.JavaConversions._
+import scala.compat.java8.FutureConverters._
 import scala.concurrent.Future
+
+import akka.stream.Materializer
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
@@ -76,7 +79,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(configuration: Configuration) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(implicit val mat: Materializer, configuration: Configuration) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
@@ -91,7 +94,7 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
         val webContext = new PlayWebContext(request, config.getSessionStore)
         val requiresAuthenticationAction = new RequiresAuthenticationAction(config)
         val javaContext = webContext.getJavaContext
-        val authenticationResult = requiresAuthenticationAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames).wrapped().flatMap[play.api.mvc.Result](r =>
+        val authenticationResult = requiresAuthenticationAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames).toScala.flatMap[play.api.mvc.Result](r =>
           if (r == null) {
             nextFilter(request)
           } else {
@@ -130,4 +133,3 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
   case class Rule(clientNames: String, authorizerNames: String)
 
 }
-

@@ -43,7 +43,7 @@ import play.mvc.Http.Session;
 
 /**
  * Unit test cases for PlayWebContext.java class
- * 
+ *
  * @author furkan yavuz
  * @since 2.1.0
  */
@@ -53,13 +53,13 @@ public class PlayWebContextTest {
 
 	// Class under test
 	private PlayWebContext playWebContext;
-	
+
 	private Request requestMock;
 	private Response responseMock;
 	private Session sessionMock;
 	private Context contextMock;
 	private SessionStore sessionStoreMock;
-	
+
 	private String host = "localhost";
 	private String port = "8080";
 
@@ -69,16 +69,16 @@ public class PlayWebContextTest {
 		requestMock = mock(Request.class);
 		responseMock = mock(Response.class);
 		contextMock = mock(Context.class);
-		
+
 		doReturn(sessionMock).when(contextMock).session();
 		doReturn(requestMock).when(contextMock).request();
 		doReturn(responseMock).when(contextMock).response();
-		
+
 		sessionStoreMock = mock(SessionStore.class);
-		
+
 		playWebContext = new PlayWebContext(contextMock, sessionStoreMock);
 	}
-	
+
 	@Test
 	public final void testConstructorNullSessionStore() {
 		// when
@@ -115,119 +115,119 @@ public class PlayWebContextTest {
 		// then
 		assertEquals("JavaContext must be equal to contextMock.", contextMock, javaContext);
 	}
-	
+
 	@Test
 	public final void testGetSessionStore() {
 		// when
 		SessionStore sessionStore = playWebContext.getSessionStore();
-		
+
 		// then
 		assertEquals("SessionStore must be equal to sessionStoreMock.", sessionStoreMock, sessionStore);
 	}
-	
+
 	@Test
 	public final void testGetRequestHeader() {
 		// given
 		String requestHeader = "HEADER";
 		doReturn(requestHeader).when(requestMock).getHeader(requestHeader);
-		
+
 		// when
 		String header = playWebContext.getRequestHeader(requestHeader);
-		
+
 		// then
 		assertEquals("Header must be equal to HEADER.", requestHeader, header);
 	}
-	
+
 	@Test
 	public final void testGetRequestMethod() {
 		// given
 		String requestMethod = "METHOD";
 		doReturn(requestMethod).when(requestMock).method();
-		
+
 		// when
 		String method = playWebContext.getRequestMethod();
-		
+
 		// then
 		assertEquals("Method must be equal to METHOD.", requestMethod, method);
 	}
-	
+
 	@Test
 	public final void testGetSessionIdentifier() {
 		// given
 		String sessionIdentifierMock = "SESSION_IDENTIFIER";
 		doReturn(sessionIdentifierMock).when(sessionStoreMock).getOrCreateSessionId(playWebContext);
-		
+
 		// when
 		Object sessionIdentifier = playWebContext.getSessionIdentifier();
-		
+
 		// then
 		assertEquals("SessionIdentifier must be equal to sessionIdentifierMock.", sessionIdentifierMock, sessionIdentifier);
 	}
-	
+
 	@Test
 	public final void testGetSessionAttribute() {
 		// given
 		String key = "KEY";
 		Object attributeMock = mock(Object.class);
 		doReturn(attributeMock).when(sessionStoreMock).get(playWebContext, key);
-		
+
 		// when
 		Object sessionAttribute = playWebContext.getSessionAttribute(key);
-		
+
 		// then
 		assertEquals("SessionAttribute must be equal to attributeMock.", attributeMock, sessionAttribute);
 	}
-	
+
 	@Test
 	public final void testSetSessionAttribute() {
 		// given
 		String key = "KEY";
 		Object value = mock(Object.class);
-		
+
 		// when
 		playWebContext.setSessionAttribute(key, value);
-		
+
 		// then
 		verify(sessionStoreMock).set(playWebContext, key, value);
 	}
-	
+
 	@Test
 	public final void testSetResponseHeader() {
 		// given
 		String key = "KEY";
 		String value = "VALUE";
-		
+
 		// when
 		playWebContext.setResponseHeader(key, value);
-		
+
 		// then
 		verify(responseMock).setHeader(key, value);
 	}
-	
+
 	@Test
 	public final void testGetServerName() {
 		// given
 		doReturn(host + ":" + port).when(requestMock).host();
-		
+
 		// when
 		String result = playWebContext.getServerName();
-		
+
 		// then
 		assertEquals("Result value must be equal to host.", host, String.valueOf(result));
 	}
-	
+
 	@Test
 	public final void testIsSecure() {
 		// given
 		doReturn(true).when(requestMock).secure();
-		
+
 		// when
 		boolean result = playWebContext.isSecure();
-		
+
 		// then
 		assertTrue("Result value must be equal to true.", result);
 	}
-	
+
 	@Test
 	public final void testGetFullRequestURL() {
 		// given
@@ -235,27 +235,27 @@ public class PlayWebContextTest {
 		doReturn(host).when(requestMock).host();
 		doReturn(":" + port).when(requestMock).uri();
 		String expectedResult = "https://" + host + ":" + port;
-		
+
 		// when
 		String result = playWebContext.getFullRequestURL();
-		
+
 		// then
 		assertEquals("Result value must be equal to " + expectedResult, expectedResult, result);
 	}
-	
+
 	@Test
 	public final void testGetRemoteAddr() {
 		// given
 		String remoteAddr = "REMOTE_ADDRESS";
 		doReturn(remoteAddr).when(requestMock).remoteAddress();
-		
+
 		// when
 		String result = playWebContext.getRemoteAddr();
-		
+
 		// then
 		assertEquals("Result must be equal to REMOTE_ADDRESS.", remoteAddr, result);
 	}
-	
+
 	@Test
 	public final void testGetRequestAttribute() {
 		// given
@@ -263,27 +263,27 @@ public class PlayWebContextTest {
 		String key = "KEY";
 		Object value = mock(Object.class);
 		contextMock.args.put(key, value);
-		
+
 		// when
 		Object result = playWebContext.getRequestAttribute(key);
-		
+
 		// then
 		assertEquals("Result must be equal to value.", value, result);
 	}
-	
+
 	@Test
 	public final void testGetPath() {
 		// given
 		String path = "PATH";
 		doReturn(path).when(requestMock).path();
-		
+
 		// when
 		String result = playWebContext.getPath();
-		
+
 		// then
 		assertEquals("Result must be equal to path.", path, result);
 	}
-	
+
 	@Test
 	public final void testSetRequestAttribute() {
 		// given
@@ -291,10 +291,10 @@ public class PlayWebContextTest {
 		Object value = mock(Object.class);
 		contextMock.args = new HashMap<String, Object>();
 		contextMock.args.put(key, value);
-		
+
 		// when
 		playWebContext.setRequestAttribute(key, value);
-		
+
 		// then
 		assertTrue(contextMock.args.containsValue(value));
 	}
@@ -320,10 +320,9 @@ public class PlayWebContextTest {
 		String key = "KEY";
 		Map<String, String[]> formParameters = new HashMap<>();
 		formParameters.put(key, new String[] { key });
-		
-		RequestBody requestBodyMock = mock(RequestBody.class);
+
+		RequestBody requestBodyMock = new RequestBody(formParameters);
 		doReturn(requestBodyMock).when(requestMock).body();
-		doReturn(formParameters).when(requestBodyMock).asFormUrlEncoded();
 
 		// when
 		Map<String, String[]> requestParameters = playWebContext.getRequestParameters();
@@ -331,21 +330,21 @@ public class PlayWebContextTest {
 		// then
 		assertTrue("RequestParameters must contains " + key, requestParameters.containsKey(key));
 	}
-	
+
 	@Test
 	public void testGetRequestCookies() {
 		// given
 		Http.Cookie httpCookie = new Http.Cookie("name", "value", Integer.MAX_VALUE, "path", "domain", true, true);
 		Http.Cookies httpCookies = new CookiesStub(httpCookie);
 		doReturn(httpCookies).when(requestMock).cookies();
-		
+
 		// when
 		Collection<Cookie> cookies = playWebContext.getRequestCookies();
 		assertNotNull("Cookies must be initialized.", cookies);
 		assertTrue("Cookies must have 1 element.", cookies.size() == 1);
-		
+
 		Cookie cookie = (Cookie) cookies.toArray()[0];
-		
+
 		// then
 		assertEquals("Domain must be equal to " + httpCookie.domain(), httpCookie.domain(), cookie.getDomain());
 		assertEquals("HttpOnly must be equal to " + httpCookie.httpOnly(), httpCookie.httpOnly(), cookie.isHttpOnly());
@@ -360,24 +359,24 @@ public class PlayWebContextTest {
 		String host = "localhost";
 		String port = "8080";
 		doReturn(host + ":" + port).when(requestMock).host();
-		
+
 		// when
 		int result = playWebContext.getServerPort();
 
 		// then
 		assertEquals("Result value must be equal to port.", port, String.valueOf(result));
 	}
-	
+
 	@Test
 	public final void testGetServerPortDefaultPort() {
 		// given
 		String host = "localhost";
 		String defaultPort = "80";
 		doReturn(host).when(requestMock).host();
-		
+
 		// when
 		int result = playWebContext.getServerPort();
-		
+
 		// then
 		assertEquals("Result value must be equal to " + defaultPort, defaultPort, String.valueOf(result));
 	}
@@ -386,10 +385,10 @@ public class PlayWebContextTest {
 	public final void testGetSchemeSecure() {
 		// given
 		doReturn(true).when(requestMock).secure();
-		
+
 		// when
 		String result = playWebContext.getScheme();
-		
+
 		// then
 		assertEquals("Result value must be equal to https", "https", result);
 	}
@@ -398,10 +397,10 @@ public class PlayWebContextTest {
 	public final void testGetSchemeNotSecure() {
 		// given
 		doReturn(false).when(requestMock).secure();
-		
+
 		// when
 		String result = playWebContext.getScheme();
-		
+
 		// then
 		assertEquals("Result value must be equal to http", "http", result);
 	}

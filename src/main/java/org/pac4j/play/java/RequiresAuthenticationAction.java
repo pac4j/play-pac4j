@@ -30,8 +30,6 @@ import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 
 import org.pac4j.play.PlayWebContext;
-import play.libs.F.Function;
-import play.libs.F.Promise;
 import play.mvc.Http.Context;
 import play.mvc.Result;
 
@@ -39,6 +37,8 @@ import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * <p>This filter protects a resource (authentication + authorization).</p>
@@ -71,16 +71,19 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
     }
 
     @Override
-    public Promise<Result> call(final Context ctx) throws Throwable {
-
+    public CompletionStage<Result> call(final Context ctx){
+      try{
         final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
         final String clientName = getStringParam(invocationHandler, CLIENT_NAME_METHOD, null);
         final String authorizerName = getStringParam(invocationHandler, AUTHORIZER_NAME_METHOD, null);
 
         return internalCall(ctx, clientName, authorizerName);
+      }catch(Throwable t){
+        throw new RuntimeException(t);
+      }
     }
 
-    public Promise<Result> internalCall(final Context ctx, final String clientName, final String authorizerName) throws Throwable {
+    public CompletionStage<Result> internalCall(final Context ctx, final String clientName, final String authorizerName) throws Throwable {
 
         final PlayWebContext context =  new PlayWebContext(ctx, config.getSessionStore());
         logger.debug("url: {}", context.getFullRequestURL());
@@ -96,7 +99,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         final boolean useSession = useSession(context, currentClients);
         logger.debug("useSession: {}", useSession);
 
-        final Promise<UserProfile> promiseProfile = Promise.promise(() -> {
+        final CompletionStage<UserProfile> promiseProfile = CompletableFuture.supplyAsync(() -> {
 
             final ProfileManager manager = new ProfileManager(context);
             UserProfile profile = manager.get(useSession);
@@ -128,35 +131,38 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
             return profile;
         });
 
-        return promiseProfile.flatMap(new Function<UserProfile, Promise<Result>>() {
+        promiseProfile.thenComposeAsync((UserProfile profile) ->{
+          if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
 
-            @Override
-            public Promise<Result> apply(UserProfile profile) throws Throwable {
-                if (profile != null) {
-                    logger.debug("authorizerName: {}", authorizerName);
-                    if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
-                        logger.debug("authenticated and authorized -> grant access");
-                        // when called from Scala
-                        if (delegate == null) {
-                            return Promise.pure(null);
-                        } else {
-                            return delegate.call(ctx);
-                        }
-                    } else {
-                        logger.debug("forbidden");
-                        return forbidden(context, currentClients, profile);
-                    }
-                } else {
-                    if (startAuthentication(context, currentClients)) {
-                        logger.debug("Starting authentication");
-                        saveRequestedUrl(context, currentClients);
-                        return Promise.promise(() -> redirectToIdentityProvider(context, currentClients));
-                    } else {
-                        logger.debug("unauthorized");
-                        return unauthorized(context, currentClients);
-                    }
-                }
-            }
+          }
+          return CompletableFuture.completedFuture(null);
+        });
+
+        return promiseProfile.thenComposeAsync((UserProfile profile) ->{
+          if (profile != null) {
+              logger.debug("authorizerName: {}", authorizerName);
+              if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
+                  logger.debug("authenticated and authorized -> grant access");
+                  // when called from Scala
+                  if (delegate == null) {
+                      return CompletableFuture.completedFuture(null);
+                  } else {
+                      return delegate.call(ctx);
+                  }
+              } else {
+                  logger.debug("forbidden");
+                  return forbidden(context, currentClients, profile);
+              }
+          } else {
+              if (startAuthentication(context, currentClients)) {
+                  logger.debug("Starting authentication");
+                  saveRequestedUrl(context, currentClients);
+                  return CompletableFuture.supplyAsync(() -> redirectToIdentityProvider(context, currentClients));
+              } else {
+                  logger.debug("unauthorized");
+                  return unauthorized(context, currentClients);
+              }
+          }
         });
     }
 
@@ -164,8 +170,8 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         return currentClients == null || currentClients.isEmpty() || currentClients.get(0) instanceof IndirectClient;
     }
 
-    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final UserProfile profile) {
-        return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.FORBIDDEN, context));
+    protected CompletionStage<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final UserProfile profile) {
+        return CompletableFuture.completedFuture((Result) config.getHttpActionAdapter().adapt(HttpConstants.FORBIDDEN, context));
     }
 
     protected boolean startAuthentication(final PlayWebContext context, final List<Client> currentClients) {
@@ -189,7 +195,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
         }
     }
 
-    protected Promise<Result> unauthorized(final PlayWebContext context, final List<Client> currentClients) {
-        return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.UNAUTHORIZED, context));
+    protected CompletionStage<Result> unauthorized(final PlayWebContext context, final List<Client> currentClients) {
+        return CompletableFuture.completedFuture((Result) config.getHttpActionAdapter().adapt(HttpConstants.UNAUTHORIZED, context));
     }
 }
