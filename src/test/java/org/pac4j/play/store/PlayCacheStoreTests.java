@@ -47,7 +47,7 @@ public final class PlayCacheStoreTests implements TestsConstants {
     }
 
     @Test
-    @PrepareForTest({ Cache.class })
+    @PrepareForTest(Cache.class)
     public void testGetSet() {
         mockStatic(Cache.class);
         PowerMockito.when(Cache.get(any(String.class))).thenReturn(VALUE);

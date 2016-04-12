@@ -103,6 +103,7 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- tests -->
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
@@ -115,8 +116,6 @@
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
-
-        <!-- Powermock Mocking Library -->
         <dependency>
             <groupId>org.powermock</groupId>
             <artifactId>powermock-core</artifactId>
@@ -134,24 +133,6 @@
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
-        </dependency>
-
-        <!-- Open Pojo Library User For Getter Setter Tests -->
-        <dependency>
-            <groupId>com.openpojo</groupId>
-            <artifactId>openpojo</artifactId>
-            <version>0.8.3</version>
-            <scope>test</scope>
-            <exclusions>
-                <exclusion>
-                    <groupId>junit</groupId>
-                    <artifactId>junit</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.hamcrest</groupId>
-                    <artifactId>hamcrest-all</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 
