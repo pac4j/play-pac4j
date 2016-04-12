@@ -3,6 +3,7 @@ package org.pac4j.play.java;
 import org.pac4j.core.authorization.checker.AuthorizationChecker;
 import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker;
 import org.pac4j.core.client.*;
+import org.pac4j.core.client.direct.AnonymousClient;
 import org.pac4j.core.client.finder.ClientFinder;
 import org.pac4j.core.client.finder.DefaultClientFinder;
 import org.pac4j.core.config.Config;
@@ -12,8 +13,8 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.core.profile.UserProfile;
 
 import org.pac4j.play.PlayWebContext;
 import play.libs.F.Promise;
@@ -28,7 +29,7 @@ import java.util.List;
 import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This action protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration.
+ * <p>This filter protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration.
  * If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients.</p>
  *
  * <p>The configuration can be provided via annotation parameters: <code>clients</code>, <code>authorizers</code> and <code>multiProfile</code>.</p>
@@ -37,7 +38,7 @@ import static org.pac4j.core.util.CommonHelper.*;
  * @author Michael Remond
  * @since 1.0.0
  */
-public class SecurityAction extends AbstractConfigAction {
+public class SecureAction extends AbstractConfigAction {
 
     @Inject
     protected Config config;
@@ -46,10 +47,10 @@ public class SecurityAction extends AbstractConfigAction {
 
     protected AuthorizationChecker authorizationChecker = new DefaultAuthorizationChecker();
 
-    public SecurityAction() {
+    public SecureAction() {
     }
 
-    public SecurityAction(final Config config) {
+    public SecureAction(final Config config) {
         this.config = config;
     }
 
@@ -78,15 +79,13 @@ public class SecurityAction extends AbstractConfigAction {
         final List<Client> currentClients = clientFinder.find(configClients, context, clients);
         logger.debug("currentClients: {}", currentClients);
 
-        final boolean useSession = useSession(context, currentClients);
-        logger.debug("useSession: {}", useSession);
+        final Promise<List<CommonProfile>> promiseProfiles = Promise.promise(() -> {
 
-        final Promise<List<UserProfile>> promiseProfiles = Promise.promise(() -> {
-
+            final boolean loadProfilesFromSession = loadProfilesFromSession(context, currentClients);
+            logger.debug("loadProfilesFromSession: {}", loadProfilesFromSession);
             final ProfileManager manager = new ProfileManager(context);
-            List<UserProfile> profiles = manager.getAll(useSession);
+            List<CommonProfile> profiles = manager.getAll(loadProfilesFromSession);
             logger.debug("profiles: {}", profiles);
-            logger.debug("multiProfile: {}", multiProfile);
 
             // no profile and some current clients
             if (isEmpty(profiles) && isNotEmpty(currentClients)) {
@@ -96,17 +95,19 @@ public class SecurityAction extends AbstractConfigAction {
                         logger.debug("Performing authentication for client: {}", currentClient);
 
                         final Credentials credentials = currentClient.getCredentials(context);
-                        final UserProfile profile = currentClient.getUserProfile(credentials, context);
+                        final CommonProfile profile = currentClient.getUserProfile(credentials, context);
                         logger.debug("profile: {}", profile);
                         if (profile != null) {
-                            manager.save(useSession, profile, multiProfile);
+                            final boolean saveProfileInSession = saveProfileInSession(context, currentClients, (DirectClient) currentClient, profile);
+                            logger.debug("saveProfileInSession: {} / multiProfile: {}", saveProfileInSession, multiProfile);
+                            manager.save(saveProfileInSession, profile, multiProfile);
                             if (!multiProfile) {
                                 break;
                             }
                         }
                     }
                 }
-                profiles = manager.getAll(useSession);
+                profiles = manager.getAll(loadProfilesFromSession);
                 logger.debug("new profiles: {}", profiles);
             }
 
@@ -139,9 +140,11 @@ public class SecurityAction extends AbstractConfigAction {
                     return unauthorized(context, currentClients);
                 }
             }
+
         }).recover(throwable -> {
             if (throwable instanceof RequiresHttpAction) {
                 final RequiresHttpAction e = (RequiresHttpAction) throwable;
+                logger.debug("extra HTTP action required in security filter: {}", e.getCode());
                 return (Result) config.getHttpActionAdapter().adapt(e.getCode(), context);
             } else {
                 throw new TechnicalException(throwable);
@@ -149,11 +152,15 @@ public class SecurityAction extends AbstractConfigAction {
         });
     }
 
-    protected boolean useSession(final WebContext context, final List<Client> currentClients) {
-        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient;
+    protected boolean loadProfilesFromSession(final WebContext context, final List<Client> currentClients) {
+        return isEmpty(currentClients) || currentClients.get(0) instanceof IndirectClient || currentClients.get(0) instanceof AnonymousClient;
     }
 
-    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final List<UserProfile> profiles, final String authorizers) {
+    protected boolean saveProfileInSession(final WebContext context, final List<Client> currentClients, final DirectClient directClient, final CommonProfile profile) {
+        return false;
+    }
+
+    protected Promise<Result> forbidden(final PlayWebContext context, final List<Client> currentClients, final List<CommonProfile> profiles, final String authorizers) {
         return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.FORBIDDEN, context));
     }
 

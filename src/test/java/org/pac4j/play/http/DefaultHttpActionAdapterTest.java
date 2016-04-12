@@ -10,7 +10,6 @@ import org.junit.Test;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.http.DefaultHttpActionAdapter;
 
 import play.mvc.Result;
 

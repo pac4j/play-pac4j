@@ -104,6 +104,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.pac4j</groupId>
+            <artifactId>pac4j-core</artifactId>
+            <version>${pac4j.version}</version>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
@@ -218,6 +224,7 @@
                     <threshold>Max</threshold>
                     <failOnError>true</failOnError>
                     <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+                    <includeTests>true</includeTests>
                 </configuration>
                 <executions>
                     <execution>
@@ -233,6 +240,9 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
                 <version>3.6</version>
+                <configuration>
+                    <includeTests>true</includeTests>
+                </configuration>
                 <executions>
                     <execution>
                         <id>run-pmd</id>
@@ -242,6 +252,16 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Tests.java</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
@@ -260,7 +280,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.1</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

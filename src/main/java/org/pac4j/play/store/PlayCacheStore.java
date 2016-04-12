@@ -3,7 +3,7 @@ package org.pac4j.play.store;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.profile.UserProfile;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
@@ -40,9 +40,8 @@ public final class PlayCacheStore implements SessionStore {
         CommonHelper.assertTrue(context instanceof PlayWebContext, "context must be a PlayWebContext");
         return (PlayWebContext) context;
     }
-    /**
-     * {@inheritDoc}
-     */
+
+    @Override
     public String getOrCreateSessionId(final WebContext context) {
         final Http.Session session = getPlayWebContext(context).getJavaSession();
         // get current sessionId
@@ -59,20 +58,16 @@ public final class PlayCacheStore implements SessionStore {
         return sessionId;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public Object get(final WebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
         return Cache.get(getKey(sessionId, key));
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void set(final WebContext context, final String key, final Object value) {
         int timeout;
-        if (value instanceof UserProfile) {
+        if (value instanceof CommonProfile) {
             timeout = profileTimeout;
         } else {
             timeout = sessionTimeout;

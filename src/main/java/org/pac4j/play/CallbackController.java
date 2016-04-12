@@ -7,8 +7,8 @@ import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.exception.RequiresHttpAction;
+import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
-import org.pac4j.core.profile.UserProfile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
@@ -57,17 +57,18 @@ public class CallbackController extends Controller {
             final Credentials credentials = client.getCredentials(context);
             logger.debug("credentials: {}", credentials);
 
-            final UserProfile profile = client.getUserProfile(credentials, context);
+            final CommonProfile profile = client.getUserProfile(credentials, context);
             logger.debug("profile: {}", profile);
             saveUserProfile(context, profile);
             return redirectToOriginallyRequestedUrl(context);
 
         } catch (final RequiresHttpAction e) {
+            logger.debug("extra HTTP action required in callback: {}", e.getCode());
             return (Result) config.getHttpActionAdapter().adapt(e.getCode(), context);
         }
     }
 
-    protected void saveUserProfile(final WebContext context, final UserProfile profile) {
+    protected void saveUserProfile(final WebContext context, final CommonProfile profile) {
         final ProfileManager manager = new ProfileManager(context);
         if (profile != null) {
             manager.save(true, profile, this.multiProfile);

@@ -3,11 +3,9 @@ package org.pac4j.play.scala
 import javax.inject.Inject
 
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.core.profile.{UserProfile, ProfileManager}
-import org.pac4j.core.util.CommonHelper
+import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.java.SecurityAction
+import org.pac4j.play.java.SecureAction
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
@@ -26,7 +24,7 @@ import collection.JavaConversions._
  * @author Hugo Valk
  * @since 1.5.0
  */
-trait Security extends Controller {
+trait Security[P<:CommonProfile] extends Controller {
 
   protected val logger = LoggerFactory.getLogger(getClass)
 
@@ -46,15 +44,15 @@ trait Security extends Controller {
     new Session(map)
   }
 
-  protected def Secure[A](action: List[UserProfile] => Action[AnyContent]): Action[AnyContent] = {
+  protected def Secure[A](action: List[P] => Action[AnyContent]): Action[AnyContent] = {
     Secure(null, null)(action)
   }
 
-  protected def Secure[A](clients: String)(action: List[UserProfile] => Action[AnyContent]): Action[AnyContent] = {
+  protected def Secure[A](clients: String)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
     Secure(clients, null)(action)
   }
 
-  protected def Secure[A](clients: String, authorizers: String, multiProfile: Boolean = false)(action: List[UserProfile] => Action[AnyContent]): Action[AnyContent] = {
+  protected def Secure[A](clients: String, authorizers: String, multiProfile: Boolean = false)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
     Secure(parse.anyContent, clients, authorizers, multiProfile)(action)
   }
 
@@ -69,17 +67,14 @@ trait Security extends Controller {
    * @tparam A
    * @return
    */
-  protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[UserProfile] => Action[A]) = Action.async(parser) { request =>
+  protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, config.getSessionStore)
-    val securityAction = new SecurityAction(config)
+    val secureAction = new SecureAction(config)
     val javaContext = webContext.getJavaContext
-    securityAction.internalCall(javaContext, clients, authorizers, multiProfile).wrapped().flatMap[play.api.mvc.Result](r =>
+    secureAction.internalCall(javaContext, clients, authorizers, multiProfile).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
-        var profiles = javaContext.args.get(Pac4jConstants.USER_PROFILES).asInstanceOf[java.util.List[UserProfile]]
-        if (CommonHelper.isEmpty(profiles)) {
-          val profileManager = new ProfileManager(webContext)
-          profiles = profileManager.getAll(true)
-        }
+        val profileManager = new ProfileManager[P](webContext)
+        val profiles = profileManager.getAll(true)
         logger.debug("profiles: {}", profiles)
         action(asScalaBuffer(profiles).toList)(request)
       } else {

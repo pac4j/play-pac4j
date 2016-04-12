@@ -39,16 +39,18 @@ public abstract class AbstractConfigAction extends Action<Result> {
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
         String value = (String) invocationHandler.invoke(configuration, method, null);
         if (value == null) {
-            return defaultValue;
+            value = defaultValue;
         }
+        logger.debug("String param: {}: {}", method.getName(), value);
         return value;
     }
 
     protected boolean getBooleanParam(final InvocationHandler invocationHandler, final Method method, final boolean defaultValue) throws Throwable {
         Boolean value = (Boolean) invocationHandler.invoke(configuration, method, null);
         if (value == null) {
-            return defaultValue;
+            value = defaultValue;
         }
+        logger.debug("Boolean param: {}: {}", method.getName(), value);
         return value;
     }
 }

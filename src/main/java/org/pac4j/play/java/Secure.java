@@ -9,13 +9,13 @@ import java.lang.annotation.Target;
 
 import play.mvc.With;
 
-@With(SecurityAction.class)
+@With(SecureAction.class)
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Inherited
 @Documented
 /**
- * This annotation is used for the {@link SecurityAction}.
+ * This annotation is used for the {@link SecureAction}.
  *
  * @author Jerome Leleu
  * @since 1.0.0

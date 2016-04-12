@@ -154,8 +154,8 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public int getServerPort() {
         String[] split = request.host().split(":");
-        String portStr = (split.length > 1) ? split[1] : "80";
-        return Integer.valueOf(portStr);
+        String portStr = split.length > 1 ? split[1] : "80";
+        return Integer.parseInt(portStr);
     }
 
     @Override

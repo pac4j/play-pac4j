@@ -4,6 +4,8 @@ import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.profile.ProfileManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.mvc.Controller;
 import play.mvc.Result;
 
@@ -14,8 +16,8 @@ import static org.pac4j.core.util.CommonHelper.*;
 
 /**
  * <p>This filter handles the application logout process.</p>
- * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter. If no url is provided, a blank page is displayed.
- * If the <code>url</code> does not match the <code>logoutUrlPattern</code>, the <code>defaultUrl</code> is used.</p>
+ * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter if it matches the <code>logoutUrlPattern</code>.
+ * Or the user is redirected to the <code>defaultUrl</code> if it is defined. Otherwise, a blank page is displayed.</p>
  *
  * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} and {@link #setLogoutUrlPattern(String)}.</p>
  *
@@ -24,7 +26,9 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class ApplicationLogoutController extends Controller {
 
-    protected String defaultUrl = Pac4jConstants.DEFAULT_URL_VALUE;
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+    protected String defaultUrl;
 
     protected String logoutUrlPattern = Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE;
 
@@ -33,7 +37,7 @@ public class ApplicationLogoutController extends Controller {
 
     public Result logout() {
 
-        assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
+        assertNotNull("config", config);
         assertNotBlank(Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
 
         final WebContext context = new PlayWebContext(ctx(), config.getSessionStore());
@@ -42,14 +46,15 @@ public class ApplicationLogoutController extends Controller {
         ctx().session().remove(Pac4jConstants.SESSION_ID);
 
         final String url = context.getRequestParameter(Pac4jConstants.URL);
-        if (url == null) {
-            return ok();
+        String redirectUrl = this.defaultUrl;
+        if (url != null && Pattern.matches(this.logoutUrlPattern, url)) {
+            redirectUrl = url;
+        }
+        logger.debug("redirectUrl: {}", redirectUrl);
+        if (redirectUrl != null) {
+            return redirect(redirectUrl);
         } else {
-            if (Pattern.matches(this.logoutUrlPattern, url)) {
-                return redirect(url);
-            } else {
-                return redirect(this.defaultUrl);
-            }
+            return ok();
         }
     }
 

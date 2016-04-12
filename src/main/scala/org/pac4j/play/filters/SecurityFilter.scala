@@ -3,8 +3,9 @@ package org.pac4j.play.filters
 import java.util.Collections
 import javax.inject.{Inject, Singleton}
 
+import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.java.SecurityAction
+import org.pac4j.play.java.SecureAction
 import org.pac4j.play.scala.Security
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
@@ -54,13 +55,11 @@ import scala.concurrent.Future
   *             }}
   *           ]
   *          }}}
-  *
   * @author Hugo Valk
-  *
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(configuration: Configuration) extends Filter with Security {
+class SecurityFilter @Inject()(configuration: Configuration) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
@@ -73,7 +72,7 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, config.getSessionStore)
-        val securityAction = new SecurityAction(config)
+        val securityAction = new SecureAction(config)
         val javaContext = webContext.getJavaContext
         val authenticationResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false).wrapped().flatMap[play.api.mvc.Result](r =>
           if (r == null) {
