@@ -183,4 +183,12 @@ public class SecureAction extends AbstractConfigAction {
     protected Promise<Result> unauthorized(final PlayWebContext context, final List<Client> currentClients) {
         return Promise.pure((Result) config.getHttpActionAdapter().adapt(HttpConstants.UNAUTHORIZED, context));
     }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
 }

@@ -7,6 +7,7 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.MockSessionStore;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.util.TestsConstants;
+import org.pac4j.play.http.DefaultHttpActionAdapter;
 import play.core.j.JavaResultExtractor;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -43,6 +44,7 @@ public abstract class AbstractWebTests implements TestsConstants {
         final SessionStore sessionStore = new MockSessionStore();
         config = new Config();
         config.setSessionStore(sessionStore);
+        config.setHttpActionAdapter(new DefaultHttpActionAdapter());
         final play.api.mvc.RequestHeader header = mock(play.api.mvc.RequestHeader.class);
         final Http.Request request = mock(Http.Request.class);
         requestParameters = new HashMap<>();
