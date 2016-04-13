@@ -73,4 +73,12 @@ public class ApplicationLogoutController extends Controller {
     public void setLogoutUrlPattern(String logoutUrlPattern) {
         this.logoutUrlPattern = logoutUrlPattern;
     }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
 }

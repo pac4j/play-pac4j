@@ -35,6 +35,10 @@ public class PlayWebContext extends BaseResponseContext {
 
     protected final SessionStore sessionStore;
 
+    public PlayWebContext(final Context context) {
+        this(context, null);
+    }
+
     public PlayWebContext(final Context context, final SessionStore sessionStore) {
         this.context = context;
         this.request = context.request();
@@ -45,6 +49,10 @@ public class PlayWebContext extends BaseResponseContext {
         } else {
             this.sessionStore = sessionStore;
         }
+    }
+
+    public PlayWebContext(final RequestHeader requestHeader) {
+        this(requestHeader, null);
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore sessionStore) {

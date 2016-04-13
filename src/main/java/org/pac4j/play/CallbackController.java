@@ -42,6 +42,8 @@ public class CallbackController extends Controller {
 
     public Result callback() {
 
+        assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
+
         assertNotNull("config", config);
         assertNotNull("config.httpActionAdapter", config.getHttpActionAdapter());
         final PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
@@ -100,5 +102,13 @@ public class CallbackController extends Controller {
 
     public void setMultiProfile(boolean multiProfile) {
         this.multiProfile = multiProfile;
+    }
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
     }
 }
