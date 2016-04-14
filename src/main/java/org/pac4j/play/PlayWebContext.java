@@ -2,9 +2,9 @@ package org.pac4j.play;
 
 import java.util.*;
 
-import org.pac4j.core.context.BaseResponseContext;
-
 import org.pac4j.core.context.Cookie;
+import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.play.store.PlayCacheStore;
 import play.api.mvc.RequestHeader;
@@ -23,7 +23,7 @@ import play.mvc.Http.Context;
  * @author Jerome Leleu
  * @since 1.1.0
  */
-public class PlayWebContext extends BaseResponseContext {
+public class PlayWebContext implements WebContext {
 
     protected final Context context;
 
@@ -34,6 +34,12 @@ public class PlayWebContext extends BaseResponseContext {
     protected final Session session;
 
     protected final SessionStore sessionStore;
+
+    protected int responseStatus = -1;
+
+    protected String responseContent = "";
+
+    protected String location;
 
     public PlayWebContext(final Context context) {
         this(context, null);
@@ -94,6 +100,36 @@ public class PlayWebContext extends BaseResponseContext {
     public SessionStore getSessionStore() { return this.sessionStore; }
 
     @Override
+    public void setResponseStatus(final int code) {
+        this.responseStatus = code;
+    }
+
+    /**
+     * Get the response status.
+     *
+     * @return the response status.
+     */
+    public int getResponseStatus() {
+        return this.responseStatus;
+    }
+
+    @Override
+    public void writeResponseContent(final String content) {
+        if (content != null) {
+            this.responseContent += content;
+        }
+    }
+
+    /**
+     * Get the response content.
+     *
+     * @return the response content
+     */
+    public String getResponseContent() {
+        return this.responseContent;
+    }
+
+    @Override
     public String getRequestHeader(final String name) {
         return request.getHeader(name);
     }
@@ -151,6 +187,18 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public void setResponseHeader(final String name, final String value) {
         response.setHeader(name, value);
+        if (HttpConstants.LOCATION_HEADER.equals(name)) {
+            location = value;
+        }
+    }
+
+    /**
+     * Get the response location.
+     *
+     * @return the response location
+     */
+    public String getResponseLocation() {
+        return location;
     }
 
     @Override
@@ -217,5 +265,16 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public String getPath() {
         return request.path();
+    }
+
+    @Override
+    public void addResponseCookie(final Cookie cookie) {
+        response.setCookie(cookie.getName(), cookie.getValue(), cookie.getMaxAge(), cookie.getPath(),
+                cookie.getDomain(), cookie.isSecure(), cookie.isHttpOnly());
+    }
+
+    @Override
+    public void setResponseContentType(final String content) {
+        response.setContentType(content);
     }
 }
