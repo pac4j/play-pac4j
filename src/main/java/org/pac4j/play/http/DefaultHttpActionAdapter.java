@@ -30,6 +30,8 @@ public class DefaultHttpActionAdapter implements HttpActionAdapter {
             return forbidden("forbidden");
         } else if (code == HttpConstants.TEMP_REDIRECT) {
             return redirect(webContext.getResponseLocation());
+        } else if (code == HttpConstants.BAD_REQUEST) {
+            return badRequest("bad request");
         } else if (code == HttpConstants.OK) {
             final String content = webContext.getResponseContent();
             logger.debug("render: {}", content);

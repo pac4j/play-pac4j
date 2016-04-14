@@ -56,6 +56,13 @@ public final class DefaultHttpActionAdapterTests extends AbstractWebTests {
     }
 
     @Test
+    public void testBadRequest() throws IOException {
+        final Result result = (Result) adapter.adapt(HttpConstants.BAD_REQUEST, context);
+        assertEquals(400, result.status());
+        assertEquals("bad request", getBody(result));
+    }
+
+    @Test
     public void testOk() throws IOException {
         when(context.getResponseContent()).thenReturn(VALUE);
         final Result result = (Result) adapter.adapt(HttpConstants.OK, context);
