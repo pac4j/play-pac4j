@@ -43,13 +43,7 @@ The configuration (`org.pac4j.core.config.Config`) contains all the clients and 
 
 The `Config` is bound for injection in a `SecurityModule` (or whatever the name you call it):
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
 public class SecurityModule extends AbstractModule {
@@ -91,8 +85,7 @@ public class SecurityModule extends AbstractModule {
 }
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule {
@@ -133,10 +126,6 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 }
 ```
 
-</td>
-</tr>
-</table>
-
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
 Notice that you define:
@@ -169,13 +158,7 @@ You can protect (authentication + authorizations) the urls of your Play applicat
 
 For example in your controllers:
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
 @Secure(clients = "FacebookClient")
@@ -184,8 +167,7 @@ public Result facebookIndex() {
 }
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
 def facebookIndex = Secure("FacebookClient") { profiles =>
@@ -195,10 +177,6 @@ def facebookIndex = Secure("FacebookClient") { profiles =>
 }
 ```
 
-</td>
-</tr>
-</table>
-
 
 ### 3b) Protect urls via the `SecurityFilter`
 
@@ -206,13 +184,7 @@ In order to protect multiple urls at the same tine, you can configure the `Secur
 
 First define a `Filters` class in your application (if you have not yet done so).
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
 package filters;
@@ -239,8 +211,7 @@ public class Filters implements HttpFilters {
 }
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
 package filters
@@ -258,10 +229,6 @@ class Filters @Inject()(securityFilter: SecurityFilter) extends HttpFilters {
 
 }
 ```
-
-</td>
-</tr>
-</table>
 
 Then tell your application to use the filters in `application.conf`:
 
@@ -323,13 +290,7 @@ GET    /callback    @org.pac4j.play.CallbackController.callback()
 
 In the `SecurityModule`:
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
 CallbackController callbackController = new CallbackController();
@@ -337,18 +298,13 @@ callbackController.setDefaultUrl("/");
 bind(CallbackController.class).toInstance(callbackController);
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
 val callbackController = new CallbackController()
 callbackController.setDefaultUrl("/")
 bind(classOf[CallbackController]).toInstance(callbackController)
 ```
-
-</td>
-</tr>
-</table>
 
 
 ### 5) Get the user profile (`ProfileManager`)
@@ -359,37 +315,34 @@ You can get all the profiles of the authenticated user (if ever multiple ones ar
 
 Examples:
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
-PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
+PlayWebContext context = new PlayWebContext(ctx());
 ProfileManager<CommonProfile> profileManager = new ProfileManager(context);
 Optional<CommonProfile> profile = manager.get(true);
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
-val webContext = new PlayWebContext(request, config.getSessionStore)
+val webContext = new PlayWebContext(request)
 val profileManager = new ProfileManager[CommonProfile](webContext)
 val profile = profileManager.get(true)
 ```
 
-</td>
-</tr>
-</table>
-
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common attributes that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
+
+*In Java:*
 
 ```java
 FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
+```
+
+*In Scala:*
+
+```scala
+val facebookProfile = commonProfile.asInstanceOf[FacebookProfile]
 ```
 
 
@@ -412,13 +365,7 @@ GET     /logout     @org.pac4j.play.ApplicationLogoutController.logout()
 
 In the `SecurityModule`:
 
-<table>
-<tr>
-<th>Java</th>
-<th>Scala</th>
-</tr>
-<tr>
-<td>
+*In Java:*
 
 ```java
 ApplicationLogoutController logoutController = new ApplicationLogoutController();
@@ -426,18 +373,13 @@ logoutController.setDefaultUrl("/");
 bind(ApplicationLogoutController.class).toInstance(logoutController);
 ```
 
-</td>
-<td>
+*In Scala:*
 
 ```scala
 val logoutController = new ApplicationLogoutController()
 logoutController.setDefaultUrl("/")
 bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
 ```
-
-</td>
-</tr>
-</table>
 
 
 ## Migration guide
