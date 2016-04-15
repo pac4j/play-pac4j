@@ -1,25 +1,10 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.play;
 
 import java.util.*;
 
-import org.pac4j.core.context.BaseResponseContext;
-
 import org.pac4j.core.context.Cookie;
+import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.play.store.PlayCacheStore;
 import play.api.mvc.RequestHeader;
@@ -38,7 +23,7 @@ import play.mvc.Http.Context;
  * @author Jerome Leleu
  * @since 1.1.0
  */
-public class PlayWebContext extends BaseResponseContext {
+public class PlayWebContext implements WebContext {
 
     protected final Context context;
 
@@ -50,6 +35,16 @@ public class PlayWebContext extends BaseResponseContext {
 
     protected final SessionStore sessionStore;
 
+    protected int responseStatus = -1;
+
+    protected String responseContent = "";
+
+    protected String location;
+
+    public PlayWebContext(final Context context) {
+        this(context, null);
+    }
+
     public PlayWebContext(final Context context, final SessionStore sessionStore) {
         this.context = context;
         this.request = context.request();
@@ -60,6 +55,10 @@ public class PlayWebContext extends BaseResponseContext {
         } else {
             this.sessionStore = sessionStore;
         }
+    }
+
+    public PlayWebContext(final RequestHeader requestHeader) {
+        this(requestHeader, null);
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore sessionStore) {
@@ -99,6 +98,36 @@ public class PlayWebContext extends BaseResponseContext {
      * @return the session store
      */
     public SessionStore getSessionStore() { return this.sessionStore; }
+
+    @Override
+    public void setResponseStatus(final int code) {
+        this.responseStatus = code;
+    }
+
+    /**
+     * Get the response status.
+     *
+     * @return the response status.
+     */
+    public int getResponseStatus() {
+        return this.responseStatus;
+    }
+
+    @Override
+    public void writeResponseContent(final String content) {
+        if (content != null) {
+            this.responseContent += content;
+        }
+    }
+
+    /**
+     * Get the response content.
+     *
+     * @return the response content
+     */
+    public String getResponseContent() {
+        return this.responseContent;
+    }
 
     @Override
     public String getRequestHeader(final String name) {
@@ -158,6 +187,18 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public void setResponseHeader(final String name, final String value) {
         response.setHeader(name, value);
+        if (HttpConstants.LOCATION_HEADER.equals(name)) {
+            location = value;
+        }
+    }
+
+    /**
+     * Get the response location.
+     *
+     * @return the response location
+     */
+    public String getResponseLocation() {
+        return location;
     }
 
     @Override
@@ -169,8 +210,8 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public int getServerPort() {
         String[] split = request.host().split(":");
-        String portStr = (split.length > 1) ? split[1] : "80";
-        return Integer.valueOf(portStr);
+        String portStr = split.length > 1 ? split[1] : "80";
+        return Integer.parseInt(portStr);
     }
 
     @Override
@@ -224,5 +265,16 @@ public class PlayWebContext extends BaseResponseContext {
     @Override
     public String getPath() {
         return request.path();
+    }
+
+    @Override
+    public void addResponseCookie(final Cookie cookie) {
+        response.setCookie(cookie.getName(), cookie.getValue(), cookie.getMaxAge(), cookie.getPath(),
+                cookie.getDomain(), cookie.isSecure(), cookie.isHttpOnly());
+    }
+
+    @Override
+    public void setResponseContentType(final String content) {
+        response.setContentType(content);
     }
 }

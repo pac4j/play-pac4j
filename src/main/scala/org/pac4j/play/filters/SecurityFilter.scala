@@ -1,18 +1,3 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.play.filters
 
 import java.util.Collections
@@ -20,7 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.java.RequiresAuthenticationAction
+import org.pac4j.play.java.SecureAction
 import org.pac4j.play.scala.Security
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
@@ -70,9 +55,7 @@ import scala.concurrent.Future
   *             }}
   *           ]
   *          }}}
-  *
   * @author Hugo Valk
-  *
   * @since 2.1.0
   */
 @Singleton
@@ -89,14 +72,14 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, config.getSessionStore)
-        val requiresAuthenticationAction = new RequiresAuthenticationAction(config)
+        val securityAction = new SecureAction(config)
         val javaContext = webContext.getJavaContext
-        val authenticationResult = requiresAuthenticationAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames).wrapped().flatMap[play.api.mvc.Result](r =>
+        val authenticationResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false).wrapped().flatMap[play.api.mvc.Result](r =>
           if (r == null) {
             nextFilter(request)
           } else {
             Future {
-              log.info(s"Authentication failed for ${request.uri} with clients ${rule.clientNames} and authorizers ${rule.authorizerNames}")
+              log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}")
               JavaHelpers.createResult(javaContext, r)
             }
           }
@@ -119,15 +102,13 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
   def configurationToRule(c: Configuration): Option[Rule] = {
     c.getConfig("\"" + c.subKeys.head + "\"").flatMap { rule =>
       val res = new Rule(rule.getString("clients").orNull, rule.getString("authorizers").orNull)
-      if (res.authorizerNames == "_anonymous_")
+      if (res.authorizers == "_anonymous_")
         None
-      else if (res.authorizerNames == "_authenticated_")
-        Some(res.copy(authorizerNames = null))
+      else if (res.authorizers == "_authenticated_")
+        Some(res.copy(authorizers = null))
       else Some(res)
     }
   }
 
-  case class Rule(clientNames: String, authorizerNames: String)
-
+  case class Rule(clients: String, authorizers: String)
 }
-

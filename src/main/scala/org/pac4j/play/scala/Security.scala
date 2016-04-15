@@ -1,27 +1,11 @@
-/*
-  Copyright 2012 - 2015 pac4j organization
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
 package org.pac4j.play.scala
 
 import javax.inject.Inject
 
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.java.RequiresAuthenticationAction
+import org.pac4j.play.java.SecureAction
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
@@ -29,12 +13,11 @@ import play.core.j.JavaHelpers
 
 import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future
+import collection.JavaConversions._
 
 /**
- * <p>This trait adds security features to your Scala controllers.</p>
+ * <p>To protect a resource, the {@link #Secure} methods must be used.</p>
  * <p>For manual computation of login urls (redirections to identity providers), the session must be first initialized using the {@link #getOrCreateSessionId} method.</p>
- * <p>To protect a resource, the {@link #RequiresAuthentication} methods must be used.</p>
- * <p>To get the current user profile, the {@link #getUserProfile} method must be called.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -61,59 +44,44 @@ trait Security[P<:CommonProfile] extends Controller {
     new Session(map)
   }
 
-  protected def RequiresAuthentication[A](action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(null, null)(action)
+  protected def Secure[A](action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(null, null)(action)
   }
 
-  protected def RequiresAuthentication[A](clientName: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(clientName, null)(action)
+  protected def Secure[A](clients: String)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(clients, null)(action)
   }
 
-  protected def RequiresAuthentication[A](clientName: String, authorizerName: String)(action: P => Action[AnyContent]): Action[AnyContent] = {
-    RequiresAuthentication(parse.anyContent, clientName, authorizerName)(action)
+  protected def Secure[A](clients: String, authorizers: String, multiProfile: Boolean = false)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(parse.anyContent, clients, authorizers, multiProfile)(action)
   }
 
   /**
-   * This function is used to protect a resource.
+   * This function is used to protect an action.
    *
    * @param parser
-   * @param clientName the list of clients (separated by commas) to use for authentication
-   * @param authorizerName the list of authorizers (separated by commas) to use to check authorizations
+   * @param clients the list of clients (separated by commas) to use for authentication
+   * @param authorizers the list of authorizers (separated by commas) to use to check authorizations
+   * @param multiProfile whether multiple authentications (and thus multiple profiles) must be kept at the same time
    * @param action
    * @tparam A
    * @return
    */
-  protected def RequiresAuthentication[A](parser: BodyParser[A], clientName: String, authorizerName: String)(action: P => Action[A]) = Action.async(parser) { request =>
+  protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, config.getSessionStore)
-    val requiresAuthenticationAction = new RequiresAuthenticationAction(config)
+    val secureAction = new SecureAction(config)
     val javaContext = webContext.getJavaContext
-    requiresAuthenticationAction.internalCall(javaContext, clientName, authorizerName).wrapped().flatMap[play.api.mvc.Result](r =>
+    secureAction.internalCall(javaContext, clients, authorizers, multiProfile).wrapped().flatMap[play.api.mvc.Result](r =>
       if (r == null) {
-        var profile = javaContext.args.get(Pac4jConstants.USER_PROFILE).asInstanceOf[P]
-        if (profile == null) {
-          getUserProfile(request) match {
-            case Some(p) => profile = p
-            case _ =>  // do nothing
-          }
-        }
-        action(profile)(request)
+        val profileManager = new ProfileManager[P](webContext)
+        val profiles = profileManager.getAll(true)
+        logger.debug("profiles: {}", profiles)
+        action(asScalaBuffer(profiles).toList)(request)
       } else {
         Future {
           JavaHelpers.createResult(javaContext, r)
         }
       }
     )
-  }
-
-  /**
-   * Return the current user profile.
-   *
-   * @param request
-   * @return the user profile
-   */
-  protected def getUserProfile(implicit request: RequestHeader): Option[P] = {
-    val webContext = new PlayWebContext(request, config.getSessionStore)
-    val profileManager = new ProfileManager[P](webContext)
-    Option(profileManager.get(true))
   }
 }
