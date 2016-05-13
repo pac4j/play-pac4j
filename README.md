@@ -6,13 +6,14 @@ The `play-pac4j` project is an **easy and powerful security library for Play fra
 
 Several versions of the library are available for the different versions of the Play framework and for the different languages:
 
-| Play framework | Java library             | Scala library
-|----------------|--------------------------|-----------------------------
-| Play 2.0       | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)   | [play-pac4j_scala2.9 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)
-| Play 2.1       | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)   | [play-pac4j_scala2.10 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)
-| Play 2.2       | [play-pac4j_java v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)   | [play-pac4j_scala v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)
-| Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
-| Play 2.4       | play-pac4j v2.1.x   | play-pac4j v2.1.x
+| Play version | pac4j version | Java library             | Scala library
+|--------------|---------------|--------------------------|-----------------------------
+| 2.0          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)   | [play-pac4j_scala2.9 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)
+| 2.1          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)   | [play-pac4j_scala2.10 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)
+| 2.2          | 1.7           | [play-pac4j_java v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)   | [play-pac4j_scala v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)
+| 2.3          | 1.7           | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
+| 2.4          | 1.8           | [play-pac4j v2.1.x](https://github.com/pac4j/play-pac4j/tree/2.1.x) | [play-pac4j v2.1.x](https://github.com/pac4j/play-pac4j/tree/2.1.x)
+| 2.5          | 1.8           | play-pac4j v2.2.x   | play-pac4j v2.2.x
 
 It supports most mechanisms for:
 - [**authentication**](https://github.com/pac4j/pac4j/wiki/Clients): CAS, OAuth, SAML, OpenID Connect, LDAP, RDBMS, etc.
@@ -53,9 +54,9 @@ Before you can protect your application, you need to add the necessary libraries
 
 You need to add a dependency on the:
 
-- `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.1.0**)
+- `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.2.0**)
 
-as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.6**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
+as well as on the appropriate `pac4j` submodules (<em>groupId</em>: **org.pac4j**, *version*: **1.8.8**): the `pac4j-oauth` dependency for OAuth support, the `pac4j-cas` dependency for CAS support, the `pac4j-ldap` module for LDAP authentication, ...
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -364,6 +365,10 @@ The following parameters can be defined:
 
 ## Migration guide
 
+### 2.1.0 -> 2.2.0
+
+Upgrade to Play 2.5
+
 ### 2.0.1 -> 2.1.0
 
 The separate Scala and Java projects have been merged. You need to change the dependency `play-pac4j-java` or `play-pac4j-scala` to simply `play-pac4j`.
@@ -408,7 +413,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.6/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.2.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.8.8/index.html).
 
 
 ## Need help?
