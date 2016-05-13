@@ -12,7 +12,7 @@ Several versions of the library are available for the different versions of the 
 | Play 2.1       | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)   | [play-pac4j_scala2.10 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x)
 | Play 2.2       | [play-pac4j_java v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)   | [play-pac4j_scala v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x)
 | Play 2.3       | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)   | [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x)
-| Play 2.4       | play-pac4j-java v2.1.x   | play-pac4j-scala_2.11 v2.1.x
+| Play 2.4       | play-pac4j v2.1.x   | play-pac4j v2.1.x
 
 It supports most mechanisms for:
 - [**authentication**](https://github.com/pac4j/pac4j/wiki/Clients): CAS, OAuth, SAML, OpenID Connect, LDAP, RDBMS, etc.
@@ -421,7 +421,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 2.1.1-SNAPSHOT is under development.
+The version 2.2.0-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 

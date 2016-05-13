@@ -15,12 +15,13 @@
  */
 package org.pac4j.play.java;
 
-import play.libs.F.Promise;
+import java.util.concurrent.CompletionStage;
+
 import play.mvc.Http.Context;
 import play.mvc.Result;
 
 /**
- * 
+ *
  * @author furkan yavuz
  * @since 2.1.0
  */
@@ -31,7 +32,7 @@ public class AbstractConfigActionStub extends AbstractConfigAction {
 	}
 
 	@Override
-	public Promise<Result> call(Context ctx) throws Throwable {
+	public CompletionStage<Result> call(Context ctx) {
 		return null;
 	}
 

@@ -8,7 +8,7 @@ import org.pac4j.play.PlayWebContext;
 import play.mvc.Controller;
 
 /**
- * This controller is an easy way to get the user profile and some default injected components (configuration and data store).
+ * This controller is an easy way to get the user profile and the injected configuration.
  *
  * @author Jerome Leleu
  * @since 2.0.0

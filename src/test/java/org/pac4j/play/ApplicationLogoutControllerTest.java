@@ -48,14 +48,14 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Session;
 
 /**
- * 
+ *
  * @author furkan yavuz
  * @since 2.1.0
  */
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ ApplicationLogoutController.class, PlayWebContext.class, Http.Context.class})
 public class ApplicationLogoutControllerTest {
-	
+
 	private ApplicationLogoutController applicationLogoutController;
 	private Config config;
 	private Context contextMock;
@@ -66,7 +66,7 @@ public class ApplicationLogoutControllerTest {
 	@Before
 	public void setUp() throws Exception {
 		applicationLogoutController = new ApplicationLogoutController();
-		
+
 		config = mock(Config.class);
 		contextMock = mock(Context.class);
 		requestMock = mock(Request.class);
@@ -84,7 +84,7 @@ public class ApplicationLogoutControllerTest {
 		mockStatic(Http.Context.class);
 		when(Http.Context.current()).thenReturn(contextMock);
 		setInternalState(applicationLogoutController, "config", config);
-		
+
 		contextMock.args = new HashMap<String, Object>();
 		String key = "KEY";
 		Object value = mock(Object.class);
@@ -92,7 +92,7 @@ public class ApplicationLogoutControllerTest {
 
 		// when
 		Result result = applicationLogoutController.logout();
-		
+
 		// then
 		assertEquals("Status must be 200", 200, result.status());
 	}
@@ -106,7 +106,7 @@ public class ApplicationLogoutControllerTest {
 		Map<String, String[]> urlParameters = new HashMap<>();
 		urlParameters.put("url", new String[]{"url"});
 		doReturn(urlParameters).when(requestMock).queryString();
-		
+
 		contextMock.args = new HashMap<String, Object>();
 		String key = "KEY";
 		Object value = mock(Object.class);
@@ -114,10 +114,10 @@ public class ApplicationLogoutControllerTest {
 
 		// when
 		Result result = applicationLogoutController.logout();
-		
+
 		// then
 		assertEquals("Request have url parameter therefore logout must return result with 303 code", 303, result.status());
-		assertEquals("Location must be " + Pac4jConstants.DEFAULT_URL_VALUE, Pac4jConstants.DEFAULT_URL_VALUE, result.header("LOCATION"));
+		assertEquals("Location must be " + Pac4jConstants.DEFAULT_URL_VALUE, Pac4jConstants.DEFAULT_URL_VALUE, result.header("LOCATION").get());
 	}
 
 	@Test
@@ -129,7 +129,7 @@ public class ApplicationLogoutControllerTest {
 		Map<String, String[]> urlParameters = new HashMap<>();
 		urlParameters.put("url", new String[]{Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE});
 		doReturn(urlParameters).when(requestMock).queryString();
-		
+
 		contextMock.args = new HashMap<String, Object>();
 		String key = "KEY";
 		Object value = mock(Object.class);
@@ -140,7 +140,7 @@ public class ApplicationLogoutControllerTest {
 		
 		// then
 		assertEquals("Request have url parameter therefore logout must return result with 303 code", 303, result.status());
-		assertEquals("Location must be " + Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, result.header("LOCATION"));
+		assertEquals("Location must be " + Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE, result.header("LOCATION").get());
 	}
 
 	@Test
