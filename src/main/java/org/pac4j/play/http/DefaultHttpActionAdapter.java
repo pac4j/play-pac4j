@@ -15,6 +15,8 @@
  */
 package org.pac4j.play.http;
 
+import java.util.Map;
+
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
@@ -22,6 +24,9 @@ import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.mvc.Http.Context;
+import play.mvc.Http.Response;
 
 import static play.mvc.Results.*;
 
@@ -44,7 +49,7 @@ public class DefaultHttpActionAdapter implements HttpActionAdapter {
         } else if (code == HttpConstants.FORBIDDEN) {
             return forbidden("forbidden");
         } else if (code == HttpConstants.TEMP_REDIRECT) {
-            return redirect(webContext.getResponseLocation());
+            return redirect(getLocation(webContext));
         } else if (code == HttpConstants.OK) {
             final String content = webContext.getResponseContent();
             logger.debug("render: {}", content);
@@ -53,5 +58,13 @@ public class DefaultHttpActionAdapter implements HttpActionAdapter {
         final String message = "Unsupported HTTP action: " + code;
         logger.error(message);
         throw new TechnicalException(message);
+    }
+
+    private String getLocation(final PlayWebContext webContext){
+      final Context context = webContext.getJavaContext();
+      final Response response = context.response();
+      final Map<String, String> headers = response.getHeaders();
+
+      return headers.get(HttpConstants.LOCATION_HEADER);
     }
 }

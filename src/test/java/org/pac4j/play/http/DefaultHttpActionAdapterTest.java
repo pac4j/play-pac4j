@@ -15,6 +15,8 @@
  */
 package org.pac4j.play.http;
 
+import java.util.Map;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -65,6 +67,14 @@ public class DefaultHttpActionAdapterTest {
 	public final void testAdaptRedirect() {
 		// given
 		PlayWebContext playWebContext = mock(PlayWebContext.class);
+		play.mvc.Http.Response response = mock(play.mvc.Http.Response.class);
+		play.mvc.Http.Context context = mock( play.mvc.Http.Context.class);
+		Map<String, String> headers = response.getHeaders();
+		headers.put(HttpConstants.LOCATION_HEADER, "/loginForm");
+		
+		doReturn(headers).when(response).getHeaders();
+		doReturn(response).when(context).response();
+		doReturn(context).when(playWebContext).getJavaContext();
 		
 		// when
 		Object result = defaultHttpActionAdapter.adapt(HttpConstants.TEMP_REDIRECT, playWebContext);
