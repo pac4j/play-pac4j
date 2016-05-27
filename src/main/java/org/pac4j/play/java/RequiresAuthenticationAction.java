@@ -28,8 +28,9 @@ import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.ProfileManager;
 import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
-
 import org.pac4j.play.PlayWebContext;
+
+import play.libs.concurrent.HttpExecution;
 import play.mvc.Http.Context;
 import play.mvc.Result;
 
@@ -130,14 +131,7 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
 
             return profile;
         });
-
-        promiseProfile.thenComposeAsync((UserProfile profile) ->{
-          if (authorizationChecker.isAuthorized(context, profile, authorizerName, config.getAuthorizers())) {
-
-          }
-          return CompletableFuture.completedFuture(null);
-        });
-
+        
         return promiseProfile.thenComposeAsync((UserProfile profile) ->{
           if (profile != null) {
               logger.debug("authorizerName: {}", authorizerName);
@@ -157,13 +151,14 @@ public class RequiresAuthenticationAction extends AbstractConfigAction {
               if (startAuthentication(context, currentClients)) {
                   logger.debug("Starting authentication");
                   saveRequestedUrl(context, currentClients);
-                  return CompletableFuture.supplyAsync(() -> redirectToIdentityProvider(context, currentClients));
+                  return CompletableFuture.completedFuture(
+                    redirectToIdentityProvider(context, currentClients));
               } else {
                   logger.debug("unauthorized");
                   return unauthorized(context, currentClients);
               }
           }
-        });
+        }, HttpExecution.defaultContext());
     }
 
     protected boolean useSession(final WebContext context, final List<Client> currentClients) {
