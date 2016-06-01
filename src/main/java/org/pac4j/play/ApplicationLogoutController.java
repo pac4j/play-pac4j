@@ -1,36 +1,30 @@
 package org.pac4j.play;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
-import org.pac4j.core.profile.ProfileManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.pac4j.core.engine.ApplicationLogoutLogic;
+import org.pac4j.play.engine.PlayApplicationLogoutLogic;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
-import java.util.regex.Pattern;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This filter handles the application logout process.</p>
- * <p>After logout, the user is redirected to the url defined by the <code>url</code> request parameter if it matches the <code>logoutUrlPattern</code>.
- * Or the user is redirected to the <code>defaultUrl</code> if it is defined. Otherwise, a blank page is displayed.</p>
+ * <p>This filter handles the application logout process, based on the {@link #applicationLogoutLogic}.</p>
  *
- * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} and {@link #setLogoutUrlPattern(String)}.</p>
+ * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} (default logourl url) and {@link #setLogoutUrlPattern(String)} (pattern that logout urls must match).</p>
  *
  * @author Jerome Leleu
  * @since 2.0.0
  */
 public class ApplicationLogoutController extends Controller {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private ApplicationLogoutLogic<Result, PlayWebContext> applicationLogoutLogic = new PlayApplicationLogoutLogic();
 
-    protected String defaultUrl;
+    private String defaultUrl;
 
-    protected String logoutUrlPattern = Pac4jConstants.DEFAULT_LOGOUT_URL_PATTERN_VALUE;
+    private String logoutUrlPattern;
 
     @Inject
     protected Config config;
@@ -38,24 +32,9 @@ public class ApplicationLogoutController extends Controller {
     public Result logout() {
 
         assertNotNull("config", config);
-        assertNotBlank(Pac4jConstants.LOGOUT_URL_PATTERN, this.logoutUrlPattern);
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), config.getSessionStore());
 
-        final WebContext context = new PlayWebContext(ctx(), config.getSessionStore());
-        final ProfileManager manager = new ProfileManager(context);
-        manager.logout();
-        ctx().session().remove(Pac4jConstants.SESSION_ID);
-
-        final String url = context.getRequestParameter(Pac4jConstants.URL);
-        String redirectUrl = this.defaultUrl;
-        if (url != null && Pattern.matches(this.logoutUrlPattern, url)) {
-            redirectUrl = url;
-        }
-        logger.debug("redirectUrl: {}", redirectUrl);
-        if (redirectUrl != null) {
-            return redirect(redirectUrl);
-        } else {
-            return ok();
-        }
+        return applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern);
     }
 
     public String getDefaultUrl() {
@@ -80,5 +59,13 @@ public class ApplicationLogoutController extends Controller {
 
     public void setConfig(Config config) {
         this.config = config;
+    }
+
+    public ApplicationLogoutLogic<Result, PlayWebContext> getApplicationLogoutLogic() {
+        return applicationLogoutLogic;
+    }
+
+    public void setApplicationLogoutLogic(ApplicationLogoutLogic<Result, PlayWebContext> applicationLogoutLogic) {
+        this.applicationLogoutLogic = applicationLogoutLogic;
     }
 }

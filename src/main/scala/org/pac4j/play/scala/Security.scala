@@ -3,6 +3,7 @@ package org.pac4j.play.scala
 import javax.inject.Inject
 
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
@@ -38,7 +39,7 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return the (updated) session
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
-    val webContext = new PlayWebContext(request, config.getSessionStore)
+    val webContext = new PlayWebContext(request, config.getSessionStore.asInstanceOf[SessionStore[PlayWebContext]])
     webContext.getSessionStore.getOrCreateSessionId(webContext)
     val map = JavaConverters.mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
     new Session(map)
@@ -68,7 +69,7 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return
    */
   protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
-    val webContext = new PlayWebContext(request, config.getSessionStore)
+    val webContext = new PlayWebContext(request, config.getSessionStore.asInstanceOf[SessionStore[PlayWebContext]])
     val secureAction = new SecureAction(config)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).wrapped().flatMap[play.api.mvc.Result](r =>

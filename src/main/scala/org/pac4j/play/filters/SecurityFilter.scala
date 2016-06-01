@@ -3,6 +3,7 @@ package org.pac4j.play.filters
 import java.util.Collections
 import javax.inject.{Inject, Singleton}
 
+import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
@@ -71,7 +72,7 @@ class SecurityFilter @Inject()(configuration: Configuration) extends Filter with
     findRule(request) match {
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
-        val webContext = new PlayWebContext(request, config.getSessionStore)
+        val webContext = new PlayWebContext(request, config.getSessionStore.asInstanceOf[SessionStore[PlayWebContext]])
         val securityAction = new SecureAction(config)
         val javaContext = webContext.getJavaContext
         val authenticationResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false).wrapped().flatMap[play.api.mvc.Result](r =>

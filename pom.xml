@@ -90,18 +90,6 @@
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>com.typesafe.play</groupId>
-            <artifactId>play_2.10</artifactId>
-            <version>${play.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.typesafe.play</groupId>
-            <artifactId>play-cache_2.10</artifactId>
-            <version>${play.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- tests -->
         <dependency>

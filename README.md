@@ -140,24 +140,30 @@ Notice that you define:
 
 ### 3a) Protect urls per Action (`Secure`)
 
-You can protect (authentication + authorizations) the urls of your Play application by using the `Secure` annotation / function. The following parameters are available:
+You can protect (authentication + authorizations) the urls of your Play application by using the `Secure` annotation / function. It has the following behaviour:
+
+1) First, if the user is not authenticated (no profile) and if some clients have been defined in the `clients` parameter, a login is tried for the direct clients.
+
+2) Then, if the user has profile, authorizations are checked according to the `authorizers` configuration. If the authorizations are valid, the user is granted access. Otherwise, a 403 error page is displayed.
+
+3) Finally, if the user is still not authenticated (no profile), he is redirected to the appropriate identity provider if the first defined client is an indirect one in the `clients` configuration. Otherwise, a 401 error page is displayed.
+
+
+The following parameters are available:
 
 1) `clients` (optional): the list of client names (separated by commas) used for authentication:
 - in all cases, this filter requires the user to be authenticated. Thus, if the `clients` is blank or not defined, the user must have been previously authenticated
-- if the user is not authenticated, the defined direct clients are tried successively to login the user
-- then if the user is still not authenticated and if the first defined client is indirect, this client is used to redirect the user to the appropriate identity provider for login
-- otherwise, a 401 HTTP error is returned
 - if the `client_name` request parameter is provided, only this client (if it exists in the `clients`) is selected.
 
 2) `authorizers` (optional): the list of authorizer names (separated by commas) used to check authorizations:
 - if the `authorizers` is blank or not defined, no authorization is checked
-- if the authorization checks fail, a 403 HTTP error is returned
 - the following authorizers are available by default (without defining them in the configuration):
   * `isFullyAuthenticated` to check if the user is authenticated but not remembered, `isRemembered` for a remembered user, `isAnonymous` to ensure the user is not authenticated, `isAuthenticated` to ensure the user is authenticated (not necessary by default unless you use the `AnonymousClient`)
   * `hsts` to use the `StrictTransportSecurityHeader` authorizer, `nosniff` for `XContentTypeOptionsHeader`, `noframe` for `XFrameOptionsHeader `, `xssprotection` for `XSSProtectionHeader `, `nocache` for `CacheControlHeader ` or `securityHeaders` for the five previous authorizers
   * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` request attribute and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
 
 3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
 
 For example in your controllers:
 
@@ -279,11 +285,19 @@ are used. When not provided, the value will be `null`.
 ### 4) Define the callback endpoint only for indirect clients (`CallbackController`)
 
 For indirect clients (like Facebook), the user is redirected to an external identity provider for login and then back to the application.
-Thus, a callback endpoint is required in the application. It is managed by the `CallbackController`. The following parameters are available:
+Thus, a callback endpoint is required in the application. It is managed by the `CallbackController` which has the following behaviour:
+
+1) the credentials are extracted from the current request to fetch the user profile (from the identity provider) which is then saved in the web session
+
+2) finally, the user is redirected back to the originally requested url (or to the `defaultUrl`).
+
+
+The following parameters are available:
 
 1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
 2) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
 
 In the `routes` file:
 
@@ -351,14 +365,21 @@ val facebookProfile = commonProfile.asInstanceOf[FacebookProfile]
 
 ### 6) Logout (`ApplicationLogoutController`)
 
-You can log out the current authenticated user using the `ApplicationLogoutController`.
-After logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`.
-Or the user is redirected to the `defaultUrl` if it is defined. Otherwise, a blank page is displayed.
+You can log out the current authenticated user using the `ApplicationLogoutController`. It has the following behaviour:
+
+1) after logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`
+
+2) or the user is redirected to the `defaultUrl` if it is defined
+
+3) otherwise, a blank page is displayed.
+
+
 The following parameters are available:
 
 1) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
 
 2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default).
+
 
 In the `routes` file:
 

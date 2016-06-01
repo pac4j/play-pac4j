@@ -19,7 +19,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
  * Tests {@link PlayCacheStore}.
  *
  * @author Jerome Leleu
- * @since 2.2.0
+ * @since 2.3.0
  */
 @RunWith(PowerMockRunner.class)
 public final class PlayCacheStoreTests implements TestsConstants {

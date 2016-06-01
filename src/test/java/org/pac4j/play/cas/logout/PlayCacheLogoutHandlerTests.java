@@ -22,7 +22,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyStatic;
  * Tests {@link PlayCacheLogoutHandler}.
  *
  * @author Jerome Leleu
- * @since 2.2.0
+ * @since 2.3.0
  */
 @RunWith(PowerMockRunner.class)
 public final class PlayCacheLogoutHandlerTests implements TestsConstants {
