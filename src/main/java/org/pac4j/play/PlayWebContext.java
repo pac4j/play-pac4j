@@ -3,7 +3,6 @@ package org.pac4j.play;
 import java.util.*;
 
 import org.pac4j.core.context.Cookie;
-import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.play.store.PlayCacheStore;
@@ -33,19 +32,15 @@ public class PlayWebContext implements WebContext {
 
     protected final Session session;
 
-    protected final SessionStore sessionStore;
-
-    protected int responseStatus = -1;
+    protected final SessionStore<PlayWebContext> sessionStore;
 
     protected String responseContent = "";
-
-    protected String location;
 
     public PlayWebContext(final Context context) {
         this(context, null);
     }
 
-    public PlayWebContext(final Context context, final SessionStore sessionStore) {
+    public PlayWebContext(final Context context, final SessionStore<PlayWebContext> sessionStore) {
         this.context = context;
         this.request = context.request();
         this.response = context.response();
@@ -61,7 +56,7 @@ public class PlayWebContext implements WebContext {
         this(requestHeader, null);
     }
 
-    public PlayWebContext(final RequestHeader requestHeader, final SessionStore sessionStore) {
+    public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
         this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), sessionStore);
     }
 
@@ -72,15 +67,6 @@ public class PlayWebContext implements WebContext {
      */
     public Session getJavaSession() {
         return session;
-    }
-
-    /**
-     * Get the Java request.
-     *
-     * @return the Java request
-     */
-    public Request getJavaRequest() {
-        return request;
     }
 
     /**
@@ -97,21 +83,10 @@ public class PlayWebContext implements WebContext {
      *
      * @return the session store
      */
-    public SessionStore getSessionStore() { return this.sessionStore; }
+    public SessionStore<PlayWebContext> getSessionStore() { return this.sessionStore; }
 
     @Override
-    public void setResponseStatus(final int code) {
-        this.responseStatus = code;
-    }
-
-    /**
-     * Get the response status.
-     *
-     * @return the response status.
-     */
-    public int getResponseStatus() {
-        return this.responseStatus;
-    }
+    public void setResponseStatus(final int code) {}
 
     @Override
     public void writeResponseContent(final String content) {
@@ -187,18 +162,6 @@ public class PlayWebContext implements WebContext {
     @Override
     public void setResponseHeader(final String name, final String value) {
         response.setHeader(name, value);
-        if (HttpConstants.LOCATION_HEADER.equals(name)) {
-            location = value;
-        }
-    }
-
-    /**
-     * Get the response location.
-     *
-     * @return the response location
-     */
-    public String getResponseLocation() {
-        return location;
     }
 
     @Override

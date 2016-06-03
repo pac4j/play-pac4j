@@ -1,15 +1,15 @@
 package org.pac4j.play.store;
 
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.cache.Cache;
 import play.mvc.Http;
+
+import java.util.LinkedHashMap;
 
 /**
  * The cache storage uses the Play Cache, only an identifier is saved into the Play session.
@@ -17,7 +17,7 @@ import play.mvc.Http;
  * @author Jerome Leleu
  * @since 2.0.0
  */
-public final class PlayCacheStore implements SessionStore {
+public final class PlayCacheStore implements SessionStore<PlayWebContext> {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);
 
@@ -36,14 +36,9 @@ public final class PlayCacheStore implements SessionStore {
         return prefix + SEPARATOR + sessionId + SEPARATOR + key;
     }
 
-    private PlayWebContext getPlayWebContext(final WebContext context) {
-        CommonHelper.assertTrue(context instanceof PlayWebContext, "context must be a PlayWebContext");
-        return (PlayWebContext) context;
-    }
-
     @Override
-    public String getOrCreateSessionId(final WebContext context) {
-        final Http.Session session = getPlayWebContext(context).getJavaSession();
+    public String getOrCreateSessionId(final PlayWebContext context) {
+        final Http.Session session = context.getJavaSession();
         // get current sessionId
         String sessionId = session.get(Pac4jConstants.SESSION_ID);
         logger.trace("retrieved sessionId: {}", sessionId);
@@ -59,15 +54,15 @@ public final class PlayCacheStore implements SessionStore {
     }
 
     @Override
-    public Object get(final WebContext context, final String key) {
+    public Object get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
         return Cache.get(getKey(sessionId, key));
     }
 
     @Override
-    public void set(final WebContext context, final String key, final Object value) {
+    public void set(final PlayWebContext context, final String key, final Object value) {
         int timeout;
-        if (value instanceof CommonProfile) {
+        if (value instanceof CommonProfile || value instanceof LinkedHashMap) {
             timeout = profileTimeout;
         } else {
             timeout = sessionTimeout;

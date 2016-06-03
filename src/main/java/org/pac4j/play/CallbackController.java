@@ -1,16 +1,7 @@
 package org.pac4j.play;
 
-import org.pac4j.core.client.Client;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.client.IndirectClient;
-import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
-import org.pac4j.core.credentials.Credentials;
-import org.pac4j.core.exception.RequiresHttpAction;
-import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.profile.ProfileManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.pac4j.core.engine.CallbackLogic;
+import org.pac4j.core.engine.DefaultCallbackLogic;
 import play.mvc.Controller;
 import play.mvc.Result;
 import org.pac4j.core.config.Config;
@@ -20,7 +11,7 @@ import javax.inject.Inject;
 import static org.pac4j.core.util.CommonHelper.*;
 
 /**
- * <p>This controller finishes the login process for an indirect client.</p>
+ * <p>This filter finishes the login process for an indirect client, based on the {@link #callbackLogic}.</p>
  *
  * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} (default url after login if none was requested) and
  * {@link #setMultiProfile(boolean)} (whether multiple profiles should be kept).</p>
@@ -31,61 +22,21 @@ import static org.pac4j.core.util.CommonHelper.*;
  */
 public class CallbackController extends Controller {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private CallbackLogic<Result, PlayWebContext> callbackLogic = new DefaultCallbackLogic<>();
 
-    protected String defaultUrl = Pac4jConstants.DEFAULT_URL_VALUE;
+    private String defaultUrl;
 
-    protected boolean multiProfile;
+    private Boolean multiProfile;
 
     @Inject
     protected Config config;
 
     public Result callback() {
 
-        assertNotBlank(Pac4jConstants.DEFAULT_URL, this.defaultUrl);
-
         assertNotNull("config", config);
-        assertNotNull("config.httpActionAdapter", config.getHttpActionAdapter());
-        final PlayWebContext context = new PlayWebContext(ctx(), config.getSessionStore());
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), config.getSessionStore());
 
-        final Clients clients = config.getClients();
-        assertNotNull("clients", clients);
-        final Client client = clients.findClient(context);
-        logger.debug("client: {}", client);
-        assertNotNull("client", client);
-        assertTrue(client instanceof IndirectClient, "only indirect clients are allowed on the callback url");
-
-        try {
-            final Credentials credentials = client.getCredentials(context);
-            logger.debug("credentials: {}", credentials);
-
-            final CommonProfile profile = client.getUserProfile(credentials, context);
-            logger.debug("profile: {}", profile);
-            saveUserProfile(context, profile);
-            return redirectToOriginallyRequestedUrl(context);
-
-        } catch (final RequiresHttpAction e) {
-            logger.debug("extra HTTP action required in callback: {}", e.getCode());
-            return (Result) config.getHttpActionAdapter().adapt(e.getCode(), context);
-        }
-    }
-
-    protected void saveUserProfile(final WebContext context, final CommonProfile profile) {
-        final ProfileManager manager = new ProfileManager(context);
-        if (profile != null) {
-            manager.save(true, profile, this.multiProfile);
-        }
-    }
-
-    protected Result redirectToOriginallyRequestedUrl(final WebContext context) {
-        final String requestedUrl = (String) context.getSessionAttribute(Pac4jConstants.REQUESTED_URL);
-        logger.debug("requestedUrl: {}", requestedUrl);
-        if (isNotBlank(requestedUrl)) {
-            context.setSessionAttribute(Pac4jConstants.REQUESTED_URL, null);
-            return redirect(requestedUrl);
-        } else {
-            return redirect(this.defaultUrl);
-        }
+        return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
     }
 
     public String getDefaultUrl() {

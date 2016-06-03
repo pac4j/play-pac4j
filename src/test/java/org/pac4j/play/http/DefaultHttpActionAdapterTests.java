@@ -5,12 +5,16 @@ import org.junit.Test;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
+import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
-import org.pac4j.play.AbstractWebTests;
 import org.pac4j.play.PlayWebContext;
+import play.core.j.JavaResultExtractor;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -19,9 +23,9 @@ import static org.mockito.Mockito.*;
  * Tests {@link DefaultHttpActionAdapter}.
  *
  * @author Jerome Leleu
- * @since 2.2.0
+ * @since 2.3.0
  */
-public final class DefaultHttpActionAdapterTests extends AbstractWebTests {
+public final class DefaultHttpActionAdapterTests implements TestsConstants {
 
     private HttpActionAdapter adapter;
 
@@ -31,6 +35,10 @@ public final class DefaultHttpActionAdapterTests extends AbstractWebTests {
     public void setUp() {
         adapter = new DefaultHttpActionAdapter();
         context = mock(PlayWebContext.class);
+    }
+
+    protected String getBody(final Result result) throws IOException {
+        return new String(JavaResultExtractor.getBody(result, 0L), HttpConstants.UTF8_ENCODING);
     }
 
     @Test
@@ -49,7 +57,13 @@ public final class DefaultHttpActionAdapterTests extends AbstractWebTests {
 
     @Test
     public void testRedirect() throws IOException {
-        when(context.getResponseLocation()).thenReturn(PAC4J_URL);
+        final Http.Context ctx = mock(Http.Context.class);
+        when(context.getJavaContext()).thenReturn(ctx);
+        final Http.Response response = mock(Http.Response.class);
+        when(ctx.response()).thenReturn(response);
+        final Map<String, String> headers = new HashMap<>();
+        headers.put(HttpConstants.LOCATION_HEADER, PAC4J_URL);
+        when(response.getHeaders()).thenReturn(headers);
         final Result result = (Result) adapter.adapt(HttpConstants.TEMP_REDIRECT, context);
         assertEquals(303, result.status());
         assertEquals(PAC4J_URL, result.redirectLocation());
