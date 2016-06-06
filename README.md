@@ -17,15 +17,19 @@ Several versions of the library are available for the different versions of the 
 | 2.5          | 1.8           | [2.2.x](https://github.com/pac4j/play-pac4j/tree/2.2.x)
 | 2.4          | 1.9           | 2.3.x
 
-**Main concepts:**
+**Main concepts and components:**
 
 1) A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism (CAS, OAuth, SAML, OpenID Connect, LDAP, JWT...) It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication
 
 2) An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile(s) (role / permission, ...) or on the current web context (IP check, CSRF...)
 
-3) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are checked, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+3) A [**config**](https://github.com/pac4j/pac4j/blob/master/pac4j-core/src/main/java/org/pac4j/core/config/Config.java) defines the security configuration via clients and authorizers
 
-4) The `CallbackController` finishes the login process for an indirect client.
+5) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+
+6) The `CallbackController` finishes the login process for an indirect client
+
+7) The `ApplicationLogoutController` logs out the user from the application.
 
 Just follow these easy steps to secure your Play 2 web application:
 
@@ -413,6 +417,8 @@ bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
 The `RequiresAuthentication` annotation and function have been renamed as `Secure` with the `clients` and `authorizers` parameters (instead of `clientName` and `authorizerName`).
 
 The `UserProfileController` class and the `getUserProfile` method in the `Security`  trait no longer exist and the `ProfileManager` must be used instead.
+
+The `ApplicationLogoutController` behaviour has slightly changed: even without any `url` request parameter, the user will be redirected to the `defaultUrl` if it has been defined
 
 ### 2.0.1 -> 2.1.0
 
