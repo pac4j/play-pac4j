@@ -25,11 +25,11 @@ Several versions of the library are available for the different versions of the 
 
 3) A [**config**](https://github.com/pac4j/pac4j/blob/master/pac4j-core/src/main/java/org/pac4j/core/config/Config.java) defines the security configuration via clients and authorizers
 
-5) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+4) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
 
-6) The `CallbackController` finishes the login process for an indirect client
+5) The `CallbackController` finishes the login process for an indirect client
 
-7) The `ApplicationLogoutController` logs out the user from the application.
+6) The `ApplicationLogoutController` logs out the user from the application.
 
 Just follow these easy steps to secure your Play 2 web application:
 
