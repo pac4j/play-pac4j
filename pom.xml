@@ -97,6 +97,7 @@
             <artifactId>pac4j-core</artifactId>
             <version>${pac4j.version}</version>
             <type>test-jar</type>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
