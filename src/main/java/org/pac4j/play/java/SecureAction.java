@@ -10,7 +10,6 @@ import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.engine.HttpActionAdapterWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.libs.F.Promise;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
@@ -19,6 +18,8 @@ import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import static org.pac4j.core.util.CommonHelper.*;
 
@@ -36,7 +37,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<Promise<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
 
     protected final static Method CLIENTS_METHOD;
 
@@ -65,17 +66,20 @@ public class SecureAction extends Action<Result> {
     }
 
     @Override
-    public Promise<Result> call(final Context ctx) throws Throwable {
-
-        final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
-        final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
-        final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
-        final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
-
-        return internalCall(ctx, clients, authorizers, multiProfile);
+    public CompletionStage<Result> call(final Context ctx) {
+        try{
+          final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
+          final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
+          final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
+          final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
+  
+          return internalCall(ctx, clients, authorizers, multiProfile);
+        }catch(Throwable t){
+          throw new RuntimeException(t);
+        }        
     }
 
-    public Promise<Result> internalCall(final Context ctx, final String clients, final String authorizers, final boolean multiProfile) throws Throwable {
+    public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final boolean multiProfile) throws Throwable {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, config.getSessionStore());
@@ -84,7 +88,7 @@ public class SecureAction extends Action<Result> {
         return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
             // when called from Scala
             if (delegate == null) {
-                return Promise.pure(null);
+                return CompletableFuture.completedFuture(null);
             } else {
                 return delegate.call(ctx);
             }
@@ -109,11 +113,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<Promise<Result>, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic<CompletionStage<Result>, PlayWebContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<Promise<Result>, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 

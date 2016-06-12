@@ -1,9 +1,12 @@
 package org.pac4j.play.engine;
 
 import org.pac4j.play.PlayWebContext;
-import play.libs.F.Promise;
 import org.pac4j.core.http.HttpActionAdapter;
 import play.mvc.Result;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 
 /**
  * Wrapper of a <code>HttpActionAdapter&lt;Result,PlayWebContext&gt;</code>.
@@ -11,7 +14,7 @@ import play.mvc.Result;
  * @author Jerome Leleu
  * @since 2.3.0
  */
-public final class HttpActionAdapterWrapper implements HttpActionAdapter<Promise<Result>, PlayWebContext> {
+public final class HttpActionAdapterWrapper implements HttpActionAdapter<CompletionStage<Result>, PlayWebContext> {
 
     private final HttpActionAdapter<Result, PlayWebContext> wrapped;
 
@@ -20,7 +23,7 @@ public final class HttpActionAdapterWrapper implements HttpActionAdapter<Promise
     }
 
     @Override
-    public Promise<Result> adapt(final int code, final PlayWebContext context) {
-        return Promise.pure(wrapped.adapt(code, context));
+    public CompletionStage<Result> adapt(final int code, final PlayWebContext context) {
+        return CompletableFuture.completedFuture(wrapped.adapt(code, context));
     }
 }
