@@ -23,3 +23,6 @@ cas.log
 perfStats.log
 .idea
 *.iml
+.fbExcludeFilterFile
+.pmd
+.pmdruleset.xml
