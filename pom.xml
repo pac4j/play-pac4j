@@ -90,7 +90,7 @@
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
-
+        
         <!-- tests -->
         <dependency>
             <groupId>org.pac4j</groupId>
@@ -123,6 +123,12 @@
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-test_2.11</artifactId>
+            <version>${play.version}</version>
+            <scope>test</scope>
+        </dependency>        
     </dependencies>
 
     <build>
