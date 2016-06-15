@@ -15,6 +15,7 @@ import play.core.j.JavaHelpers
 import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future
 import collection.JavaConversions._
+import scala.compat.java8.FutureConverters._
 
 /**
  * <p>To protect a resource, the {@link #Secure} methods must be used.</p>
@@ -72,7 +73,7 @@ trait Security[P<:CommonProfile] extends Controller {
     val webContext = new PlayWebContext(request, config.getSessionStore.asInstanceOf[SessionStore[PlayWebContext]])
     val secureAction = new SecureAction(config)
     val javaContext = webContext.getJavaContext
-    secureAction.internalCall(javaContext, clients, authorizers, multiProfile).wrapped().flatMap[play.api.mvc.Result](r =>
+    secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         val profileManager = new ProfileManager[P](webContext)
         val profiles = profileManager.getAll(true)
