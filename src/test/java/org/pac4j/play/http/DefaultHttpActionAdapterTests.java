@@ -8,9 +8,11 @@ import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.pac4j.play.PlayWebContext;
-import play.core.j.JavaResultExtractor;
+
 import play.mvc.Http;
 import play.mvc.Result;
+import play.test.Helpers;
+import play.test.WithApplication;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -25,12 +27,12 @@ import static org.mockito.Mockito.*;
  * @author Jerome Leleu
  * @since 2.3.0
  */
-public final class DefaultHttpActionAdapterTests implements TestsConstants {
+public final class DefaultHttpActionAdapterTests extends WithApplication implements TestsConstants{
 
-    private HttpActionAdapter adapter;
+    private HttpActionAdapter<Result, PlayWebContext> adapter;
 
     private PlayWebContext context;
-
+    
     @Before
     public void setUp() {
         adapter = new DefaultHttpActionAdapter();
@@ -38,7 +40,7 @@ public final class DefaultHttpActionAdapterTests implements TestsConstants {
     }
 
     protected String getBody(final Result result) throws IOException {
-        return new String(JavaResultExtractor.getBody(result, 0L), HttpConstants.UTF8_ENCODING);
+      return Helpers.contentAsString(result);
     }
 
     @Test
@@ -66,7 +68,7 @@ public final class DefaultHttpActionAdapterTests implements TestsConstants {
         when(response.getHeaders()).thenReturn(headers);
         final Result result = (Result) adapter.adapt(HttpConstants.TEMP_REDIRECT, context);
         assertEquals(303, result.status());
-        assertEquals(PAC4J_URL, result.redirectLocation());
+        assertEquals(PAC4J_URL, result.redirectLocation().get());
     }
 
     @Test
