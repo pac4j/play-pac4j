@@ -9,7 +9,9 @@ import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlayCacheStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.cache.Cache;
+import play.cache.CacheApi;
+
+import javax.inject.Inject;
 
 /**
  * This class handles logout requests from a CAS server using the Play Cache.
@@ -21,7 +23,13 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public PlayCacheLogoutHandler() {}
+
+    private final CacheApi cache;
+
+    @Inject
+    public PlayCacheLogoutHandler(CacheApi cacheApi) {
+        this.cache = cacheApi;
+    }
 
     public void destroySession(WebContext context) {
         final PlayWebContext webContext = (PlayWebContext) context;
@@ -29,8 +37,8 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         logger.debug("logoutRequest: {}", logoutRequest);
         final String ticket = CommonHelper.substringBetween(logoutRequest, "SessionIndex>", "</");
         logger.debug("extract ticket: {}", ticket);
-        final String sessionId = (String) Cache.get(ticket);
-        Cache.remove(ticket);
+        final String sessionId = cache.get(ticket);
+        cache.remove(ticket);
         webContext.getJavaSession().put(Pac4jConstants.SESSION_ID, sessionId);
         final ProfileManager profileManager = new ProfileManager(webContext);
         profileManager.remove(true);
@@ -42,6 +50,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         final PlayCacheStore playCacheStore = (PlayCacheStore) webContext.getSessionStore();
         final String sessionId = playCacheStore.getOrCreateSessionId(webContext);
         logger.debug("save sessionId: {}", sessionId);
-        Cache.set(ticket, sessionId, playCacheStore.getProfileTimeout());
+        cache.set(ticket, sessionId, playCacheStore.getProfileTimeout());
     }
 }

@@ -2,12 +2,13 @@ package org.pac4j.play.java;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
-
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.engine.HttpActionAdapterWrapper;
+import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Action;
@@ -21,7 +22,7 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.pac4j.core.util.CommonHelper.*;
+import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
 /**
  * <p>This filter protects an url, based on the {@link #securityLogic}.</p>
@@ -55,14 +56,15 @@ public class SecureAction extends Action<Result> {
         }
     }
 
+    final private Config config;
+
+    final private SessionStore sessionStore;
+
     @Inject
-    protected Config config;
-
-    public SecureAction() {
-    }
-
-    public SecureAction(final Config config) {
+    public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
         this.config = config;
+        this.config.setSessionStore(playSessionStore);
+        this.sessionStore = playSessionStore;
     }
 
     @Override
@@ -82,7 +84,7 @@ public class SecureAction extends Action<Result> {
     public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final boolean multiProfile) throws Throwable {
 
         assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx, config.getSessionStore());
+        final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
         final HttpActionAdapterWrapper actionAdapterWrapper = new HttpActionAdapterWrapper(config.getHttpActionAdapter());
 
         return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
@@ -119,13 +121,5 @@ public class SecureAction extends Action<Result> {
 
     public void setSecurityLogic(SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
-    }
-
-    public Config getConfig() {
-        return config;
-    }
-
-    public void setConfig(Config config) {
-        this.config = config;
     }
 }

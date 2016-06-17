@@ -5,7 +5,6 @@ import java.util.*;
 import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.play.store.PlayCacheStore;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
 import play.mvc.Http;
@@ -13,7 +12,7 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Http.Session;
 import play.mvc.Http.Context;
-
+import static org.pac4j.core.util.CommonHelper.assertNotNull;
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
  * <p>"Session objects" are managed by the defined {@link SessionStore}.</p>
@@ -36,24 +35,13 @@ public class PlayWebContext implements WebContext {
 
     protected String responseContent = "";
 
-    public PlayWebContext(final Context context) {
-        this(context, null);
-    }
-
     public PlayWebContext(final Context context, final SessionStore<PlayWebContext> sessionStore) {
         this.context = context;
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        if (sessionStore == null) {
-            this.sessionStore = new PlayCacheStore();
-        } else {
-            this.sessionStore = sessionStore;
-        }
-    }
-
-    public PlayWebContext(final RequestHeader requestHeader) {
-        this(requestHeader, null);
+        assertNotNull("sessionStore must not be null", sessionStore);
+        this.sessionStore = sessionStore;
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
