@@ -341,7 +341,7 @@ Examples:
 ```java
 PlayWebContext context = new PlayWebContext(ctx());
 ProfileManager<CommonProfile> profileManager = new ProfileManager(context);
-Optional<CommonProfile> profile = manager.get(true);
+Optional<CommonProfile> profile = profileManager.get(true);
 ```
 
 *In Scala:*
