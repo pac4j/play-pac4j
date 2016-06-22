@@ -348,7 +348,7 @@ public class Application {
     public Result getUserProfile() {
         PlayWebContext webContext = new PlayWebContext(ctx(), playSessionStore)
         ProfileManager<CommonProfile> profileManager = new ProfileManager(context);
-        Optional<CommonProfile> profile = manager.get(true);
+        Optional<CommonProfile> profile = profileManager.get(true);
         ....
     } 
 
