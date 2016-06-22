@@ -4,7 +4,12 @@ import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.play.PlayWebContext;
 
 /**
- * Created by ie01034 on 17-6-2016.
+ *
+ * To store data in session.
+ * Extending the SessionStore is necessary for dependency injection to work.
+ * @author Ilias Elkhalloufi & Wessel Bakker
+ * @since 1.9.0
+ *
  */
 public interface PlaySessionStore extends SessionStore<PlayWebContext> {
 
