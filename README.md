@@ -13,7 +13,6 @@ Several versions of the library are available for the different versions of the 
 | 2.1          | 1.7           | [play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.10 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
 | 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
-| 2.5          | 1.8           | [2.2.x](https://github.com/pac4j/play-pac4j/tree/2.2.x)
 | 2.4          | 1.9           | [2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x)
 | 2.5          | 1.9           | 2.4.x
 
@@ -38,7 +37,7 @@ Just follow these easy steps to secure your Play 2 web application:
 
 You need to add a dependency on:
 
-- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.4.0-SNAPSHOT**)
+- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.4.0**)
 - the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
@@ -478,7 +477,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 2.4.0-SNAPSHOT is under development.
+The version 2.4.1-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
