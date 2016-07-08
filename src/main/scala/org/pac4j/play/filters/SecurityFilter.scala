@@ -13,7 +13,6 @@ import org.pac4j.play.store.PlaySessionStore
 import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.{Configuration, Logger}
-import play.core.j.JavaHelpers
 import play.mvc.Http
 
 import scala.collection.JavaConversions._
@@ -35,7 +34,7 @@ import scala.concurrent.Future
   * `_anonymous_` will disable authentication and authorization for urls matching the regex.
   * `_authenticated_` will require authentication, but will set clients and authorizers both to `null`.
   *
-  * Rules are traversed top to bottom. The first matching rule will define which clients and authorizers
+  * Rules are traversed and applied from top to bottom. The first matching rule will define which clients and authorizers
   * are used. When not provided, the value will be `null`.
   *
   * @example {{{
@@ -61,15 +60,15 @@ import scala.concurrent.Future
   *   }}
   * ]
   * }}}
-  * @see http://www.pac4j.org/
-  * @see https://github.com/pac4j/play-pac4j
+  * @author Hugo Valk
+  * @since 2.1.0
   */
 @Singleton
 class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val sessionStore: PlaySessionStore, val config: Config) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
-  val rules = configuration.getConfigList("security.rules")
+  val rules = configuration.getConfigList("pac4j.security.rules")
     .getOrElse(Collections.emptyList())
 
   override def apply(nextFilter: (RequestHeader) => Future[play.api.mvc.Result])
@@ -80,7 +79,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
         val webContext = new PlayWebContext(request, sessionStore)
         val securityAction = new SecureAction(config, sessionStore)
         val javaContext = webContext.getJavaContext
-        val futureResult = securityAction.internalCall(javaContext, rule.clientNames, rule.authorizerNames, false)
+        val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
           if (requiresAuthenticationResult == null)
@@ -95,7 +94,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
             * Or the future results in an exception
             */
             Future {
-              log.info(s"Authentication failed for ${request.uri} with clients ${rule.clientNames} and authorizers ${rule.authorizerNames}. Authentication response code ${requiresAuthenticationResult.status}.")
+              log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}. Authentication response code ${requiresAuthenticationResult.status}.")
               createResultSimple(javaContext, requiresAuthenticationResult)
             }
         }
@@ -119,15 +118,15 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
   def configurationToRule(c: Configuration): Option[Rule] = {
     c.getConfig("\"" + c.subKeys.head + "\"").flatMap { rule =>
       val res = new Rule(rule.getString("clients").orNull, rule.getString("authorizers").orNull)
-      if (res.authorizerNames == "_anonymous_")
+      if (res.authorizers == "_anonymous_")
         None
-      else if (res.authorizerNames == "_authenticated_")
-        Some(res.copy(authorizerNames = null))
+      else if (res.authorizers == "_authenticated_")
+        Some(res.copy(authorizers = null))
       else Some(res)
     }
   }
 
-  case class Rule(clientNames: String, authorizerNames: String)
+  case class Rule(clients: String, authorizers: String)
 
   def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
     import scala.collection.convert.decorateAsScala._
