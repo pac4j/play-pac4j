@@ -1,5 +1,6 @@
 package org.pac4j.play.cas.logout;
 
+import com.google.inject.Provider;
 import org.pac4j.cas.logout.NoLogoutHandler;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
@@ -25,11 +26,23 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
 
 
     private final CacheApi cache;
+    private final Provider<CacheApi> cacheApiProvider;
 
     @Inject
-    public PlayCacheLogoutHandler(CacheApi cacheApi) {
+    public PlayCacheLogoutHandler(final CacheApi cacheApi) {
+        this.cacheApiProvider = null;
         this.cache = cacheApi;
     }
+
+    public PlayCacheLogoutHandler(final Provider<CacheApi> cacheApiProvider) {
+        this.cache = null;
+        this.cacheApiProvider = cacheApiProvider;
+    }
+
+    private CacheApi getCache() {
+        return cache != null ? cache : cacheApiProvider.get();
+    }
+
 
     public void destroySession(WebContext context) {
         final PlayWebContext webContext = (PlayWebContext) context;
@@ -37,8 +50,8 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         logger.debug("logoutRequest: {}", logoutRequest);
         final String ticket = CommonHelper.substringBetween(logoutRequest, "SessionIndex>", "</");
         logger.debug("extract ticket: {}", ticket);
-        final String sessionId = cache.get(ticket);
-        cache.remove(ticket);
+        final String sessionId = getCache().get(ticket);
+        getCache().remove(ticket);
         webContext.getJavaSession().put(Pac4jConstants.SESSION_ID, sessionId);
         final ProfileManager profileManager = new ProfileManager(webContext);
         profileManager.remove(true);
@@ -50,6 +63,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         final PlayCacheStore playCacheStore = (PlayCacheStore) webContext.getSessionStore();
         final String sessionId = playCacheStore.getOrCreateSessionId(webContext);
         logger.debug("save sessionId: {}", sessionId);
-        cache.set(ticket, sessionId, playCacheStore.getProfileTimeout());
+        getCache().set(ticket, sessionId, playCacheStore.getProfileTimeout());
     }
 }
