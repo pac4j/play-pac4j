@@ -33,7 +33,7 @@ trait Security[P<:CommonProfile] extends Controller {
   @Inject
   protected val config: Config
   @Inject
-  protected val sessionStore: PlaySessionStore
+  protected val playSessionStore: PlaySessionStore
 
   /**
    * Get or create a new sessionId.
@@ -42,7 +42,7 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return the (updated) session
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
-    val webContext = new PlayWebContext(request, sessionStore)
+    val webContext = new PlayWebContext(request, playSessionStore)
     webContext.getSessionStore.getOrCreateSessionId(webContext)
     val map = JavaConverters.mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
     new Session(map)
@@ -72,8 +72,8 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return
    */
   protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
-    val webContext = new PlayWebContext(request, sessionStore)
-    val secureAction = new SecureAction(config, sessionStore)
+    val webContext = new PlayWebContext(request, playSessionStore)
+    val secureAction = new SecureAction(config, playSessionStore)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {

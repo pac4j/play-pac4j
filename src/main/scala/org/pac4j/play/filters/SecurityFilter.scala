@@ -64,7 +64,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val sessionStore: PlaySessionStore, val config: Config) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
@@ -76,8 +76,8 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
     findRule(request) match {
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
-        val webContext = new PlayWebContext(request, sessionStore)
-        val securityAction = new SecureAction(config, sessionStore)
+        val webContext = new PlayWebContext(request, playSessionStore)
+        val securityAction = new SecureAction(config, playSessionStore)
         val javaContext = webContext.getJavaContext
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
