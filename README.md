@@ -56,7 +56,7 @@ public class SecurityModule extends AbstractModule {
 
   @Override
   protected void configure() {  
-    bind(PlaySessionStore.class).to(PlayCacheStore.class)
+    bind(PlaySessionStore.class).to(PlayCacheStore.class);
   
     FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
     TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
