@@ -30,12 +30,12 @@ public class ApplicationLogoutController extends Controller {
     @Inject
     protected Config config;
     @Inject
-    protected PlaySessionStore sessionStore;
+    protected PlaySessionStore playSessionStore;
 
     public Result logout() {
 
         assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), sessionStore);
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
         return applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern);
     }

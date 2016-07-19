@@ -32,12 +32,12 @@ public class CallbackController extends Controller {
     @Inject
     protected Config config;
     @Inject
-    protected PlaySessionStore sessionStore;
+    protected PlaySessionStore playSessionStore;
 
     public Result callback() {
 
         assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), sessionStore);
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
         return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
     }
