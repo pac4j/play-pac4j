@@ -9,12 +9,13 @@ import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlayCacheStore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import play.cache.Cache;
+import play.cache.CacheApi;
 import play.mvc.Http;
 
 import java.util.LinkedHashMap;
 
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -30,18 +31,20 @@ public final class PlayCacheLogoutHandlerTests implements TestsConstants {
     private PlayCacheLogoutHandler handler;
 
     private PlayWebContext context;
+    private CacheApi cacheApiMock;
 
     @Before
     public void setUp() {
-        handler = new PlayCacheLogoutHandler();
+        cacheApiMock = mock(CacheApi.class);
+        handler = new PlayCacheLogoutHandler(cacheApiMock);
         context = mock(PlayWebContext.class);
     }
 
     @Test
-    @PrepareForTest(Cache.class)
+    @PrepareForTest(CacheApi.class)
     public void testRecord() {
-        mockStatic(Cache.class);
-        when(context.getSessionStore()).thenReturn(new PlayCacheStore());
+        mockStatic(CacheApi.class);
+        when(context.getSessionStore()).thenReturn(new PlayCacheStore(cacheApiMock));
         final Http.Session session = mock(Http.Session.class);
         when(context.getJavaSession()).thenReturn(session);
         handler.recordSession(context, KEY);
@@ -50,13 +53,13 @@ public final class PlayCacheLogoutHandlerTests implements TestsConstants {
     }
 
     @Test
-    @PrepareForTest(Cache.class)
+    @PrepareForTest(CacheApi.class)
     public void testDestroy() {
-        mockStatic(Cache.class);
+        mockStatic(CacheApi.class);
         when(context.getRequestParameter("logoutRequest")).thenReturn("SessionIndex>" + VALUE + "</");
         final Http.Session session = mock(Http.Session.class);
         when(context.getJavaSession()).thenReturn(session);
-        when(Cache.get(VALUE)).thenReturn(KEY);
+        when(cacheApiMock.get(VALUE)).thenReturn(KEY);
         handler.destroySession(context);
         verify(session).put(Pac4jConstants.SESSION_ID, KEY);
         verify(context).setRequestAttribute(Pac4jConstants.USER_PROFILES, new LinkedHashMap());

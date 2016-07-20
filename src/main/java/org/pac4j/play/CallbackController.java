@@ -1,14 +1,15 @@
 package org.pac4j.play;
 
+import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
+import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Result;
-import org.pac4j.core.config.Config;
 
 import javax.inject.Inject;
 
-import static org.pac4j.core.util.CommonHelper.*;
+import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
 /**
  * <p>This filter finishes the login process for an indirect client, based on the {@link #callbackLogic}.</p>
@@ -30,11 +31,13 @@ public class CallbackController extends Controller {
 
     @Inject
     protected Config config;
+    @Inject
+    protected PlaySessionStore playSessionStore;
 
     public Result callback() {
 
         assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), config.getSessionStore());
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
         return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
     }

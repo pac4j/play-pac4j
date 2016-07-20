@@ -1,14 +1,13 @@
 package org.pac4j.play.store;
 
+import com.google.inject.Inject;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.cache.Cache;
+import play.cache.CacheApi;
 import play.mvc.Http;
-
 import java.util.LinkedHashMap;
 
 /**
@@ -17,7 +16,7 @@ import java.util.LinkedHashMap;
  * @author Jerome Leleu
  * @since 2.0.0
  */
-public final class PlayCacheStore implements SessionStore<PlayWebContext> {
+public class PlayCacheStore implements PlaySessionStore {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);
 
@@ -31,6 +30,13 @@ public final class PlayCacheStore implements SessionStore<PlayWebContext> {
 
     // 1 minute = 60 second
     private int sessionTimeout = 60;
+
+    private final CacheApi cache;
+
+    @Inject
+    public PlayCacheStore(final CacheApi cache) {
+        this.cache = cache;
+    }
 
     String getKey(final String sessionId, final String key) {
         return prefix + SEPARATOR + sessionId + SEPARATOR + key;
@@ -56,7 +62,7 @@ public final class PlayCacheStore implements SessionStore<PlayWebContext> {
     @Override
     public Object get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
-        return Cache.get(getKey(sessionId, key));
+        return cache.get(getKey(sessionId, key));
     }
 
     @Override
@@ -68,7 +74,7 @@ public final class PlayCacheStore implements SessionStore<PlayWebContext> {
             timeout = sessionTimeout;
         }
         final String sessionId = getOrCreateSessionId(context);
-        Cache.set(getKey(sessionId, key), value, timeout);
+        cache.set(getKey(sessionId, key), value, timeout);
     }
 
     public String getPrefix() {
@@ -94,4 +100,5 @@ public final class PlayCacheStore implements SessionStore<PlayWebContext> {
     public void setSessionTimeout(int sessionTimeout) {
         this.sessionTimeout = sessionTimeout;
     }
+
 }

@@ -43,7 +43,7 @@ You need to add a dependency on:
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
 
-### 2) Define the configuration (`Config` + `Client` + `Authorizer`)
+### 2) Define the configuration (`Config` + `Client` + `Authorizer` + `PlaySessionStore`)
 
 The configuration (`org.pac4j.core.config.Config`) contains all the clients and authorizers required by the application to handle security.
 
@@ -55,7 +55,9 @@ The `Config` is bound for injection in a `SecurityModule` (or whatever the name 
 public class SecurityModule extends AbstractModule {
 
   @Override
-  protected void configure() {
+  protected void configure() {  
+    bind(PlaySessionStore.class).to(PlayCacheStore.class);
+  
     FacebookClient facebookClient = new FacebookClient("fbId", "fbSecret");
     TwitterClient twitterClient = new TwitterClient("twId", "twSecret");
 
@@ -63,6 +65,7 @@ public class SecurityModule extends AbstractModule {
     IndirectBasicAuthClient basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
 
     CasClient casClient = new CasClient("http://mycasserver/login");
+    casClient.setLogoutHandler(new PlayCacheLogoutHandler(getProvider(CacheApi.class)));
 
     SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
                     "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:openidp-feide.xml");
@@ -97,6 +100,8 @@ public class SecurityModule extends AbstractModule {
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   override def configure(): Unit = {
+  
+    bind(classOf[PlaySessionStore]).to(classOf[PlayCacheStore])
 
     val facebookClient = new FacebookClient("fbId", "fbSecret")
     val twitterClient = new TwitterClient("twId", "twSecret")
@@ -105,6 +110,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     val basicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
 
     val casClient = new CasClient("http://mycasserver/login")
+    casClient.setLogoutHandler(new PlayCacheLogoutHandler(getProvider(classOf[CacheApi])))
 
     val cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks", "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:openidp-feide.xml")
     cfg.setMaximumAuthenticationLifetime(3600)
@@ -134,11 +140,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
-Notice that you define:
-
-1) an optional [`SessionStore`](https://github.com/pac4j/pac4j/wiki/SessionStore) using the `setSessionStore(sessionStore)` method (by default, the `PlayCacheStore` uses the Play cache to store pac4j data)
-
-2) a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method. The available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+Notice that you define a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method. The available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 
 
 ### 3a) Protect urls per Action (`Secure`)
@@ -338,17 +340,33 @@ Examples:
 *In Java:*
 
 ```java
-PlayWebContext context = new PlayWebContext(ctx());
-ProfileManager<CommonProfile> profileManager = new ProfileManager(context);
-Optional<CommonProfile> profile = profileManager.get(true);
+public class Application {
+
+    @Inject
+    protected PlaySessionStore playSessionStore;  
+
+    public Result getUserProfile() {
+        PlayWebContext webContext = new PlayWebContext(ctx(), playSessionStore)
+        ProfileManager<CommonProfile> profileManager = new ProfileManager(context);
+        Optional<CommonProfile> profile = profileManager.get(true);
+        ....
+    } 
+
+}
 ```
 
 *In Scala:*
 
 ```scala
-val webContext = new PlayWebContext(request)
-val profileManager = new ProfileManager[CommonProfile](webContext)
-val profile = profileManager.get(true)
+class Application @Inject()(sessionStore: PlaySessionStore) extends Controller {
+
+    def getUserProfile() = Action { request =>
+        val webContext = new PlayWebContext(request, playSessionStore)
+        val profileManager = new ProfileManager[CommonProfile](webContext)
+        val profile = profileManager.get(true)
+        ....
+    }
+}
 ```
 
 The retrieved profile is at least a `CommonProfile`, from which you can retrieve the most common attributes that all profiles share. But you can also cast the user profile to the appropriate profile according to the provider used for authentication. For example, after a Facebook authentication:
@@ -410,6 +428,11 @@ bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
 
 
 ## Migration guide
+
+### 2.4.0 (Play 2.5) -> 2.5.0 (Play 2.5)
+
+The `SecurityModule` class needs to bind the `PlaySessionStore` to the `PlayCacheStore`
+The `PlayWebContext` needs a `PlaySessionStore`, see examples at heading 5 (Get the user profile (`ProfileManager`))
 
 ### 2.1.0 (Play 2.4) / 2.2.0 (Play 2.5) -> 2.3.0 (Play 2.4) / 2.4.0 (Play 2.5)
 
