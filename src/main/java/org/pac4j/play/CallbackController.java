@@ -36,6 +36,8 @@ public class CallbackController extends Controller {
 
     public Result callback() {
 
+        assertNotNull("callbackLogic", callbackLogic);
+
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 

@@ -83,6 +83,8 @@ public class SecureAction extends Action<Result> {
 
     public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final boolean multiProfile) throws Throwable {
 
+        assertNotNull("securityLogic", securityLogic);
+
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
         final HttpActionAdapterWrapper actionAdapterWrapper = new HttpActionAdapterWrapper(config.getHttpActionAdapter());
@@ -94,7 +96,7 @@ public class SecureAction extends Action<Result> {
             } else {
                 return delegate.call(ctx);
             }
-        }, actionAdapterWrapper, clients, authorizers, null, multiProfile, ctx);
+        }, actionAdapterWrapper, clients, authorizers, null, multiProfile);
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {

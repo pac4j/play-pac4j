@@ -12,7 +12,9 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Http.Session;
 import play.mvc.Http.Context;
+
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
+
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
  * <p>"Session objects" are managed by the defined {@link SessionStore}.</p>
@@ -40,7 +42,7 @@ public class PlayWebContext implements WebContext {
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        assertNotNull("sessionStore must not be null", sessionStore);
+        assertNotNull("sessionStore", sessionStore);
         this.sessionStore = sessionStore;
     }
 
