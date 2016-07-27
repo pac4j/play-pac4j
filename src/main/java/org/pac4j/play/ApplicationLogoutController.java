@@ -34,6 +34,8 @@ public class ApplicationLogoutController extends Controller {
 
     public Result logout() {
 
+        assertNotNull("applicationLogoutLogic", applicationLogoutLogic);
+
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 

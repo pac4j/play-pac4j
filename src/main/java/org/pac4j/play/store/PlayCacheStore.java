@@ -2,13 +2,11 @@ package org.pac4j.play.store;
 
 import com.google.inject.Inject;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.cache.CacheApi;
 import play.mvc.Http;
-import java.util.LinkedHashMap;
 
 /**
  * The cache storage uses the Play Cache, only an identifier is saved into the Play session.
@@ -26,10 +24,7 @@ public class PlayCacheStore implements PlaySessionStore {
     private String prefix = "";
 
     // 1 hour = 3600 seconds
-    private int profileTimeout = 3600;
-
-    // 1 minute = 60 second
-    private int sessionTimeout = 60;
+    private int timeout = 3600;
 
     private final CacheApi cache;
 
@@ -67,12 +62,6 @@ public class PlayCacheStore implements PlaySessionStore {
 
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
-        int timeout;
-        if (value instanceof CommonProfile || value instanceof LinkedHashMap) {
-            timeout = profileTimeout;
-        } else {
-            timeout = sessionTimeout;
-        }
         final String sessionId = getOrCreateSessionId(context);
         cache.set(getKey(sessionId, key), value, timeout);
     }
@@ -85,20 +74,11 @@ public class PlayCacheStore implements PlaySessionStore {
         this.prefix = prefix;
     }
 
-    public int getProfileTimeout() {
-        return profileTimeout;
+    public int getTimeout() {
+        return timeout;
     }
 
-    public void setProfileTimeout(int profileTimeout) {
-        this.profileTimeout = profileTimeout;
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
     }
-
-    public int getSessionTimeout() {
-        return sessionTimeout;
-    }
-
-    public void setSessionTimeout(int sessionTimeout) {
-        this.sessionTimeout = sessionTimeout;
-    }
-
 }
