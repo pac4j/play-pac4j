@@ -2,7 +2,7 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-play.png" width="300" />
 </p>
 
-The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like session fixation and CSRF protection.
+The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection.
 It's based on Play 2 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
@@ -38,7 +38,7 @@ Just follow these easy steps to secure your Play 2 web application:
 You need to add a dependency on:
 
 - the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.5.0-SNAPSHOT**)
-- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.1**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -431,8 +431,9 @@ bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
 
 ### 2.4.0 (Play 2.5) -> 2.5.0 (Play 2.5)
 
-The `SecurityModule` class needs to bind the `PlaySessionStore` to the `PlayCacheStore`
-The `PlayWebContext` needs a `PlaySessionStore`, see examples at heading 5 (Get the user profile (`ProfileManager`))
+The `SecurityModule` class needs to bind the `PlaySessionStore` to the `PlayCacheStore`.
+
+The `PlayWebContext` needs a `PlaySessionStore`, see examples at heading 5 (Get the user profile (`ProfileManager`)).
 
 ### 2.1.0 (Play 2.4) / 2.2.0 (Play 2.5) -> 2.3.0 (Play 2.4) / 2.4.0 (Play 2.5)
 
@@ -454,29 +455,6 @@ The `DataStore` concept is replaced by the pac4j `SessionStore` concept. The `Pl
 
 The `DefaultHttpActionAdapter` does not need to be bound in the security module, but must to be set using the `config.setHttpActionAdapter` method.
 
-### 1.5.x -> 2.0.0
-
-`play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...) and is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
-
-In Java, the `SecurityController` and `JavaController` are deprecated and you need to use the `UserProfileController` to get the user profile (you can also use the `ProfileManager` object directly).
-
-The "target url" concept has disappeared as it was too complicated, it could be simulated though.
-
-The `SecurityCallbackController` is deprecated and you must use the `CallbackController`. The logout support has been moved to the `ApplicationLogoutController`.
-
-The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebContext`.
-
-The `StorageHelper` has been removed, replaced by the `PlayCacheStore` implementation where you can set the timeouts. You can provide your own implementation of the `CacheStore` if necessary.
-
-The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler` (it relies on the Play Cache).
-
-The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the clients (authentication) and the authorizers (authorizations).
-
-Custom 401 / 403 HTTP error pages must now be defined by overriding the `DefaultHttpActionAdapter`.
-
-The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
-The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead (with the `authorizerName` parameter).
-
 
 ## Demo
 
@@ -487,7 +465,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.5.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.0/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.5.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.1/index.html).
 
 
 ## Need help?

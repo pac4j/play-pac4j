@@ -7,7 +7,6 @@ import play.mvc.Result;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-
 /**
  * Wrapper of a <code>HttpActionAdapter&lt;Result,PlayWebContext&gt;</code>.
  *

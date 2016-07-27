@@ -24,7 +24,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-
     private final CacheApi cache;
     private final Provider<CacheApi> cacheApiProvider;
 
@@ -42,7 +41,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
     private CacheApi getCache() {
         return cache != null ? cache : cacheApiProvider.get();
     }
-
 
     public void destroySession(WebContext context) {
         final PlayWebContext webContext = (PlayWebContext) context;
@@ -63,6 +61,6 @@ public class PlayCacheLogoutHandler extends NoLogoutHandler {
         final PlayCacheStore playCacheStore = (PlayCacheStore) webContext.getSessionStore();
         final String sessionId = playCacheStore.getOrCreateSessionId(webContext);
         logger.debug("save sessionId: {}", sessionId);
-        getCache().set(ticket, sessionId, playCacheStore.getProfileTimeout());
+        getCache().set(ticket, sessionId, playCacheStore.getTimeout());
     }
 }
