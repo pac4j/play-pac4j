@@ -455,29 +455,6 @@ The `DataStore` concept is replaced by the pac4j `SessionStore` concept. The `Pl
 
 The `DefaultHttpActionAdapter` does not need to be bound in the security module, but must to be set using the `config.setHttpActionAdapter` method.
 
-### 1.5.x -> 2.0.0
-
-`play-pac4j v2.0` is a huge refactoring of the previous version 1.5. It takes advantage of the new features of `pac4j` v1.8 (REST support, authorizations, configuration objects...) and is fully based on dependency injection -> see [Play 2.4 migration guide](https://www.playframework.com/documentation/2.4.x/Migration24).
-
-In Java, the `SecurityController` and `JavaController` are deprecated and you need to use the `UserProfileController` to get the user profile (you can also use the `ProfileManager` object directly).
-
-The "target url" concept has disappeared as it was too complicated, it could be simulated though.
-
-The `SecurityCallbackController` is deprecated and you must use the `CallbackController`. The logout support has been moved to the `ApplicationLogoutController`.
-
-The `JavaWebContext` and `ScalaWebContext` have been merged into a new `PlayWebContext`.
-
-The `StorageHelper` has been removed, replaced by the `PlayCacheStore` implementation where you can set the timeouts. You can provide your own implementation of the `CacheStore` if necessary.
-
-The `PlayLogoutHandler` has been moved to the `org.pac4j.play.cas.logout` package and renamed as `PlayCacheLogoutHandler` (it relies on the Play Cache).
-
-The static specific `Config` has been replaced by the default `org.pac4j.core.config.Config` object to define the clients (authentication) and the authorizers (authorizations).
-
-Custom 401 / 403 HTTP error pages must now be defined by overriding the `DefaultHttpActionAdapter`.
-
-The `isAjax` parameter is no longer available as AJAX requests are now automatically detected. The `stateless` parameter is no longer available as the stateless nature is held by the client itself.
-The `requireAnyRole` and `requieAllRoles` parameters are no longer available and authorizers must be used instead (with the `authorizerName` parameter).
-
 
 ## Demo
 
