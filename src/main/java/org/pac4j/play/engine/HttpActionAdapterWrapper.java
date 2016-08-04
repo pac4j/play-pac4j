@@ -18,18 +18,18 @@ import com.google.inject.Inject;
  */
 public final class HttpActionAdapterWrapper implements HttpActionAdapter<CompletionStage<Result>, PlayWebContext> {
 	
- private final HttpActionAdapter<Result, PlayWebContext> wrapped;
+   private final HttpActionAdapter<Result, PlayWebContext> wrapped;
 	
- @Inject
- private HttpExecutionContext ec;
+   @Inject
+   private HttpExecutionContext ec;
 
- public HttpActionAdapterWrapper(final HttpActionAdapter<Result, PlayWebContext> wrapped) {
-  this.wrapped = wrapped;
- }
+   public HttpActionAdapterWrapper(final HttpActionAdapter<Result, PlayWebContext> wrapped) {
+       this.wrapped = wrapped;
+   }
 
- @Override
- public CompletionStage<Result> adapt(final int code, PlayWebContext context) {
-  return CompletableFuture.supplyAsync(() -> wrapped.adapt(code, context), ec.current());
- }
+   @Override
+   public CompletionStage<Result> adapt(final int code, PlayWebContext context) {
+       return CompletableFuture.supplyAsync(() -> wrapped.adapt(code, context), ec.current());
+   }
 
 }
