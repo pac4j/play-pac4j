@@ -17,7 +17,7 @@ import com.google.inject.Inject;
  * @since 2.3.0
  */
 public final class HttpActionAdapterWrapper implements HttpActionAdapter<CompletionStage<Result>, PlayWebContext> {
-	
+
     private final HttpActionAdapter<Result, PlayWebContext> wrapped;
 	
     @Inject
