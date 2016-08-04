@@ -27,8 +27,8 @@ public final class HttpActionAdapterWrapper implements HttpActionAdapter<Complet
        this.wrapped = wrapped;
    }
 
-   @Override
-   public CompletionStage<Result> adapt(final int code, PlayWebContext context) {
-       return CompletableFuture.supplyAsync(() -> wrapped.adapt(code, context), ec.current());
-   }
+    @Override
+    public CompletionStage<Result> adapt(final int code, PlayWebContext context) {
+        return CompletableFuture.supplyAsync(() -> wrapped.adapt(code, context), ec.current());
+    }
 }
