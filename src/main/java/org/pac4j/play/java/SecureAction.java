@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
+import play.libs.concurrent.HttpExecutionContext;
 
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
@@ -39,6 +40,8 @@ public class SecureAction extends Action<Result> {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    
+    private HttpExecutionContext ec;
 
     protected final static Method CLIENTS_METHOD;
 
@@ -61,10 +64,11 @@ public class SecureAction extends Action<Result> {
     final private SessionStore sessionStore;
 
     @Inject
-    public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
+    public SecureAction(final Config config, final PlaySessionStore playSessionStore, HttpExecutionContext ec) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
+        this.ec = ec;
     }
 
     @Override
@@ -87,16 +91,17 @@ public class SecureAction extends Action<Result> {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
-        final HttpActionAdapterWrapper actionAdapterWrapper = new HttpActionAdapterWrapper(config.getHttpActionAdapter());
+        final HttpActionAdapter actionAdapter = config.getHttpActionAdapter();
 
-        return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+        return CompletableFuture.supplyAsync(() -> securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
             // when called from Scala
             if (delegate == null) {
                 return CompletableFuture.completedFuture(null);
             } else {
                 return delegate.call(ctx);
             }
-        }, actionAdapterWrapper, clients, authorizers, null, multiProfile);
+        }, actionAdapter, clients, authorizers, null, multiProfile), 
+        ec.current);
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
