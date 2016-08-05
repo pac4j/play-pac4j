@@ -6,6 +6,10 @@ import org.pac4j.play.engine.PlayApplicationLogoutLogic;
 import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.libs.concurrent.HttpExecutionContext;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
@@ -31,15 +35,17 @@ public class ApplicationLogoutController extends Controller {
     protected Config config;
     @Inject
     protected PlaySessionStore playSessionStore;
+    @Inject
+    protected HttpExecutionContext ec;
 
-    public Result logout() {
+    public CompletionStage<Result> logout() {
 
         assertNotNull("applicationLogoutLogic", applicationLogoutLogic);
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
-        return applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern);
+        return CompletableFuture.supplyAsync(() -> applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern), ec.current());
     }
 
     public String getDefaultUrl() {
