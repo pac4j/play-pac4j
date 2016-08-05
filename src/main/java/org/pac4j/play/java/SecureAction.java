@@ -7,7 +7,7 @@ import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.engine.HttpActionAdapterWrapper;
+import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
