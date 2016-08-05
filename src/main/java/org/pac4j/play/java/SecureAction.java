@@ -100,7 +100,7 @@ public class SecureAction extends Action<Result> {
                 return delegate.call(ctx);
             }
         }, actionAdapter, clients, authorizers, null, multiProfile), 
-        ec.current);
+        ec.current());
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
