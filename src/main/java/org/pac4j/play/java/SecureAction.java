@@ -40,7 +40,7 @@ public class SecureAction extends Action<Result> {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
-    
+    @Inject
     private HttpExecutionContext ec;
 
     protected final static Method CLIENTS_METHOD;
@@ -64,11 +64,10 @@ public class SecureAction extends Action<Result> {
     final private SessionStore sessionStore;
 
     @Inject
-    public SecureAction(final Config config, final PlaySessionStore playSessionStore, HttpExecutionContext ec) {
+    public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
-        this.ec = ec;
     }
 
     @Override
