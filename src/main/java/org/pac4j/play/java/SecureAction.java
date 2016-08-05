@@ -39,7 +39,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
     
     private HttpExecutionContext ec;
 
