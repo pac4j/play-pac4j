@@ -8,7 +8,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import com.google.inject.Inject;
+import javax.inject.Inject;
 
 /**
  * Wrapper of a <code>HttpActionAdapter&lt;Result,PlayWebContext&gt;</code>.
