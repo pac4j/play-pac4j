@@ -8,6 +8,9 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.libs.concurrent.HttpExecutionContext;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 import javax.inject.Inject;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
