@@ -40,7 +40,7 @@ public class SecureAction extends Action<Result> {
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
     private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
-        
+
     protected final static Method CLIENTS_METHOD;
 
     protected final static Method AUTHORIZERS_METHOD;
