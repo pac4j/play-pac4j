@@ -97,7 +97,7 @@ public class SecureAction extends Action<Result> {
             if (delegate == null) {
                 return null;
             } else {
-                return delegate.call(ctx);
+                return delegate.call(ctx).toCompletableFuture().get();
             }
         }, actionAdapter, clients, authorizers, null, multiProfile), 
         ec.current());
