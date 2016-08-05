@@ -121,11 +121,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<CompletionStage<Result>, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic<Result, PlayWebContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(SecurityLogic<Result, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
