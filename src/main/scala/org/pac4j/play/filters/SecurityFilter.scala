@@ -14,6 +14,7 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc.Http
+import play.libs.concurrent.HttpExecutionContext
 
 import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
@@ -64,7 +65,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, val ec: HttpExecutionContext) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
@@ -77,7 +78,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, playSessionStore)
-        val securityAction = new SecureAction(config, playSessionStore)
+        val securityAction = new SecureAction(config, playSessionStore, ec)
         val javaContext = webContext.getJavaContext
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
