@@ -3,12 +3,17 @@ package org.pac4j.play;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.engine.ApplicationLogoutLogic;
 import org.pac4j.play.engine.PlayApplicationLogoutLogic;
+
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import javax.inject.Inject;
 
 import static org.pac4j.core.util.CommonHelper.*;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 /**
  * <p>This filter handles the application logout process, based on the {@link #applicationLogoutLogic}.</p>
@@ -28,13 +33,16 @@ public class ApplicationLogoutController extends Controller {
 
     @Inject
     protected Config config;
+    
+    @Inject
+    protected HttpExecutionContext ec;
 
-    public Result logout() {
+    public CompletionStage<Result> logout() {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), config.getSessionStore());
 
-        return applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern);
+        return CompletableFuture.supplyAsync(() -> applicationLogoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.logoutUrlPattern), ec.current());
     }
 
     public String getDefaultUrl() {

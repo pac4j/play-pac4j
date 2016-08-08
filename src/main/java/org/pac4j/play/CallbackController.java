@@ -2,6 +2,8 @@ package org.pac4j.play;
 
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
+
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import org.pac4j.core.config.Config;
@@ -9,6 +11,9 @@ import org.pac4j.core.config.Config;
 import javax.inject.Inject;
 
 import static org.pac4j.core.util.CommonHelper.*;
+
+import java.util.concurrent.CompletionStage;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * <p>This filter finishes the login process for an indirect client, based on the {@link #callbackLogic}.</p>
@@ -30,14 +35,18 @@ public class CallbackController extends Controller {
 
     @Inject
     protected Config config;
+    
+    @Inject
+    protected HttpExecutionContext ec;
 
-    public Result callback() {
+    public CompletionStage<Result> callback() {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), config.getSessionStore());
 
-        return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
-    }
+        return CompletableFuture.supplyAsync(() -> {
+            return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
+        }, ec.current());    }
 
     public String getDefaultUrl() {
         return defaultUrl;

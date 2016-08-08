@@ -12,6 +12,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.core.j.JavaHelpers
+import play.libs.concurrent.HttpExecutionContext
 
 import akka.stream.Materializer
 
@@ -76,7 +77,7 @@ class SecurityFilter @Inject()(implicit val mat: Materializer, configuration: Co
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, config.getSessionStore.asInstanceOf[SessionStore[PlayWebContext]])
-        val securityAction = new SecureAction(config)
+        val securityAction = new SecureAction(config, ec)
         val javaContext = webContext.getJavaContext
         val authenticationResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false).toScala.flatMap[play.api.mvc.Result](r =>
           if (r == null) {
