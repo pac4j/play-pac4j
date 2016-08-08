@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.core.j.JavaHelpers
+import play.libs.concurrent.HttpExecutionContext
 
 import _root_.scala.collection.JavaConverters
 import _root_.scala.concurrent.Future
@@ -34,6 +35,8 @@ trait Security[P<:CommonProfile] extends Controller {
   protected val config: Config
   @Inject
   protected val playSessionStore: PlaySessionStore
+  @Inject
+  protected val ec: HttpExecutionContext
 
   /**
    * Get or create a new sessionId.
@@ -73,7 +76,7 @@ trait Security[P<:CommonProfile] extends Controller {
    */
   protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
     val webContext = new PlayWebContext(request, playSessionStore)
-    val secureAction = new SecureAction(config, playSessionStore)
+    val secureAction = new SecureAction(config, playSessionStore, ec)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
