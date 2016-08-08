@@ -8,7 +8,6 @@ import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.engine.HttpActionAdapterWrapper;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.function.Supplier;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
