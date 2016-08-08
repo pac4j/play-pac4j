@@ -6,6 +6,7 @@ import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.engine.HttpActionAdapterWrapper;
 import org.pac4j.play.store.PlaySessionStore;
@@ -22,6 +23,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
@@ -41,8 +43,6 @@ public class SecureAction extends Action<Result> {
 
     private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
     
-    private HttpExecutionContext ec;
-
     protected final static Method CLIENTS_METHOD;
 
     protected final static Method AUTHORIZERS_METHOD;
@@ -62,9 +62,11 @@ public class SecureAction extends Action<Result> {
     final private Config config;
 
     final private SessionStore sessionStore;
+    
+    final private HttpExecutionContext ec;
 
     @Inject
-    public SecureAction(final Config config, final PlaySessionStore playSessionStore, HttpExecutionContext ec) {
+    public SecureAction(final Config config, final PlaySessionStore playSessionStore, final HttpExecutionContext ec) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
@@ -93,15 +95,16 @@ public class SecureAction extends Action<Result> {
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
         final HttpActionAdapter actionAdapter = config.getHttpActionAdapter();
 
-        return CompletableFuture.supplyAsync(() -> securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
-            // when called from Scala
-            if (delegate == null) {
-                return CompletableFuture.completedFuture(null);
-            } else {
-                return delegate.call(ctx);
-            }
-        }, actionAdapter, clients, authorizers, null, multiProfile), 
-        ec.current);
+        return CompletableFuture.supplyAsync(() -> {
+        	return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+	            // when called from Scala
+	            if (delegate == null) {
+	                return null;
+	            } else {
+	                return delegate.call(ctx).toCompletableFuture().get();
+	            }
+        	}, actionAdapter, clients, authorizers, null, multiProfile);
+        }, ec.current());
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
@@ -122,11 +125,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<CompletionStage<Result>, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic<Result, PlayWebContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(SecurityLogic<Result, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
