@@ -219,7 +219,9 @@ public class PlayWebContext implements WebContext {
             	cookie.setDomain(httpCookie.domain());
             }
             cookie.setHttpOnly(httpCookie.httpOnly());
-            cookie.setMaxAge(httpCookie.maxAge() != null? httpCookie.maxAge():-1);
+            if(httpCookie.maxAge() != null) {
+                cookie.setMaxAge(httpCookie.maxAge());
+            }
             cookie.setPath(httpCookie.path());
             cookie.setSecure(httpCookie.secure());
             cookies.add(cookie);
