@@ -215,9 +215,13 @@ public class PlayWebContext implements WebContext {
         final Http.Cookies httpCookies = request.cookies();
         httpCookies.forEach(httpCookie -> {
             final Cookie cookie = new Cookie(httpCookie.name(), httpCookie.value());
-            cookie.setDomain(httpCookie.domain());
+            if(httpCookie.domain() != null) {
+            	cookie.setDomain(httpCookie.domain());
+            }
             cookie.setHttpOnly(httpCookie.httpOnly());
-            cookie.setMaxAge(httpCookie.maxAge());
+            if(httpCookie.maxAge() != null) {
+                cookie.setMaxAge(httpCookie.maxAge());
+            }
             cookie.setPath(httpCookie.path());
             cookie.setSecure(httpCookie.secure());
             cookies.add(cookie);
