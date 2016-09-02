@@ -36,7 +36,7 @@ trait Security[P<:CommonProfile] extends Controller {
   @Inject
   protected val playSessionStore: PlaySessionStore
   @Inject
-  protected val ec: HttpExecutionContext
+  protected val ec: HttpExecutionContext = null
 
   /**
    * Get or create a new sessionId.
