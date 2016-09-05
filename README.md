@@ -16,19 +16,23 @@ Several versions of the library are available for the different versions of the 
 | 2.4          | 1.9           | [2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 1.9           | [2.4.x](https://github.com/pac4j/play-pac4j/tree/2.4.x) (Java & Scala)
 
-**Main concepts and components:**
+[**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html):
 
-1) A [**client**](https://github.com/pac4j/pac4j/wiki/Clients) represents an authentication mechanism (CAS, OAuth, SAML, OpenID Connect, LDAP, JWT...) It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication
+1) A [**client**](http://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication:
 
-2) An [**authorizer**](https://github.com/pac4j/pac4j/wiki/Authorizers) is meant to check authorizations on the authenticated user profile(s) (role / permission, ...) or on the current web context (IP check, CSRF...)
+&#9656; OAuth - SAML - CAS - OpenID Connect - HTTP - OpenID - Google App Engine - LDAP - SQL - JWT - MongoDB - Stormpath - IP address
 
-3) A [**config**](https://github.com/pac4j/pac4j/blob/master/pac4j-core/src/main/java/org/pac4j/core/config/Config.java) defines the security configuration via clients and authorizers
+2) An [**authorizer**](http://www.pac4j.org/docs/authorizers.html) is meant to check authorizations on the authenticated user profile(s) or on the current web context:
 
-4) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+&#9656; Roles / permissions - Anonymous / remember-me / (fully) authenticated - Profile type, attribute -  CORS - CSRF - Security headers - IP address, HTTP method
 
-5) The `CallbackController` finishes the login process for an indirect client
+3) The `Secure` annotation / function or the `SecurityFilter` protects an url by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
 
-6) The `ApplicationLogoutController` logs out the user from the application.
+4) The `CallbackController` finishes the login process for an indirect client
+
+5) The `ApplicationLogoutController` logs out the user from the application.
+
+==
 
 Just follow these easy steps to secure your Play 2 web application:
 
@@ -42,6 +46,7 @@ You need to add a dependency on:
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
+---
 
 ### 2) Define the configuration (`Config` + `Client` + `Authorizer` + `PlaySessionStore`)
 
@@ -142,6 +147,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
 Notice that you define a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method. The available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 
+---
 
 ### 3a) Protect urls per Action (`Secure`)
 
@@ -191,6 +197,7 @@ def facebookIndex = Secure("FacebookClient") { profiles =>
 }
 ```
 
+==
 
 ### 3b) Protect urls via the `SecurityFilter`
 
@@ -286,6 +293,7 @@ are used. When not provided, the value will be `null`.
       }}
     ]
 
+---
 
 ### 4) Define the callback endpoint only for indirect clients (`CallbackController`)
 
@@ -328,6 +336,7 @@ callbackController.setDefaultUrl("/")
 bind(classOf[CallbackController]).toInstance(callbackController)
 ```
 
+---
 
 ### 5) Get the user profile (`ProfileManager`)
 
@@ -383,6 +392,7 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 val facebookProfile = commonProfile.asInstanceOf[FacebookProfile]
 ```
 
+---
 
 ### 6) Logout (`ApplicationLogoutController`)
 
@@ -426,6 +436,7 @@ logoutController.setDefaultUrl("/")
 bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
 ```
 
+---
 
 ## Migration guide
 
