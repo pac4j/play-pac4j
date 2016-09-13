@@ -236,8 +236,13 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
-        response.setCookie(cookie.getName(), cookie.getValue(), cookie.getMaxAge(), cookie.getPath(),
-                cookie.getDomain(), cookie.isSecure(), cookie.isHttpOnly());
+        response.setCookie(cookie.getName(),
+            cookie.getValue(),
+            cookie.getMaxAge() == -1 ? null : cookie.getMaxAge(),
+            cookie.getPath(),
+            cookie.getDomain(),
+            cookie.isSecure(),
+            cookie.isHttpOnly());
     }
 
     @Override
