@@ -14,7 +14,7 @@ Several versions of the library are available for the different versions of the 
 | 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 1.9           | 2.4.x (Java & Scala)
+| 2.5          | 1.9           | [2.4.x](https://github.com/pac4j/play-pac4j/tree/2.4.x) (Java & Scala)
 
 **Main concepts and components:**
 
@@ -38,7 +38,7 @@ Just follow these easy steps to secure your Play 2 web application:
 You need to add a dependency on:
 
 - the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.4.0**)
-- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.1**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the appropriate `pac4j` [submodules](https://github.com/pac4j/pac4j/wiki/Clients) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.2**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -464,7 +464,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.4.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.1/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.4.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.2/index.html).
 
 
 ## Need help?
@@ -484,4 +484,3 @@ Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac
 ```scala
 resolvers ++= Seq(Resolver.mavenLocal, "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/")
 ```
-
