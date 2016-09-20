@@ -293,6 +293,33 @@ are used. When not provided, the value will be `null`.
       }}
     ]
 
+==
+
+### 3c) Working with Deadbolt (only Java)
+
+While the `play-pac4j` security library can handle authorizations on its own, [Deadbolt](http://deadbolt.ws) is a famous and much used library for authorizations. So you can use it seamlessly with `play-pac4j`.
+
+You need to bind the Deadbolt `HandlerCache` to the `Pac4jHandlerCache` (in your `SecurityModule`):
+
+```java
+bind(HandlerCache.class).to(Pac4jHandlerCache.class);
+```
+
+Thus, everytime you use a *Deadbolt* handler, the *Deadbolt* subject will be automatically built from the current *pac4j* authenticated user profile, the key used to get the appropriate handler will represent the `clients` parameter used to perform the *pac4j* authentication (like in the `Secure` annotation).
+
+Example to secure an action in a controller:
+
+```java
+@SubjectPresent
+```
+
+Example to secure an action in a controller and start a Facebook login process if not authenticated:
+
+```java
+@SubjectPresent(handlerKey = "FacebookClient", forceBeforeAuthCheck = true)
+```
+
+
 ---
 
 ### 4) Define the callback endpoint only for indirect clients (`CallbackController`)

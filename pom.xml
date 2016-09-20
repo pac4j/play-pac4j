@@ -74,6 +74,7 @@
         <pac4j.version>1.9.2</pac4j.version>
         <play.version>2.5.8</play.version>
         <java.version>1.8</java.version>
+        <deadbolt.version>2.5.1</deadbolt.version>
         <powermock.version>1.6.4</powermock.version>
     </properties>
 
@@ -99,6 +100,12 @@
             <groupId>com.typesafe.play</groupId>
             <artifactId>play-cache_2.11</artifactId>
             <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>be.objectify</groupId>
+            <artifactId>deadbolt-java_2.11</artifactId>
+            <version>${deadbolt.version}</version>
             <scope>provided</scope>
         </dependency>
 
