@@ -2,8 +2,8 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-play.png" width="300" />
 </p>
 
-The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection.
-It's based on Play 2 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
+The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It can work with Deadbolt.
+It's based on Play 2.5 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
