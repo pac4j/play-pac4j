@@ -1,5 +1,6 @@
 package org.pac4j.play.filters
 
+import java.net.URI
 import java.util.Collections
 import javax.inject.{Inject, Singleton}
 
@@ -19,6 +20,7 @@ import play.libs.concurrent.HttpExecutionContext
 import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Future
+import scala.util.{Failure, Success, Try}
 
 
 /**
@@ -86,18 +88,19 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
           if (requiresAuthenticationResult == null)
             // If the authentication succeeds, the action result is null
             nextFilter(request)
-          else
-          /**
-            * When the user is not authenticated, the result is one of the following:
-            * - forbidden
-            * - redirect to IDP
-            * - unauthorized
-            * Or the future results in an exception
-            */
+          else {
+            /**
+              * When the user is not authenticated, the result is one of the following:
+              * - forbidden
+              * - redirect to IDP
+              * - unauthorized
+              * Or the future results in an exception
+              */
             Future {
               log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}. Authentication response code ${requiresAuthenticationResult.status}.")
-              createResultSimple(javaContext, requiresAuthenticationResult)
+              createResultSimple(javaContext, result(requiresAuthenticationResult.asScala())(request))
             }
+          }
         }
         futureResult.onFailure{case x => log.error("Exception during authentication procedure", x)}
 
@@ -106,6 +109,26 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
       case None =>
         log.debug(s"No authentication needed for ${request.uri}")
         nextFilter(request)
+    }
+  }
+
+  /**
+    * Includes a redirect uri in session depending on the validity of the incoming uri
+    * @param requiresAuthenticationResult the result with no authentication
+    * @param request the current request
+    * @return a result with an loginRedirect session if uri is valid
+    */
+  def result(requiresAuthenticationResult: Result)(implicit request: RequestHeader) : Result = {
+    // throws an URISyntaxException if given a string that violates RFC2396
+    Try(new URI(request.uri)) match {
+      case Success(uri) => {
+        log.debug(s"redirect url set to ${request.uri}.")
+        requiresAuthenticationResult.addingToSession(("loginRedirect" -> uri.getPath))
+      }
+      case Failure(exc) => {
+        log.debug(s"Exception thrown when creating an URI obj from ${request.uri}. Exception: ${exc.toString}")
+        requiresAuthenticationResult
+      }
     }
   }
 
@@ -129,8 +152,8 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
 
   case class Rule(clients: String, authorizers: String)
 
-  def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
+  def createResultSimple(javaContext: Http.Context, scalaResult: Result): Result = {
     import scala.collection.convert.decorateAsScala._
-     javaResult.asScala.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
+    scalaResult.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
   }
 }
