@@ -46,8 +46,8 @@ public class CallbackController extends Controller {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
-
-        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false), ec.current());
+        final String url = ctx().session().getOrDefault("loginRedirect", getDefaultUrl());
+        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), url, this.multiProfile, false), ec.current());
     }
 
     public String getDefaultUrl() {
