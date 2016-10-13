@@ -3,7 +3,6 @@ package org.pac4j.play.java;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
@@ -11,10 +10,10 @@ import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
-import play.libs.concurrent.HttpExecutionContext;
 
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
@@ -39,7 +38,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<Result, PlayWebContext> securityLogic;
     
     protected final static Method CLIENTS_METHOD;
 
@@ -69,6 +68,7 @@ public class SecureAction extends Action<Result> {
         this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
         this.ec = ec;
+        this.securityLogic = config.getSecurityLogic();
     }
 
     @Override
