@@ -20,7 +20,6 @@ import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Future
 
-
 /**
   * Filter on all requests to apply security by the Pac4J framework.
   *
@@ -131,6 +130,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
 
   def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
     import scala.collection.convert.decorateAsScala._
-     javaResult.asScala.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
+    val scalaResult = javaResult.asScala.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
+    scalaResult.withSession(javaContext.session().asScala.toSeq: _*)
   }
 }
