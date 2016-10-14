@@ -3,6 +3,7 @@ package org.pac4j.play.java;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
@@ -38,7 +39,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<Result, PlayWebContext> securityLogic;
+    private SecurityLogic securityLogic = new DefaultSecurityLogic();
     
     protected final static Method CLIENTS_METHOD;
 
@@ -68,7 +69,6 @@ public class SecureAction extends Action<Result> {
         this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
         this.ec = ec;
-        this.securityLogic = config.getSecurityLogic();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class SecureAction extends Action<Result> {
         final HttpActionAdapter actionAdapter = config.getHttpActionAdapter();
 
         return CompletableFuture.supplyAsync(() -> {
-        	return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+        	return ((SecurityLogic<Result, PlayWebContext>) securityLogic).perform(playWebContext, config, (webCtx, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return null;
@@ -127,7 +127,9 @@ public class SecureAction extends Action<Result> {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<Result, PlayWebContext> securityLogic) {
+    @com.google.inject.Inject(optional = true)
+    public void setSecurityLogic(SecurityLogic securityLogic) {
         this.securityLogic = securityLogic;
+        this.logger.debug("Using securityLogic implementation: {}", this.securityLogic.getClass());
     }
 }
