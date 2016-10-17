@@ -1,10 +1,13 @@
 package org.pac4j.play;
 
+import java.io.Serializable;
 import java.util.*;
 
 import org.pac4j.core.context.Cookie;
+import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.util.JavaSerializationHelper;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
 import play.mvc.Http;
@@ -18,12 +21,14 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
  * <p>"Session objects" are managed by the defined {@link SessionStore}.</p>
- * <p>"Request attributes" are saved/restored to/from the context.</p>
- * 
+ * <p>"Request attributes" are saved/restored to/from the flash scope.</p>
+ *
  * @author Jerome Leleu
  * @since 1.1.0
  */
 public class PlayWebContext implements WebContext {
+
+    public final static JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
 
     protected final Context context;
 
@@ -190,13 +195,24 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public Object getRequestAttribute(String name) {
-        return context.args.get(name);
+    public Object getRequestAttribute(final String name) {
+        Object value = null;
+        String tempValue = context.flash().get(name);
+        // this is a hack: we try to get the profiles from the tag because of the SecurityFilter
+        if (tempValue == null && Pac4jConstants.USER_PROFILES.equals(name)) {
+            tempValue = request.tags().get(name);
+        }
+        if (tempValue != null) {
+            value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(tempValue);
+        }
+        return value;
     }
 
     @Override
-    public void setRequestAttribute(String name, Object value) {
-        context.args.put(name, value);
+    public void setRequestAttribute(final String name, final Object value) {
+        if (value != null) {
+            context.flash().put(name, JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) value));
+        }
     }
 
     @Override
