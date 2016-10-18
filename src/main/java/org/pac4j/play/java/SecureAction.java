@@ -11,10 +11,10 @@ import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
-import play.libs.concurrent.HttpExecutionContext;
 
 import javax.inject.Inject;
 import java.lang.reflect.InvocationHandler;
@@ -39,7 +39,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic securityLogic = new DefaultSecurityLogic();
     
     protected final static Method CLIENTS_METHOD;
 
@@ -94,7 +94,7 @@ public class SecureAction extends Action<Result> {
         final HttpActionAdapter actionAdapter = config.getHttpActionAdapter();
 
         return CompletableFuture.supplyAsync(() -> {
-        	return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+        	return ((SecurityLogic<Result, PlayWebContext>) securityLogic).perform(playWebContext, config, (webCtx, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return null;
@@ -127,7 +127,9 @@ public class SecureAction extends Action<Result> {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<Result, PlayWebContext> securityLogic) {
+    @com.google.inject.Inject(optional = true)
+    public void setSecurityLogic(SecurityLogic securityLogic) {
         this.securityLogic = securityLogic;
+        this.logger.debug("Using securityLogic implementation: {}", this.securityLogic.getClass());
     }
 }
