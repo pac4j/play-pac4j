@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
@@ -82,21 +83,28 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
-          if (requiresAuthenticationResult == null)
+          if (requiresAuthenticationResult == null) {
             // If the authentication succeeds, the action result is null
-            nextFilter(request)
-          else
-          /**
-            * When the user is not authenticated, the result is one of the following:
-            * - forbidden
-            * - redirect to IDP
-            * - unauthorized
-            * Or the future results in an exception
-            */
+            // this is a hack: add the current profiles in the tag
+            val profiles = javaContext.flash().get(Pac4jConstants.USER_PROFILES)
+            if (profiles != null) {
+              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, profiles))
+            } else {
+              nextFilter(request)
+            }
+          } else {
+            /**
+              * When the user is not authenticated, the result is one of the following:
+              * - forbidden
+              * - redirect to IDP
+              * - unauthorized
+              * Or the future results in an exception
+              */
             Future {
               log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}. Authentication response code ${requiresAuthenticationResult.status}.")
               createResultSimple(javaContext, requiresAuthenticationResult)
             }
+          }
         }
         futureResult.onFailure{case x => log.error("Exception during authentication procedure", x)}
 
