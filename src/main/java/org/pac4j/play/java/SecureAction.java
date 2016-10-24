@@ -67,6 +67,10 @@ public class SecureAction extends Action<Result> {
     public SecureAction(final Config config, final PlaySessionStore playSessionStore, final HttpExecutionContext ec) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
+        final SecurityLogic configSecurityLogic = config.getSecurityLogic();
+        if (configSecurityLogic != null) {
+            this.securityLogic = configSecurityLogic;
+        }
         this.sessionStore = playSessionStore;
         this.ec = ec;
     }

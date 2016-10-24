@@ -143,9 +143,11 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 }
 ```
 
-`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
+`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
 
-Notice that you define a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method. The available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+Notice that you can also configure a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method of the `Config` object. The default available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+
+You can also define a specific `SecurityLogic` via the `setSecurityLogic` method.
 
 ---
 
