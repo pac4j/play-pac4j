@@ -85,10 +85,10 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
           if (requiresAuthenticationResult == null) {
             // If the authentication succeeds, the action result is null
-            // this is a hack: add the current profiles in the tag
-            val profiles = javaContext.flash().get(Pac4jConstants.USER_PROFILES)
+            // this is a hack: add the current profiles from the context args ("request attributes") in the tags of the request for further retrieval
+            val profiles = javaContext.args.get(Pac4jConstants.USER_PROFILES)
             if (profiles != null) {
-              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, profiles))
+              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64(profiles.asInstanceOf[Serializable])))
             } else {
               nextFilter(request)
             }
