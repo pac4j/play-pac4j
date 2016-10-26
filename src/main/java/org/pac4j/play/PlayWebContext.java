@@ -1,6 +1,5 @@
 package org.pac4j.play;
 
-import java.io.Serializable;
 import java.util.*;
 
 import org.pac4j.core.context.Cookie;
@@ -21,7 +20,7 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
  * <p>"Session objects" are managed by the defined {@link SessionStore}.</p>
- * <p>"Request attributes" are saved/restored to/from the flash scope.</p>
+ * <p>"Request attributes" are saved/restored to/from the context.</p>
  *
  * @author Jerome Leleu
  * @since 1.1.0
@@ -196,23 +195,20 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public Object getRequestAttribute(final String name) {
-        Object value = null;
-        String tempValue = context.flash().get(name);
+        Object value = context.args.get(name);
         // this is a hack: we try to get the profiles from the tag because of the SecurityFilter
-        if (tempValue == null && Pac4jConstants.USER_PROFILES.equals(name)) {
-            tempValue = request.tags().get(name);
-        }
-        if (tempValue != null) {
-            value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(tempValue);
+        if (value == null && Pac4jConstants.USER_PROFILES.equals(name)) {
+            final String tempValue = request.tags().get(name);
+            if (tempValue != null) {
+                value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(tempValue);
+            }
         }
         return value;
     }
 
     @Override
     public void setRequestAttribute(final String name, final Object value) {
-        if (value != null) {
-            context.flash().put(name, JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) value));
-        }
+        context.args.put(name, value);
     }
 
     @Override
