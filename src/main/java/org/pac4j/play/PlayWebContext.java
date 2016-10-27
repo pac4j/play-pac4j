@@ -27,6 +27,8 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
  */
 public class PlayWebContext implements WebContext {
 
+    public final static String SB64_PREFIX = "{sb64}";
+
     public final static JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
 
     protected final Context context;
@@ -196,11 +198,11 @@ public class PlayWebContext implements WebContext {
     @Override
     public Object getRequestAttribute(final String name) {
         Object value = context.args.get(name);
-        // this is a hack: we try to get the profiles from the tag because of the SecurityFilter
-        if (value == null && Pac4jConstants.USER_PROFILES.equals(name)) {
-            final String tempValue = request.tags().get(name);
-            if (tempValue != null) {
-                value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(tempValue);
+        // this is a hack: we try to get the profiles as a serialized value because of the SecurityFilter
+        if (Pac4jConstants.USER_PROFILES.equals(name) && value != null && value instanceof String) {
+            final String sValue = (String) value;
+            if (sValue.startsWith(SB64_PREFIX)) {
+                value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(sValue.substring(SB64_PREFIX.length()));
             }
         }
         return value;

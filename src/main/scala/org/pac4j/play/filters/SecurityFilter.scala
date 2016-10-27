@@ -88,7 +88,8 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
             // this is a hack: add the current profiles from the context args ("request attributes") in the tags of the request for further retrieval
             val profiles = javaContext.args.get(Pac4jConstants.USER_PROFILES)
             if (profiles != null) {
-              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64(profiles.asInstanceOf[Serializable])))
+              val serializedProfile = PlayWebContext.SB64_PREFIX + PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64(profiles.asInstanceOf[java.io.Serializable])
+              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, serializedProfile))
             } else {
               nextFilter(request)
             }
