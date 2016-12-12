@@ -77,16 +77,20 @@ trait Security[P<:CommonProfile] extends Controller {
    * @return
    */
   protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
-    val javaBodyContent = request.asInstanceOf[Request[AnyContent]].body.asFormUrlEncoded
-      .getOrElse(Map.empty[String, Seq[String]])
-      .map(field => field._1 -> field._2.toArray)  // Make field values Java-friendly
-      .asJava
+    val webContext = request.body match {
+      case content: AnyContentAsFormUrlEncoded =>
+        val javaBodyContent = content.asFormUrlEncoded
+          .getOrElse(Map.empty[String, Seq[String]])
+          .map(field => field._1 -> field._2.toArray)  // Make field values Java-friendly
+          .asJava
+        val javaBody = new RequestBody(javaBodyContent)
+        val jRequest = Request(request, javaBody)
+        val jContext = JavaHelpers.createJavaContext(jRequest)
+        new PlayWebContext(jContext, playSessionStore)
+      case _ =>
+        new PlayWebContext(request, playSessionStore)
+    }
 
-    val javaBody = new RequestBody(javaBodyContent)
-    val jRequest = Request(request, javaBody)
-    val jContext = JavaHelpers.createJavaContext(jRequest)
-
-    val webContext = new PlayWebContext(jContext, playSessionStore)
     val secureAction = new SecureAction(config, playSessionStore, ec)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
