@@ -17,35 +17,42 @@ import java.util.concurrent.CompletionStage;
  * With CDI there is no way to access the session store by injecting it directly into the the template via CDI.
  * The only way to do this is to pass it as an argument to the template itself, which can be annoying when yo need the profile in an main.tpl for exp. which is called from the other template.
  *
+ * <pre>
  * <code>
- * @(profile: CommonProfile)
+ * {@literal@}(profile: CommonProfile)
  *
  * ...
- * @main(profile) {
+ * {@literal@}main(profile) {
  *   <h1>Hello</h1>
  * }
  * ...
  * </code>
+ * </pre>
  *
  *
  * Just annotate your controller with the {@link ProfileToContext} annotation and you have the profile in the CTX.
  *
+ * <pre>
  * <code>
- *   @UserToContextAnnotation
+ *   {@literal@}UserToContextAnnotation
  *    public class UserToContextController extends Controller {
  *      ...
  *    }
  * </code>
+ * </pre>
  *
  * You can access the Optional for the profile from the template with the following code:
+ *
+ * <pre>
  * <code>
- *   @import Http.Context
- *   @currentUserOptional = @{Context.current().args.get(org.pac4j.play.java.UserToContextAction.CONTEXT_CURRENT_PROFILE_KEY).asInstanceOf[java.util.Optional[org.pac4j.core.profile.CommonProfile]]}
- *   @if(currentUserOptional.isEmpty == false) {
+ *   {@literal@}import Http.Context
+ *   {@literal@}currentUserOptional = @{Context.current().args.get(org.pac4j.play.java.UserToContextAction.CONTEXT_CURRENT_PROFILE_KEY).asInstanceOf[java.util.Optional[org.pac4j.core.profile.CommonProfile]]}
+ *   {@literal@}(currentUserOptional.isEmpty == false) {
  *     Hello: @currentUserOptional.get().getUsername
  *   }
  *
  * </code>
+ * </pre>
  *
  * @author Sebastian Hardt (s.hardt@micromata.de)
  */
@@ -63,25 +70,28 @@ public class ProfileToContextAction extends Action<ProfileToContext>
   private final PlaySessionStore playSessionStore;
 
   @Inject
-  public ProfileToContextAction(final PlaySessionStore playSessionStore) {
+  public ProfileToContextAction(final PlaySessionStore playSessionStore)
+  {
     this.playSessionStore = playSessionStore;
   }
 
   @Override
   public CompletionStage<Result> call(Http.Context ctx)
   {
-    Optional<CommonProfile> userProfile = getUserProfile(ctx,playSessionStore);
-    ctx.args.put(CONTEXT_CURRENT_PROFILE_KEY,userProfile);
+    Optional<CommonProfile> userProfile = getUserProfile(ctx, playSessionStore);
+    ctx.args.put(CONTEXT_CURRENT_PROFILE_KEY, userProfile);
     return delegate.call(ctx);
   }
 
   /**
    * Gets the current user profile from the session store.
+   *
    * @param ctx the http context.
    * @return the {@link Optional}
    */
-  public static Optional<CommonProfile> getUserProfile(Http.Context ctx,final PlaySessionStore playSessionStore) {
-    PlayWebContext webContext = new PlayWebContext(ctx,playSessionStore );
+  public static Optional<CommonProfile> getUserProfile(Http.Context ctx, final PlaySessionStore playSessionStore)
+  {
+    PlayWebContext webContext = new PlayWebContext(ctx, playSessionStore);
     ProfileManager<CommonProfile> profileManager = new ProfileManager(webContext);
     Optional<CommonProfile> profile = profileManager.get(true);
     return profile;
