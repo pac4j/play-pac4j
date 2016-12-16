@@ -19,7 +19,7 @@ import java.util.concurrent.CompletionStage;
  *
  * <pre>
  * {@code
- * @literal@}(profile: CommonProfile)
+ * {@literal@}(profile: CommonProfile)
  *
  * ...
  * {@literal@}main(profile) {
@@ -33,25 +33,24 @@ import java.util.concurrent.CompletionStage;
  * Just annotate your controller with the {@link ProfileToContext} annotation and you have the profile in the CTX.
  *
  * <pre>
- * <code>
+ * {@code
  *   {@literal@}UserToContextAnnotation
  *    public class UserToContextController extends Controller {
  *      ...
  *    }
- * </code>
+ * }
  * </pre>
  *
  * You can access the Optional for the profile from the template with the following code:
  *
  * <pre>
- * <code>
+ * {@code
  *   {@literal@}import Http.Context
  *   {@literal@}currentUserOptional = @{Context.current().args.get(org.pac4j.play.java.UserToContextAction.CONTEXT_CURRENT_PROFILE_KEY).asInstanceOf[java.util.Optional[org.pac4j.core.profile.CommonProfile]]}
  *   {@literal@}(currentUserOptional.isEmpty == false) {
  *     Hello: @currentUserOptional.get().getUsername
  *   }
- *
- * </code>
+ * }
  * </pre>
  *
  * @author Sebastian Hardt (s.hardt@micromata.de)
