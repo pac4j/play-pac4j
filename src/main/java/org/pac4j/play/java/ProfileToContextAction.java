@@ -18,15 +18,15 @@ import java.util.concurrent.CompletionStage;
  * The only way to do this is to pass it as an argument to the template itself, which can be annoying when yo need the profile in an main.tpl for exp. which is called from the other template.
  *
  * <pre>
- * <code>
- * {@literal@}(profile: CommonProfile)
+ * {@code
+ * @literal@}(profile: CommonProfile)
  *
  * ...
  * {@literal@}main(profile) {
  *   <h1>Hello</h1>
  * }
  * ...
- * </code>
+ * }
  * </pre>
  *
  *
