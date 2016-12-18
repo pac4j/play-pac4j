@@ -2,6 +2,7 @@ package org.pac4j.play.deadbolt2;
 
 import be.objectify.deadbolt.java.DeadboltHandler;
 import be.objectify.deadbolt.java.DynamicResourceHandler;
+import be.objectify.deadbolt.java.models.Permission;
 import be.objectify.deadbolt.java.models.Subject;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -18,6 +19,7 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -94,6 +96,18 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                 logger.debug("no profile found -> returning empty");
                 return Optional.empty();
             }
+        }, httpExecutionContext.current());
+    }
+
+    @Override
+    public CompletionStage<List<? extends Permission>> getPermissionsForRole(String roleName) {
+        return CompletableFuture.supplyAsync(() -> {
+            final Http.Context context = Http.Context.current();
+            Optional<CommonProfile> maybeProfile = getProfile(context);
+            if(maybeProfile.isPresent()){
+                return new Pac4jSubject(maybeProfile.get()).getPermissions();
+            }
+            return Collections.emptyList();
         }, httpExecutionContext.current());
     }
 
