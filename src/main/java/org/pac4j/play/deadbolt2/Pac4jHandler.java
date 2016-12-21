@@ -43,7 +43,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     private final PlaySessionStore playSessionStore;
 
-    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore) {
+    private final Pac4jRoleHandler roleHandler;
+
+    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore, final Pac4jRoleHandler roleHandler) {
         CommonHelper.assertNotNull("config", config);
         CommonHelper.assertNotNull("httpExecutionContext", httpExecutionContext);
         CommonHelper.assertNotNull("playSessionStore", playSessionStore);
@@ -52,6 +54,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         this.httpExecutionContext = httpExecutionContext;
         this.clients = clients;
         this.playSessionStore = playSessionStore;
+        this.roleHandler = roleHandler;
     }
 
     @Override
@@ -101,14 +104,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     @Override
     public CompletionStage<List<? extends Permission>> getPermissionsForRole(String roleName) {
-        return CompletableFuture.supplyAsync(() -> {
-            final Http.Context context = Http.Context.current();
-            Optional<CommonProfile> maybeProfile = getProfile(context);
-            if(maybeProfile.isPresent()){
-                return new Pac4jSubject(maybeProfile.get()).getPermissions();
-            }
-            return Collections.emptyList();
-        }, httpExecutionContext.current());
+        return roleHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
     }
 
     private Optional<CommonProfile> getProfile(final Http.Context context) {
