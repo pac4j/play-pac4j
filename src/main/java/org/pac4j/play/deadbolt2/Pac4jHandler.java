@@ -19,7 +19,6 @@ import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -43,9 +42,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     private final PlaySessionStore playSessionStore;
 
-    private final Pac4jRoleHandler roleHandler;
+    private final Pac4jRoleHandler rolePermissionsHandler;
 
-    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore, final Pac4jRoleHandler roleHandler) {
+    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore, final Pac4jRoleHandler rolePermissionsHandler) {
         CommonHelper.assertNotNull("config", config);
         CommonHelper.assertNotNull("httpExecutionContext", httpExecutionContext);
         CommonHelper.assertNotNull("playSessionStore", playSessionStore);
@@ -54,7 +53,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         this.httpExecutionContext = httpExecutionContext;
         this.clients = clients;
         this.playSessionStore = playSessionStore;
-        this.roleHandler = roleHandler;
+        this.rolePermissionsHandler = rolePermissionsHandler;
     }
 
     @Override
@@ -104,7 +103,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     @Override
     public CompletionStage<List<? extends Permission>> getPermissionsForRole(String roleName) {
-        return roleHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
+        return rolePermissionsHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
     }
 
     private Optional<CommonProfile> getProfile(final Http.Context context) {
