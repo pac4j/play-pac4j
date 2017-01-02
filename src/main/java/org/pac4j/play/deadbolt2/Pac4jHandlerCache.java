@@ -33,12 +33,15 @@ public class Pac4jHandlerCache implements HandlerCache {
 
     private DeadboltHandler defaultHandler;
 
+    private final Pac4jRoleHandler roleHandler;
+
     @Inject
-    public Pac4jHandlerCache(final Config config, final HttpExecutionContext httpExecutionContext, final PlaySessionStore playSessionStore) {
+    public Pac4jHandlerCache(final Config config, final HttpExecutionContext httpExecutionContext, final PlaySessionStore playSessionStore, Pac4jRoleHandler roleHandler) {
         this.config = config;
         this.httpExecutionContext = httpExecutionContext;
         this.playSessionStore = playSessionStore;
-        defaultHandler = new Pac4jHandler(config, httpExecutionContext, null, playSessionStore);
+        this.roleHandler = roleHandler;
+        defaultHandler = new Pac4jHandler(config, httpExecutionContext, null, playSessionStore, roleHandler);
         handlers.put(ConfigKeys.DEFAULT_HANDLER_KEY, defaultHandler);
     }
 
@@ -54,7 +57,7 @@ public class Pac4jHandlerCache implements HandlerCache {
     protected synchronized DeadboltHandler getAndBuildHandler(final String clients) {
         DeadboltHandler handler = handlers.get(clients);
         if (handler == null) {
-            handler = new Pac4jHandler(config, httpExecutionContext, clients, playSessionStore);
+            handler = new Pac4jHandler(config, httpExecutionContext, clients, playSessionStore, roleHandler);
         }
         return handler;
     }

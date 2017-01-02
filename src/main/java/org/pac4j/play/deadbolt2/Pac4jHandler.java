@@ -2,6 +2,7 @@ package org.pac4j.play.deadbolt2;
 
 import be.objectify.deadbolt.java.DeadboltHandler;
 import be.objectify.deadbolt.java.DynamicResourceHandler;
+import be.objectify.deadbolt.java.models.Permission;
 import be.objectify.deadbolt.java.models.Subject;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.config.Config;
@@ -41,7 +42,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     private final PlaySessionStore playSessionStore;
 
-    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore) {
+    private final Pac4jRoleHandler rolePermissionsHandler;
+
+    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore, final Pac4jRoleHandler rolePermissionsHandler) {
         CommonHelper.assertNotNull("config", config);
         CommonHelper.assertNotNull("httpExecutionContext", httpExecutionContext);
         CommonHelper.assertNotNull("playSessionStore", playSessionStore);
@@ -50,6 +53,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         this.httpExecutionContext = httpExecutionContext;
         this.clients = clients;
         this.playSessionStore = playSessionStore;
+        this.rolePermissionsHandler = rolePermissionsHandler;
     }
 
     @Override
@@ -95,6 +99,11 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                 return Optional.empty();
             }
         }, httpExecutionContext.current());
+    }
+
+    @Override
+    public CompletionStage<List<? extends Permission>> getPermissionsForRole(String roleName) {
+        return rolePermissionsHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
     }
 
     private Optional<CommonProfile> getProfile(final Http.Context context) {

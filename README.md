@@ -300,7 +300,10 @@ While the `play-pac4j` security library can handle authorizations on its own, [D
 
 You need to bind the Deadbolt `HandlerCache` to the `Pac4jHandlerCache` (in your `SecurityModule`):
 
+Also `pac4j` does not require a linked of permissions with roles, you must bind a `Pac4jRoleHandler` handler to correct use of `@RoleBasedPermissions` action.
+
 ```java
+bind(Pac4jRoleHandler.class).to(MyCustomRoleHandler.class);
 bind(HandlerCache.class).to(Pac4jHandlerCache.class);
 ```
 
