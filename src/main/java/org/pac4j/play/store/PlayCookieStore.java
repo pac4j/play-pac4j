@@ -16,16 +16,11 @@ import org.pac4j.jwt.JwtClaims;
 import org.pac4j.jwt.config.encryption.SecretEncryptionConfiguration;
 import com.google.inject.Inject;
 
-import play.cache.CacheApi;
 import play.mvc.Http;
 
 /**
  * The Cookie storage uses an encrypted JWT inside the Play Session cookie for
  * storage, allowing for a stateless backend.
- * 
- * The optional cache uses Play's native CacheApi as a performance boost. If the
- * cache is enabled, it still falls back to the JWT in cases where the two
- * disagree.
  * 
  * @author Nolan Barth
  * @since 2.6.2
@@ -42,19 +37,16 @@ public class PlayCookieStore implements PlaySessionStore {
 	// 1 hour = 3600 seconds
 	private int timeout = 3600;
 
-	private boolean useCache = false;
 	private JwtAuthenticator jwtAuthenticator;
 	private JwtGenerator<CommonProfile> jwtGenerator;
-	private final CacheApi cache;
 
 	@Inject
-	public PlayCookieStore(final CacheApi cache, final SecretEncryptionConfiguration secretEncryptConfig) {
+	public PlayCookieStore(final SecretEncryptionConfiguration secretEncryptConfig) {
 		super();
 		this.jwtAuthenticator = new JwtAuthenticator();
 		this.jwtAuthenticator.addEncryptionConfiguration(secretEncryptConfig);
 		this.jwtGenerator = new JwtGenerator<CommonProfile>();
 		this.jwtGenerator.setEncryptionConfiguration(secretEncryptConfig);
-		this.cache = cache;
 	}
 
 	String getKey(final String sessionId, final String key) {
@@ -94,13 +86,6 @@ public class PlayCookieStore implements PlaySessionStore {
 			session.remove(sessionId);
 		final String sessionToken = jwtGenerator.generate(sessionMap);
 		session.put(sessionId, sessionToken);
-		if (useCache)
-			updateCache(sessionId, sessionToken, sessionMap);
-	}
-
-	private void updateCache(String sessionId, String sessionToken, Map<String, Object> sessionMap) {
-		cache.set(getKey(sessionId, "MapCache"), sessionMap);
-		cache.set(getKey(sessionId, "TokenCache"), sessionToken);
 	}
 
 	private Map<String, Object> getOrCreateSessionMap(final PlayWebContext context, String sessionId) {
@@ -108,10 +93,7 @@ public class PlayCookieStore implements PlaySessionStore {
 		// get the claims, and if it fails, generate the session map
 		Map<String, Object> sessionMap;
 		try {
-			if (useCache)
-				sessionMap = getSessionMapWithCache(sessionId, sessionToken);
-			else
-				sessionMap = jwtAuthenticator.validateTokenAndGetClaims(sessionToken);
+			sessionMap = jwtAuthenticator.validateTokenAndGetClaims(sessionToken);
 		} catch (TechnicalException | NullPointerException e) {
 			sessionMap = new HashMap<String, Object>();
 			// Ensures the map will be correctly built into a profile during the
@@ -119,21 +101,6 @@ public class PlayCookieStore implements PlaySessionStore {
 			sessionMap.put(JwtClaims.SUBJECT, sessionId);
 		}
 		return sessionMap;
-	}
-
-	private Map<String, Object> getSessionMapWithCache(String sessionId, String sessionToken)
-			throws TechnicalException, NullPointerException {
-		String cachedToken = cache.get(getKey(sessionId, "TokenCache"));
-		// check to see if the cache is up to date with the current sessionToken
-		if (sessionToken.contentEquals(cachedToken)) {
-			// If the cache is up to date, try to use it, if the cached map is
-			// missing, decrypt the token.
-			return (Map<String, Object>) cache.getOrElse(getKey(sessionId, "MapCache"), () -> {
-				return jwtAuthenticator.validateTokenAndGetClaims(sessionToken);
-			});
-		} else {
-			return jwtAuthenticator.validateTokenAndGetClaims(sessionToken);
-		}
 	}
 
 	@Override
@@ -201,13 +168,4 @@ public class PlayCookieStore implements PlaySessionStore {
 	public void setJwtGenerator(JwtGenerator<CommonProfile> jwtGenerator) {
 		this.jwtGenerator = jwtGenerator;
 	}
-
-	public boolean isUseCache() {
-		return useCache;
-	}
-
-	public void setUseCache(boolean useCache) {
-		this.useCache = useCache;
-	}
-
 }
