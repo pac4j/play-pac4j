@@ -149,6 +149,8 @@ Notice that you can also configure a specific `HttpActionAdapter` to handle spec
 
 You can also define a specific `SecurityLogic` via the `setSecurityLogic` method.
 
+In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. Since this method uses encryption to secure the session inside the cookie, it is likely less efficient for some solutions. However, in cases where you want to preserve Play's statelessness, you can opt to use it instead of the `PlayCacheStore`.
+
 If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'll need to replace this line:
 
 *Java:*
@@ -159,7 +161,7 @@ If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'
 
 `bind(classOf[PlaySessionStore]).to(classOf[PlayCacheStore])`
 
-with a configured instance of PlayCookieStore, like this:
+with an instance of `PlayCookieStore` with an `EncryptionConfiguration`, like this:
 
 *Java:*
 
