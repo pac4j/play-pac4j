@@ -54,7 +54,7 @@ public class CallbackController extends Controller {
         return defaultUrl;
     }
 
-    public void setDefaultUrl(String defaultUrl) {
+    public void setDefaultUrl(final String defaultUrl) {
         this.defaultUrl = defaultUrl;
     }
 
@@ -62,7 +62,7 @@ public class CallbackController extends Controller {
         return multiProfile;
     }
 
-    public void setMultiProfile(boolean multiProfile) {
+    public void setMultiProfile(final boolean multiProfile) {
         this.multiProfile = multiProfile;
     }
 
@@ -70,7 +70,7 @@ public class CallbackController extends Controller {
         return config;
     }
 
-    public void setConfig(Config config) {
+    public void setConfig(final Config config) {
         this.config = config;
     }
 }

@@ -3,18 +3,19 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also application logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.5 and on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
+It's based on Play 2.5 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2.0**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
 | Play version | pac4j version | play-pac4j version
 |--------------|---------------|-------------------
-| 2.0          | 1.7           |[play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.9 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
+| 2.0          | 1.7           | [play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.9 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
 | 2.1          | 1.7           | [play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.10 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
 | 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 1.9           | play-pac4j 2.6.x (Java & Scala)
+| 2.5          | 1.9           | [play-pac4j 2.6.x](https://github.com/pac4j/play-pac4j/tree/2.6.x) (Java & Scala)
+| 2.5          | 2.0           | 3.0.x (Java & Scala)
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
@@ -41,8 +42,8 @@ Just follow these easy steps to secure your Play 2 web application:
 
 You need to add a dependency on:
 
-- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **2.6.2**)
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **1.9.5**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0-SNAPSHOT**)
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -143,7 +144,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 }
 ```
 
-`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
+`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheSessionStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
 
 Notice that you can also configure a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method of the `Config` object. The default available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 
@@ -423,28 +424,41 @@ val facebookProfile = commonProfile.asInstanceOf[FacebookProfile]
 
 ---
 
-### 6) Logout (`ApplicationLogoutController`)
+### 6) Logout (`LogoutController`)
 
-You can log out the current authenticated user using the `ApplicationLogoutController`. It has the following behaviour:
+The `LogoutController` can handle:
 
-1) after logout, the user is redirected to the url defined by the `url` request parameter if it matches the `logoutUrlPattern`
+- the local logout by removing the pac4j profiles from the session (it can be used for the front-channel logout from the identity provider in case of a central logout)
+- the central logout by calling the identity provider logout endpoint.
 
-2) or the user is redirected to the `defaultUrl` if it is defined
 
-3) otherwise, a blank page is displayed.
+It has the following behaviour:
+
+1) If the `localLogout` property is `true`, the pac4j profiles are removed from the web session (and the web session is destroyed if the `destroySession` property is `true`)
+
+2) A post logout action is computed as the redirection to the `url` request parameter if it matches the `logoutUrlPattern` or to the `defaultUrl` if it is defined or as a blank page otherwise
+
+3) If the `centralLogout` property is `true`, the user is redirected to the identity provider for a central logout and
+then optionally to the post logout redirection URL (if it's supported by the identity provider and if it's an absolute URL).
+If no central logout is defined, the post logout action is performed directly.
 
 
 The following parameters are available:
 
 1) `defaultUrl` (optional): the default logout url if no `url` request parameter is provided or if the `url` does not match the `logoutUrlPattern` (not defined by default)
 
-2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default).
+2) `logoutUrlPattern` (optional): the logout url pattern that the `url` parameter must match (only relative urls are allowed by default)
 
+3) `localLogout` (optional): whether a local logout must be performed (`true` by default)
+
+4) `destroySession` (optional):  whether we must destroy the web session during the local logout (`false` by default)
+
+5) `centralLogout` (optional): whether a central logout must be performed (`false` by default).
 
 In the `routes` file:
 
 ```properties
-GET     /logout     @org.pac4j.play.ApplicationLogoutController.logout()
+GET     /logout     @org.pac4j.play.LogoutController.logout()
 ```
 
 In the `SecurityModule`:
@@ -452,22 +466,26 @@ In the `SecurityModule`:
 *In Java:*
 
 ```java
-ApplicationLogoutController logoutController = new ApplicationLogoutController();
+LogoutController logoutController = new LogoutController();
 logoutController.setDefaultUrl("/");
-bind(ApplicationLogoutController.class).toInstance(logoutController);
+bind(LogoutController.class).toInstance(logoutController);
 ```
 
 *In Scala:*
 
 ```scala
-val logoutController = new ApplicationLogoutController()
+val logoutController = new LogoutController()
 logoutController.setDefaultUrl("/")
-bind(classOf[ApplicationLogoutController]).toInstance(logoutController)
+bind(classOf[LogoutController]).toInstance(logoutController)
 ```
 
 ---
 
 ## Migration guide
+
+### 2.5 / 2.6 -> 3.0.0
+
+The `ApplicationLogoutController` has been renamed as `LogoutController` and the `PlayCacheStore` as `PlayCacheSessionStore`.
 
 ### 2.4.0 (Play 2.5) -> 2.5.0 (Play 2.5)
 
@@ -505,7 +523,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/2.6.2) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/1.9.5/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/3.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.0.0/index.html).
 
 
 ## Need help?
@@ -518,7 +536,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 2.6.3-SNAPSHOT is under development.
+The version 3.0.0-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
