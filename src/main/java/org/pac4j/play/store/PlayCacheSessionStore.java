@@ -95,6 +95,11 @@ public class PlayCacheSessionStore implements PlaySessionStore {
         return this;
     }
 
+    @Override
+    public boolean renewSession(final PlayWebContext context) {
+        return false;
+    }
+
     public String getPrefix() {
         return prefix;
     }

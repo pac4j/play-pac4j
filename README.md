@@ -31,7 +31,7 @@ Several versions of the library are available for the different versions of the 
 
 4) The `CallbackController` finishes the login process for an indirect client
 
-5) The `ApplicationLogoutController` logs out the user from the application.
+5) The `LogoutController` logs out the user from the application.
 
 ==
 
@@ -42,8 +42,8 @@ Just follow these easy steps to secure your Play 2 web application:
 
 You need to add a dependency on:
 
-- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0-SNAPSHOT**)
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0-RC2-SNAPSHOT**)
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0-RC2-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -58,6 +58,43 @@ The `Config` is bound for injection in a `SecurityModule` (or whatever the name 
 *In Java:*
 
 ```java
+package modules;
+
+import be.objectify.deadbolt.java.cache.HandlerCache;
+import com.google.inject.AbstractModule;
+import controllers.CustomAuthorizer;
+import controllers.DemoHttpActionAdapter;
+import org.pac4j.cas.client.CasClient;
+import org.pac4j.cas.config.CasConfiguration;
+import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer;
+import org.pac4j.core.client.Clients;
+import org.pac4j.core.client.direct.AnonymousClient;
+import org.pac4j.core.config.Config;
+import org.pac4j.http.client.direct.DirectBasicAuthClient;
+import org.pac4j.http.client.direct.ParameterClient;
+import org.pac4j.http.client.indirect.FormClient;
+import org.pac4j.http.client.indirect.IndirectBasicAuthClient;
+import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator;
+import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;
+import org.pac4j.oauth.client.FacebookClient;
+import org.pac4j.oauth.client.TwitterClient;
+import org.pac4j.oidc.client.OidcClient;
+import org.pac4j.oidc.config.OidcConfiguration;
+import org.pac4j.play.ApplicationLogoutController;
+import org.pac4j.play.CallbackController;
+import org.pac4j.play.cas.logout.PlayCacheLogoutHandler;
+import org.pac4j.play.deadbolt2.Pac4jHandlerCache;
+import org.pac4j.play.deadbolt2.Pac4jRoleHandler;
+import org.pac4j.play.store.PlayCacheStore;
+import org.pac4j.play.store.PlaySessionStore;
+import org.pac4j.saml.client.SAML2Client;
+import org.pac4j.saml.client.SAML2ClientConfiguration;
+import play.Configuration;
+import play.Environment;
+import play.cache.CacheApi;
+
+import java.io.File;
+
 public class SecurityModule extends AbstractModule {
 
   @Override
@@ -103,6 +140,36 @@ public class SecurityModule extends AbstractModule {
 *In Scala:*
 
 ```scala
+package modules
+
+import com.google.inject.AbstractModule
+import controllers.{CustomAuthorizer, DemoHttpActionAdapter, RoleAdminAuthGenerator}
+import org.pac4j.cas.client.CasClient
+import org.pac4j.core.client.Clients
+import org.pac4j.http.client.direct.{DirectBasicAuthClient, ParameterClient}
+import org.pac4j.http.client.indirect.{FormClient, IndirectBasicAuthClient}
+import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
+import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
+import org.pac4j.oauth.client.{FacebookClient, TwitterClient}
+import org.pac4j.oidc.client.OidcClient
+import org.pac4j.play.cas.logout.PlayCacheLogoutHandler
+import org.pac4j.play.{ApplicationLogoutController, CallbackController}
+import org.pac4j.saml.client.SAML2ClientConfiguration
+import play.api.{Configuration, Environment}
+import java.io.File
+
+import org.pac4j.cas.config.{CasConfiguration, CasProtocol}
+import org.pac4j.play.store.{PlayCacheStore, PlaySessionStore}
+import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer
+import org.pac4j.core.client.direct.AnonymousClient
+import org.pac4j.core.config.Config
+import org.pac4j.jwt.config.encryption.SecretEncryptionConfiguration
+import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
+import org.pac4j.oidc.config.OidcConfiguration
+import org.pac4j.oidc.profile.OidcProfile
+import org.pac4j.saml.client.SAML2Client
+import play.cache.CacheApi
+
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule {
 
   override def configure(): Unit = {
@@ -536,7 +603,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 3.0.0-SNAPSHOT is under development.
+The version 3.0.0-RC2-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
