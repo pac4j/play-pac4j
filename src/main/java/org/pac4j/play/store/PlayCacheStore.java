@@ -1,84 +1,83 @@
 package org.pac4j.play.store;
 
-import com.google.inject.Inject;
-import org.pac4j.core.context.Pac4jConstants;
+import javax.inject.Inject;
+import com.google.inject.Provider;
+import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.store.AbstractStore;
+import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import play.cache.CacheApi;
-import play.mvc.Http;
+
+import java.io.Serializable;
 
 /**
- * The cache storage uses the Play Cache, only an identifier is saved into the Play session.
+ * Store using the Play Cache.
  *
  * @author Jerome Leleu
- * @since 2.0.0
+ * @since 3.0.0
  */
-public class PlayCacheStore implements PlaySessionStore {
-
-    private static final Logger logger = LoggerFactory.getLogger(PlayCacheStore.class);
-
-    private final static String SEPARATOR = "$";
-
-    // prefix for the cache
-    private String prefix = "";
-
-    // 1 hour = 3600 seconds
-    private int timeout = 3600;
+public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
     private final CacheApi cache;
+    private final Provider<CacheApi> cacheProvider;
+    private int timeout;
 
     @Inject
-    public PlayCacheStore(final CacheApi cache) {
-        this.cache = cache;
+    public PlayCacheStore(final CacheApi cacheApi) {
+        this.cacheProvider = null;
+        this.cache = cacheApi;
     }
 
-    String getKey(final String sessionId, final String key) {
-        return prefix + SEPARATOR + sessionId + SEPARATOR + key;
+    public PlayCacheStore(final Provider<CacheApi> cacheProvider) {
+        this.cache = null;
+        this.cacheProvider = cacheProvider;
     }
 
     @Override
-    public String getOrCreateSessionId(final PlayWebContext context) {
-        final Http.Session session = context.getJavaSession();
-        // get current sessionId
-        String sessionId = session.get(Pac4jConstants.SESSION_ID);
-        logger.trace("retrieved sessionId: {}", sessionId);
-        // if null, generate a new one
-        if (sessionId == null) {
-            // generate id for session
-            sessionId = java.util.UUID.randomUUID().toString();
-            logger.debug("generated sessionId: {}", sessionId);
-            // and save it to session
-            session.put(Pac4jConstants.SESSION_ID, sessionId);
+    protected void internalInit() {
+        CommonHelper.assertTrue(this.timeout >= 0, "timeout must be greater than zero");
+        if (this.cache == null && this.cacheProvider == null) {
+            throw new TechnicalException("The cache and the cacheProvider must not be both null");
         }
-        return sessionId;
     }
 
     @Override
-    public Object get(final PlayWebContext context, final String key) {
-        final String sessionId = getOrCreateSessionId(context);
-        return cache.get(getKey(sessionId, key));
+    protected O internalGet(final K key) {
+        return getCache().get(computeKey(key));
     }
 
     @Override
-    public void set(final PlayWebContext context, final String key, final Object value) {
-        final String sessionId = getOrCreateSessionId(context);
-        cache.set(getKey(sessionId, key), value, timeout);
+    protected void internalSet(final K key, final O value) {
+        getCache().set(computeKey(key), value, this.timeout);
     }
 
-    public String getPrefix() {
-        return prefix;
+    @Override
+    protected void internalRemove(final K key) {
+        getCache().remove(computeKey(key));
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
+    protected String computeKey(final Object objKey) {
+        if (objKey instanceof String) {
+            return (String) objKey;
+        } else {
+            return PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) objKey);
+        }
+    }
+
+    public CacheApi getCache() {
+        return cache != null ? cache : cacheProvider.get();
     }
 
     public int getTimeout() {
         return timeout;
     }
 
-    public void setTimeout(int timeout) {
+    public void setTimeout(final int timeout) {
         this.timeout = timeout;
+    }
+
+    @Override
+    public String toString() {
+        return CommonHelper.toString(this.getClass(), "cache", getCache(), "timeout", timeout);
     }
 }

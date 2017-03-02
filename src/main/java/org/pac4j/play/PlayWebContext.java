@@ -3,6 +3,7 @@ package org.pac4j.play;
 import java.util.*;
 
 import org.pac4j.core.context.Cookie;
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -39,7 +40,7 @@ public class PlayWebContext implements WebContext {
 
     protected final Session session;
 
-    protected final SessionStore<PlayWebContext> sessionStore;
+    protected SessionStore<PlayWebContext> sessionStore;
 
     protected String responseContent = "";
 
@@ -48,12 +49,22 @@ public class PlayWebContext implements WebContext {
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        assertNotNull("sessionStore", sessionStore);
-        this.sessionStore = sessionStore;
+        setSessionStore(sessionStore);
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
         this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), sessionStore);
+    }
+
+    @Override
+    public SessionStore getSessionStore() {
+        return this.sessionStore;
+    }
+
+    @Override
+    public void setSessionStore(final SessionStore sessionStore) {
+        assertNotNull("sessionStore", sessionStore);
+        this.sessionStore = sessionStore;
     }
 
     /**
@@ -73,13 +84,6 @@ public class PlayWebContext implements WebContext {
     public Context getJavaContext() {
         return this.context;
     }
-
-    /**
-     * Return the session store.
-     *
-     * @return the session store
-     */
-    public SessionStore<PlayWebContext> getSessionStore() { return this.sessionStore; }
 
     @Override
     public void setResponseStatus(final int code) {}
@@ -106,8 +110,8 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public String getRequestMethod() {
-        return request.method();
+    public HttpConstants.HTTP_METHOD getRequestMethod() {
+        return HttpConstants.HTTP_METHOD.valueOf(request.method());
     }
 
     @Override
@@ -138,21 +142,6 @@ public class PlayWebContext implements WebContext {
             parameters.putAll(urlParameters);
         }
         return parameters;
-    }
-
-    @Override
-    public Object getSessionIdentifier() {
-        return sessionStore.getOrCreateSessionId(this);
-    }
-
-    @Override
-    public Object getSessionAttribute(final String key) {
-        return sessionStore.get(this, key);
-    }
-
-    @Override
-    public void setSessionAttribute(final String key, final Object value) {
-        sessionStore.set(this, key, value);
     }
 
     @Override
