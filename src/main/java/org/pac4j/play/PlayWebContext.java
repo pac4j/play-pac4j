@@ -3,7 +3,6 @@ package org.pac4j.play;
 import java.util.*;
 
 import org.pac4j.core.context.Cookie;
-import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -110,8 +109,8 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public HttpConstants.HTTP_METHOD getRequestMethod() {
-        return HttpConstants.HTTP_METHOD.valueOf(request.method());
+    public String getRequestMethod() {
+        return request.method();
     }
 
     @Override
