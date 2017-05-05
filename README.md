@@ -322,8 +322,6 @@ def facebookIndex = Secure("FacebookClient") { profiles =>
 }
 ```
 
-==
-
 ### 3b) Protect urls via the `SecurityFilter`
 
 In order to protect multiple urls at the same tine, you can configure the `SecurityFilter`. You need to configure your application to include the `SecurityFilter` as follows:
