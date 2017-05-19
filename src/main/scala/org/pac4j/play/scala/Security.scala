@@ -85,7 +85,7 @@ trait Security[P<:CommonProfile] extends Controller {
           .asJava
         val javaBody = new RequestBody(javaBodyContent)
         val jRequest = Request(request, javaBody)
-        val jContext = JavaHelpers.createJavaContext(jRequest)
+        val jContext = JavaHelpers.createJavaContext(jRequest, JavaHelpers.createContextComponents())
         new PlayWebContext(jContext, playSessionStore)
       case _ =>
         new PlayWebContext(request, playSessionStore)

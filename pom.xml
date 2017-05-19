@@ -72,7 +72,7 @@
 
     <properties>
         <pac4j.version>2.0.0</pac4j.version>
-        <play.version>2.5.8</play.version>
+        <play.version>2.6.0-M5</play.version>
         <java.version>1.8</java.version>
         <deadbolt.version>2.5.1</deadbolt.version>
         <powermock.version>1.6.4</powermock.version>
@@ -108,6 +108,12 @@
             <version>${deadbolt.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
 
         <!-- tests -->
         <dependency>

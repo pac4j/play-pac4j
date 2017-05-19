@@ -52,7 +52,7 @@ public class PlayWebContext implements WebContext {
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
-        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), sessionStore);
+        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
     }
 
     @Override
