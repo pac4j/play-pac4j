@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 
 import akka.stream.Materializer
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
@@ -14,11 +15,11 @@ import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc.Http
+import play.libs.concurrent.HttpExecutionContext
 
 import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.Future
-
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
@@ -64,7 +65,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, override val ec: HttpExecutionContext) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
@@ -77,26 +78,34 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, playSessionStore)
-        val securityAction = new SecureAction(config, playSessionStore)
+        val securityAction = new SecureAction(config, playSessionStore, ec)
         val javaContext = webContext.getJavaContext
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
-          if (requiresAuthenticationResult == null)
+          if (requiresAuthenticationResult == null) {
             // If the authentication succeeds, the action result is null
-            nextFilter(request)
-          else
-          /**
-            * When the user is not authenticated, the result is one of the following:
-            * - forbidden
-            * - redirect to IDP
-            * - unauthorized
-            * Or the future results in an exception
-            */
+            // this is a hack: add the current profiles from the context args ("request attributes") in the tags of the request for further retrieval
+            val profiles = javaContext.args.get(Pac4jConstants.USER_PROFILES)
+            if (profiles != null) {
+              val serializedProfile = PlayWebContext.SB64_PREFIX + PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64(profiles.asInstanceOf[java.io.Serializable])
+              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, serializedProfile))
+            } else {
+              nextFilter(request)
+            }
+          } else {
+            /**
+              * When the user is not authenticated, the result is one of the following:
+              * - forbidden
+              * - redirect to IDP
+              * - unauthorized
+              * Or the future results in an exception
+              */
             Future {
               log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}. Authentication response code ${requiresAuthenticationResult.status}.")
               createResultSimple(javaContext, requiresAuthenticationResult)
             }
+          }
         }
         futureResult.onFailure{case x => log.error("Exception during authentication procedure", x)}
 
@@ -130,6 +139,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
 
   def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
     import scala.collection.convert.decorateAsScala._
-     javaResult.asScala.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
+    val scalaResult = javaResult.asScala.withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
+    scalaResult.withSession(javaContext.session().asScala.toSeq: _*)
   }
 }

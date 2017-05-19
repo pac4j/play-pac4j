@@ -12,7 +12,7 @@
     <artifactId>play-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for Play framework</name>
-    <version>2.5.0-SNAPSHOT</version>
+    <version>3.0.1-SNAPSHOT</version>
     <description>Security library for Play framework based on pac4j</description>
     <url>https://github.com/pac4j/play-pac4j</url>
 
@@ -71,9 +71,10 @@
     </pluginRepositories>
 
     <properties>
-        <pac4j.version>1.9.1</pac4j.version>
-        <play.version>2.5.4</play.version>
+        <pac4j.version>2.0.0</pac4j.version>
+        <play.version>2.5.8</play.version>
         <java.version>1.8</java.version>
+        <deadbolt.version>2.5.1</deadbolt.version>
         <powermock.version>1.6.4</powermock.version>
     </properties>
 
@@ -101,7 +102,13 @@
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
-        
+        <dependency>
+            <groupId>be.objectify</groupId>
+            <artifactId>deadbolt-java_2.11</artifactId>
+            <version>${deadbolt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
         <!-- tests -->
         <dependency>
             <groupId>org.pac4j</groupId>
@@ -139,7 +146,7 @@
             <artifactId>play-test_2.11</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>
-        </dependency>        
+        </dependency>
     </dependencies>
 
     <build>
@@ -229,6 +236,7 @@
                 <version>3.6</version>
                 <configuration>
                     <includeTests>true</includeTests>
+                    <printFailingErrors>true</printFailingErrors>
                 </configuration>
                 <executions>
                     <execution>

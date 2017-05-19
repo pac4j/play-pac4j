@@ -17,22 +17,22 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 /**
- * Tests {@link PlayCacheStore}.
+ * Tests {@link PlayCacheSessionStore}.
  *
  * @author Jerome Leleu
  * @since 2.3.0
  */
 @RunWith(PowerMockRunner.class)
-public final class PlayCacheStoreTests implements TestsConstants {
+public final class PlayCacheSessionStoreTests implements TestsConstants {
 
-    private PlayCacheStore store;
+    private PlayCacheSessionStore store;
     private PlayWebContext context;
     private CacheApi cacheApiMock;
 
     @Before
     public void setUp() {
         cacheApiMock = mock(CacheApi.class);
-        store = new PlayCacheStore(cacheApiMock);
+        store = new PlayCacheSessionStore(cacheApiMock);
         final Http.Session session = mock(Http.Session.class);
         context = mock(PlayWebContext.class);
         when(context.getJavaSession()).thenReturn(session);

@@ -6,6 +6,10 @@ import org.pac4j.core.engine.DefaultCallbackLogic;
 import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.libs.concurrent.HttpExecutionContext;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
@@ -33,22 +37,24 @@ public class CallbackController extends Controller {
     protected Config config;
     @Inject
     protected PlaySessionStore playSessionStore;
+    @Inject
+    protected HttpExecutionContext ec;
 
-    public Result callback() {
+    public CompletionStage<Result> callback() {
 
         assertNotNull("callbackLogic", callbackLogic);
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
-        return callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false);
+        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false), ec.current());
     }
 
     public String getDefaultUrl() {
         return defaultUrl;
     }
 
-    public void setDefaultUrl(String defaultUrl) {
+    public void setDefaultUrl(final String defaultUrl) {
         this.defaultUrl = defaultUrl;
     }
 
@@ -56,7 +62,7 @@ public class CallbackController extends Controller {
         return multiProfile;
     }
 
-    public void setMultiProfile(boolean multiProfile) {
+    public void setMultiProfile(final boolean multiProfile) {
         this.multiProfile = multiProfile;
     }
 
@@ -64,7 +70,7 @@ public class CallbackController extends Controller {
         return config;
     }
 
-    public void setConfig(Config config) {
+    public void setConfig(final Config config) {
         this.config = config;
     }
 }
