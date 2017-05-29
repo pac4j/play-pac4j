@@ -14,9 +14,8 @@ import play.core.j.JavaHelpers
 import play.libs.concurrent.HttpExecutionContext
 import play.mvc.Http.RequestBody
 
-import _root_.scala.collection.JavaConverters
-import _root_.scala.concurrent.Future
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters
+import scala.concurrent.Future
 import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 
