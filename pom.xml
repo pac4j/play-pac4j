@@ -97,19 +97,19 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play_2.11</artifactId>
+            <artifactId>play_2.12</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play-cache_2.11</artifactId>
+            <artifactId>play-cache_2.12</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>be.objectify</groupId>
-            <artifactId>deadbolt-java_2.11</artifactId>
+            <artifactId>deadbolt-java_2.12</artifactId>
             <version>${deadbolt.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -154,7 +154,7 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play-test_2.11</artifactId>
+            <artifactId>play-test_2.12</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>
         </dependency>
