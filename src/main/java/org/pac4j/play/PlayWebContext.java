@@ -14,6 +14,8 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Http.Session;
 import play.mvc.Http.Context;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
@@ -228,14 +230,16 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
-        response.setCookie(new Http.Cookie(
-            cookie.getName(),
-            cookie.getValue(),
-            cookie.getMaxAge() == -1 ? null : cookie.getMaxAge(),
-            cookie.getPath(),
-            cookie.getDomain(),
-            cookie.isSecure(),
-            cookie.isHttpOnly()));
+    	final Duration maxAge = cookie.getMaxAge() == -1 ? null : Duration.of(cookie.getMaxAge(), ChronoUnit.SECONDS);
+    	final Http.Cookie responseCookie =
+    			Http.Cookie.builder(cookie.getName(), cookie.getValue())
+    			  .withMaxAge(maxAge)
+    			  .withPath(cookie.getPath())
+    			  .withDomain(cookie.getDomain())
+    			  .withSecure(cookie.isSecure())
+    			  .withHttpOnly(cookie.isHttpOnly())
+    			  .build();
+        response.setCookie(responseCookie);
     }
 
     @Override
