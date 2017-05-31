@@ -11,7 +11,6 @@ import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.scala.Security
 import org.pac4j.play.store.PlaySessionStore
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc.Http
@@ -19,7 +18,7 @@ import play.libs.concurrent.HttpExecutionContext
 
 import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
@@ -65,7 +64,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, override val ec: HttpExecutionContext) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, override val ec: HttpExecutionContext, implicit val executionContext: ExecutionContext) extends Filter with Security[CommonProfile] {
 
   val log = Logger(this.getClass)
 
