@@ -8,7 +8,7 @@ import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import play.cache.CacheApi;
+import play.cache.SyncCacheApi;
 import play.mvc.Http;
 
 /**
@@ -30,12 +30,12 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     private final PlayCacheStore<String, Object> store;
 
     @Inject
-    public PlayCacheSessionStore(final CacheApi cache) {
+    public PlayCacheSessionStore(final SyncCacheApi cache) {
         this.store = new PlayCacheStore<>(cache);
         setDefaultTimeout();
     }
 
-    public PlayCacheSessionStore(final Provider<CacheApi> cacheProvider) {
+    public PlayCacheSessionStore(final Provider<SyncCacheApi> cacheProvider) {
         this.store = new PlayCacheStore<>(cacheProvider);
         setDefaultTimeout();
     }

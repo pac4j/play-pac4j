@@ -6,7 +6,7 @@ import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.store.AbstractStore;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
-import play.cache.CacheApi;
+import play.cache.SyncCacheApi;
 
 import java.io.Serializable;
 
@@ -18,17 +18,17 @@ import java.io.Serializable;
  */
 public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
-    private final CacheApi cache;
-    private final Provider<CacheApi> cacheProvider;
+    private final SyncCacheApi cache;
+    private final Provider<SyncCacheApi> cacheProvider;
     private int timeout;
 
     @Inject
-    public PlayCacheStore(final CacheApi cacheApi) {
+    public PlayCacheStore(final SyncCacheApi cacheApi) {
         this.cacheProvider = null;
         this.cache = cacheApi;
     }
 
-    public PlayCacheStore(final Provider<CacheApi> cacheProvider) {
+    public PlayCacheStore(final Provider<SyncCacheApi> cacheProvider) {
         this.cache = null;
         this.cacheProvider = cacheProvider;
     }
@@ -64,7 +64,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
         }
     }
 
-    public CacheApi getCache() {
+    public SyncCacheApi getCache() {
         return cache != null ? cache : cacheProvider.get();
     }
 
