@@ -230,15 +230,19 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
-    	final Duration maxAge = cookie.getMaxAge() == -1 ? null : Duration.of(cookie.getMaxAge(), ChronoUnit.SECONDS);
-    	final Http.Cookie responseCookie =
-    			Http.Cookie.builder(cookie.getName(), cookie.getValue())
-    			  .withMaxAge(maxAge)
-    			  .withPath(cookie.getPath())
-    			  .withDomain(cookie.getDomain())
-    			  .withSecure(cookie.isSecure())
-    			  .withHttpOnly(cookie.isHttpOnly())
-    			  .build();
+        final Http.CookieBuilder cookieBuilder =
+                Http.Cookie.builder(cookie.getName(), cookie.getValue())
+                        .withPath(cookie.getPath())
+                        .withDomain(cookie.getDomain())
+                        .withSecure(cookie.isSecure())
+                        .withHttpOnly(cookie.isHttpOnly());
+        // in Play, maxAge: Cookie duration in seconds (null for a transient cookie [value by default], 0 or less for one that expires now)
+        // in pac4j, maxAge == -1 -> session cookie, 0 -> expires now, > 0, expires in x seconds
+        final int maxAge = cookie.getMaxAge();
+        if (maxAge != -1) {
+            cookieBuilder.withMaxAge(Duration.of(maxAge, ChronoUnit.SECONDS));
+        }
+        final Http.Cookie responseCookie = cookieBuilder.build();
         response.setCookie(responseCookie);
     }
 
