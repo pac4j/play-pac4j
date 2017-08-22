@@ -25,13 +25,13 @@ import scala.concurrent.{Future, ExecutionContext}
   *
   * Rules for the security filter can be supplied in application.conf. An example is shown below. It
   * consists of a list of filter rules, where the key is a regular expression that will be used to
-  * match the url.
+  * match the path + query string.
   *
   * For each regex key, there are two subkeys: `authorizers` and `clients`. Here you can define the
   * correct values, like you would supply to the `RequireAuthentication` method in controllers. There
-  * two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
+  * are two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
   *
-  * `_anonymous_` will disable authentication and authorization for urls matching the regex.
+  * `_anonymous_` will disable authentication and authorization for paths matching the regex.
   * `_authenticated_` will require authentication, but will set clients and authorizers both to `null`.
   *
   * Rules are traversed and applied from top to bottom. The first matching rule will define which clients and authorizers
@@ -116,12 +116,18 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
     }
   }
 
-  def findRule(request: RequestHeader): Option[Rule] =
+  def findRule(request: RequestHeader): Option[Rule] = {
+    var pathWithQueryString = request.path.replaceAll("(/)\\1{1,}", "$1")
+    val queryString = request.rawQueryString
+    if (queryString != null && queryString.length() > 0) {
+      pathWithQueryString += '?' + queryString
+    }
     rules.find { rule =>
       val key = rule.subKeys.head
       val regex = key.replace("\"", "")
-      request.uri.matches(regex)
+      pathWithQueryString.matches(regex)
     }.flatMap(configurationToRule)
+  }
 
   def configurationToRule(c: Configuration): Option[Rule] = {
     c.getConfig("\"" + c.subKeys.head + "\"").flatMap { rule =>
