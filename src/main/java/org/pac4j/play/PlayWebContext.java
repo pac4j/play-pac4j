@@ -6,9 +6,9 @@ import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.util.JavaSerializationHelper;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
+import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
@@ -29,9 +29,7 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
  */
 public class PlayWebContext implements WebContext {
 
-    public final static String SB64_PREFIX = "{sb64}";
-
-    public final static JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
+    public static final TypedKey<Object> PAC4J_USER_PROFILES = TypedKey.create(Pac4jConstants.USER_PROFILES);
 
     protected final Context context;
 
@@ -188,11 +186,11 @@ public class PlayWebContext implements WebContext {
     @Override
     public Object getRequestAttribute(final String name) {
         Object value = context.args.get(name);
-        // this is a hack: we try to get the profiles as a serialized value because of the SecurityFilter
-        if (Pac4jConstants.USER_PROFILES.equals(name) && value != null && value instanceof String) {
-            final String sValue = (String) value;
-            if (sValue.startsWith(SB64_PREFIX)) {
-                value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(sValue.substring(SB64_PREFIX.length()));
+        // for the user profiles, if we don't get a value from the context.args, we try from the attributes (call after the SecurityFilter)
+        if (Pac4jConstants.USER_PROFILES.equals(name) && value == null) {
+            final Optional<Object> optionalValue = request.attrs().getOptional(PAC4J_USER_PROFILES);
+            if (optionalValue.isPresent()) {
+                value = optionalValue.get();
             }
         }
         return value;
