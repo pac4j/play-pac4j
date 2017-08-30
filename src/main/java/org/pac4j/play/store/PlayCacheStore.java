@@ -5,7 +5,7 @@ import com.google.inject.Provider;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.store.AbstractStore;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.PlayWebContext;
+import org.pac4j.core.util.JavaSerializationHelper;
 import play.cache.SyncCacheApi;
 
 import java.io.Serializable;
@@ -17,6 +17,8 @@ import java.io.Serializable;
  * @since 3.0.0
  */
 public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
+
+    public static final JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
 
     private final SyncCacheApi cache;
     private final Provider<SyncCacheApi> cacheProvider;
@@ -60,7 +62,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
         if (objKey instanceof String) {
             return (String) objKey;
         } else {
-            return PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) objKey);
+            return JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) objKey);
         }
     }
 
