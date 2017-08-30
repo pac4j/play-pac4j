@@ -39,7 +39,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<CompletableFuture<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
     
     protected final static Method CLIENTS_METHOD;
 
@@ -95,18 +95,21 @@ public class SecureAction extends Action<Result> {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
-        final HttpActionAdapter actionAdapter = config.getHttpActionAdapter();
+        final HttpActionAdapter<Result, PlayWebContext> actionAdapter = config.getHttpActionAdapter();
+        final HttpActionAdapter<CompletableFuture<Result>, PlayWebContext> actionAdapterWrapper = (code, webCtx) -> CompletableFuture.completedFuture(actionAdapter.adapt(code, webCtx));
 
-        return CompletableFuture.supplyAsync(() -> {
-        	return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
-	            // when called from Scala
-	            if (delegate == null) {
-	                return null;
-	            } else {
-	                return delegate.call(ctx).toCompletableFuture().get();
-	            }
-        	}, actionAdapter, clients, authorizers, null, multiProfile);
-        }, ec.current());
+        final CompletableFuture<CompletableFuture<Result>> future2 = CompletableFuture.supplyAsync(() ->
+                securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+                    // when called from Scala
+                    if (delegate == null) {
+                        return CompletableFuture.completedFuture(null);
+                    } else {
+                        return delegate.call(ctx).toCompletableFuture();
+                    }
+                }, actionAdapterWrapper, clients, authorizers, null, multiProfile)
+            , ec.current());
+
+        return future2.thenApplyAsync(r -> r.join(), ec.current());
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
@@ -127,11 +130,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<Result, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic<CompletableFuture<Result>, PlayWebContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(SecurityLogic<Result, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic<CompletableFuture<Result>, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
