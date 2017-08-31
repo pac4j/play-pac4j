@@ -3,7 +3,7 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.6 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2.0**. It's available under the Apache 2 license.
+It's based on Play 2.6 and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
@@ -43,7 +43,7 @@ Just follow these easy steps to secure your Play 2 web application:
 You need to add a dependency on:
 
 - the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **4.0.0**)
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.0.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.1.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -648,7 +648,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/4.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.0.0/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/4.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.1.0/index.html).
 
 
 ## Need help?
