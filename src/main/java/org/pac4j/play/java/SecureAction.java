@@ -98,7 +98,7 @@ public class SecureAction extends Action<Result> {
         return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
-	                return null;
+	                return CompletableFuture.completedFuture(null);
 	            } else {
 	                return delegate.call(ctx);
 	            }
