@@ -28,7 +28,7 @@ import scala.compat.java8.FutureConverters._
  * @author Hugo Valk
  * @since 1.5.0
  */
-trait Security[P<:CommonProfile] extends Controller {
+trait Security[P<:CommonProfile] extends BaseController {
 
   protected val logger = LoggerFactory.getLogger(getClass)
 
