@@ -6,10 +6,8 @@ import javax.inject.{Inject, Singleton}
 import akka.stream.Materializer
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
-import org.pac4j.play.scala.Security
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc._
 import play.api.{Configuration, Logger}
@@ -63,7 +61,7 @@ import scala.concurrent.{Future, ExecutionContext}
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, implicit val executionContext: ExecutionContext) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, implicit val executionContext: ExecutionContext) extends Filter {
 
   val log = Logger(this.getClass)
 
