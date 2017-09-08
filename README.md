@@ -606,7 +606,7 @@ bind(classOf[LogoutController]).toInstance(logoutController)
 
 ### 3.0 -> 4.0.0 (Play 2.6)
 
-Nothing special needs to be done.
+The `Security` trait extends the `BaseController` and thus, the `controllerComponents` must be injected.
 
 ### 2.5 / 2.6 -> 3.0.0
 
