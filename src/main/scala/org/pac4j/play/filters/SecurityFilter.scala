@@ -64,7 +64,7 @@ import scala.concurrent.{Future, ExecutionContext}
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, override val ec: HttpExecutionContext, implicit val executionContext: ExecutionContext) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, val ec: HttpExecutionContext, implicit val executionContext: ExecutionContext) extends Filter {
 
   val log = Logger(this.getClass)
 
