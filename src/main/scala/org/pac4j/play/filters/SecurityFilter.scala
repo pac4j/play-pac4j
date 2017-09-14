@@ -6,33 +6,29 @@ import javax.inject.{Inject, Singleton}
 import akka.stream.Materializer
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.core.profile.CommonProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
-import org.pac4j.play.scala.Security
 import org.pac4j.play.store.PlaySessionStore
-import play.api.libs.concurrent.Execution.Implicits._
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc.Http
-import play.libs.concurrent.HttpExecutionContext
 
 import scala.collection.JavaConversions._
 import scala.compat.java8.FutureConverters._
-import scala.concurrent.Future
+import scala.concurrent.{Future, ExecutionContext}
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
   *
   * Rules for the security filter can be supplied in application.conf. An example is shown below. It
   * consists of a list of filter rules, where the key is a regular expression that will be used to
-  * match the url.
+  * match the path + query string.
   *
   * For each regex key, there are two subkeys: `authorizers` and `clients`. Here you can define the
   * correct values, like you would supply to the `RequireAuthentication` method in controllers. There
-  * two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
+  * are two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
   *
-  * `_anonymous_` will disable authentication and authorization for urls matching the regex.
+  * `_anonymous_` will disable authentication and authorization for paths matching the regex.
   * `_authenticated_` will require authentication, but will set clients and authorizers both to `null`.
   *
   * Rules are traversed and applied from top to bottom. The first matching rule will define which clients and authorizers
@@ -65,7 +61,7 @@ import scala.concurrent.Future
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, override val ec: HttpExecutionContext) extends Filter with Security[CommonProfile] {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, implicit val executionContext: ExecutionContext) extends Filter {
 
   val log = Logger(this.getClass)
 
@@ -78,18 +74,18 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, playSessionStore)
-        val securityAction = new SecureAction(config, playSessionStore, ec)
+        val securityAction = new SecureAction(config, playSessionStore)
         val javaContext = webContext.getJavaContext
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
           if (requiresAuthenticationResult == null) {
             // If the authentication succeeds, the action result is null
-            // this is a hack: add the current profiles from the context args ("request attributes") in the tags of the request for further retrieval
+            // we pass the current profiles from the context.args to the request attributes
+            // so that the next call to the PlayWebContext.getRequestAttribute works
             val profiles = javaContext.args.get(Pac4jConstants.USER_PROFILES)
             if (profiles != null) {
-              val serializedProfile = PlayWebContext.SB64_PREFIX + PlayWebContext.JAVA_SERIALIZATION_HELPER.serializeToBase64(profiles.asInstanceOf[java.io.Serializable])
-              nextFilter(request.withTag(Pac4jConstants.USER_PROFILES, serializedProfile))
+              nextFilter(request.addAttr[AnyRef](PlayWebContext.PAC4J_USER_PROFILES.underlying(), profiles))
             } else {
               nextFilter(request)
             }
@@ -117,12 +113,18 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
     }
   }
 
-  def findRule(request: RequestHeader): Option[Rule] =
+  def findRule(request: RequestHeader): Option[Rule] = {
+    var pathWithQueryString = request.path.replaceAll("(/)\\1{1,}", "$1")
+    val queryString = request.rawQueryString
+    if (queryString != null && queryString.length() > 0) {
+      pathWithQueryString += '?' + queryString
+    }
     rules.find { rule =>
       val key = rule.subKeys.head
       val regex = key.replace("\"", "")
-      request.uri.matches(regex)
+      pathWithQueryString.matches(regex)
     }.flatMap(configurationToRule)
+  }
 
   def configurationToRule(c: Configuration): Option[Rule] = {
     c.getConfig("\"" + c.subKeys.head + "\"").flatMap { rule =>

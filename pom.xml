@@ -12,7 +12,7 @@
     <artifactId>play-pac4j</artifactId>
     <packaging>jar</packaging>
     <name>pac4j implementation for Play framework</name>
-    <version>2.6.2-SNAPSHOT</version>
+    <version>4.0.0-SNAPSHOT</version>
     <description>Security library for Play framework based on pac4j</description>
     <url>https://github.com/pac4j/play-pac4j</url>
 
@@ -50,6 +50,11 @@
             <url>http://scala-tools.org/repo-releases</url>
         </repository>
         <repository>
+            <id>Akka Snapshot Repository</id>
+            <name>Akka Snapshot Repository</name>
+            <url>http://repo.akka.io/snapshots/</url>
+        </repository>
+        <repository>
             <id>sonatype-nexus-snapshots</id>
             <name>Sonatype Nexus Snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots</url>
@@ -71,10 +76,10 @@
     </pluginRepositories>
 
     <properties>
-        <pac4j.version>1.9.4</pac4j.version>
-        <play.version>2.5.8</play.version>
+        <pac4j.version>2.1.0</pac4j.version>
+        <play.version>2.6.2</play.version>
         <java.version>1.8</java.version>
-        <deadbolt.version>2.5.1</deadbolt.version>
+        <deadbolt.version>2.6.0</deadbolt.version>
         <powermock.version>1.6.4</powermock.version>
     </properties>
 
@@ -92,22 +97,28 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play_2.11</artifactId>
+            <artifactId>play_2.12</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play-cache_2.11</artifactId>
+            <artifactId>play-cache_2.12</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>be.objectify</groupId>
-            <artifactId>deadbolt-java_2.11</artifactId>
+            <artifactId>deadbolt-java_2.12</artifactId>
             <version>${deadbolt.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>4.1.0</version>
+        </dependency>
+
 
         <!-- tests -->
         <dependency>
@@ -143,7 +154,7 @@
         </dependency>
         <dependency>
             <groupId>com.typesafe.play</groupId>
-            <artifactId>play-test_2.11</artifactId>
+            <artifactId>play-test_2.12</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>
         </dependency>

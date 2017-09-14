@@ -8,7 +8,7 @@ import org.pac4j.play.PlayWebContext;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import play.cache.CacheApi;
+import play.cache.SyncCacheApi;
 import play.mvc.Http;
 
 import static org.junit.Assert.*;
@@ -17,22 +17,22 @@ import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 /**
- * Tests {@link PlayCacheStore}.
+ * Tests {@link PlayCacheSessionStore}.
  *
  * @author Jerome Leleu
  * @since 2.3.0
  */
 @RunWith(PowerMockRunner.class)
-public final class PlayCacheStoreTests implements TestsConstants {
+public final class PlayCacheSessionStoreTests implements TestsConstants {
 
-    private PlayCacheStore store;
+    private PlayCacheSessionStore store;
     private PlayWebContext context;
-    private CacheApi cacheApiMock;
+    private SyncCacheApi cacheApiMock;
 
     @Before
     public void setUp() {
-        cacheApiMock = mock(CacheApi.class);
-        store = new PlayCacheStore(cacheApiMock);
+        cacheApiMock = mock(SyncCacheApi.class);
+        store = new PlayCacheSessionStore(cacheApiMock);
         final Http.Session session = mock(Http.Session.class);
         context = mock(PlayWebContext.class);
         when(context.getJavaSession()).thenReturn(session);
@@ -49,9 +49,9 @@ public final class PlayCacheStoreTests implements TestsConstants {
     }
 
     @Test
-    @PrepareForTest(CacheApi.class)
+    @PrepareForTest(SyncCacheApi.class)
     public void testGetSet() {
-        mockStatic(CacheApi.class);
+        mockStatic(SyncCacheApi.class);
         PowerMockito.when(cacheApiMock.get(any(String.class))).thenReturn(VALUE);
         store.setPrefix(KEY);
         store.set(context, KEY, VALUE);

@@ -1,18 +1,21 @@
 package org.pac4j.play.http;
 
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
+
 import org.pac4j.core.util.TestsConstants;
+
 import org.pac4j.core.util.TestsHelper;
 import org.pac4j.play.PlayWebContext;
 
 import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
-import play.test.WithApplication;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -21,13 +24,14 @@ import java.util.Map;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+
 /**
  * Tests {@link DefaultHttpActionAdapter}.
  *
  * @author Jerome Leleu
  * @since 2.3.0
  */
-public final class DefaultHttpActionAdapterTests extends WithApplication implements TestsConstants{
+public final class DefaultHttpActionAdapterTests implements TestsConstants {
 
     private HttpActionAdapter<Result, PlayWebContext> adapter;
 
@@ -37,6 +41,10 @@ public final class DefaultHttpActionAdapterTests extends WithApplication impleme
     public void setUp() {
         adapter = new DefaultHttpActionAdapter();
         context = mock(PlayWebContext.class);
+    }
+    
+    @After
+    public void teardown() {
     }
 
     protected String getBody(final Result result) throws IOException {

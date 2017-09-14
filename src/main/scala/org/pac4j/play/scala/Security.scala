@@ -11,12 +11,10 @@ import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.core.j.JavaHelpers
-import play.libs.concurrent.HttpExecutionContext
 import play.mvc.Http.RequestBody
 
-import _root_.scala.collection.JavaConverters
-import _root_.scala.concurrent.Future
-import scala.collection.JavaConversions._
+import scala.collection.JavaConverters
+import scala.concurrent.Future
 import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 
@@ -29,7 +27,7 @@ import scala.compat.java8.FutureConverters._
  * @author Hugo Valk
  * @since 1.5.0
  */
-trait Security[P<:CommonProfile] extends Controller {
+trait Security[P<:CommonProfile] extends BaseController {
 
   protected val logger = LoggerFactory.getLogger(getClass)
 
@@ -37,8 +35,6 @@ trait Security[P<:CommonProfile] extends Controller {
   protected val config: Config
   @Inject
   protected val playSessionStore: PlaySessionStore
-  @Inject
-  protected val ec: HttpExecutionContext = null
 
   /**
    * Get or create a new sessionId.
@@ -48,7 +44,7 @@ trait Security[P<:CommonProfile] extends Controller {
    */
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
     val webContext = new PlayWebContext(request, playSessionStore)
-    webContext.getSessionStore.getOrCreateSessionId(webContext)
+    webContext.getSessionStore.asInstanceOf[PlaySessionStore].getOrCreateSessionId(webContext)
     val map = JavaConverters.mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
     new Session(map)
   }
@@ -85,13 +81,13 @@ trait Security[P<:CommonProfile] extends Controller {
           .asJava
         val javaBody = new RequestBody(javaBodyContent)
         val jRequest = Request(request, javaBody)
-        val jContext = JavaHelpers.createJavaContext(jRequest)
+        val jContext = JavaHelpers.createJavaContext(jRequest, JavaHelpers.createContextComponents())
         new PlayWebContext(jContext, playSessionStore)
       case _ =>
         new PlayWebContext(request, playSessionStore)
     }
 
-    val secureAction = new SecureAction(config, playSessionStore, ec)
+    val secureAction = new SecureAction(config, playSessionStore)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {

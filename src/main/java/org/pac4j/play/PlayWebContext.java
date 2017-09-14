@@ -6,14 +6,16 @@ import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.util.JavaSerializationHelper;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
+import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Http.Session;
 import play.mvc.Http.Context;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
@@ -27,9 +29,7 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
  */
 public class PlayWebContext implements WebContext {
 
-    public final static String SB64_PREFIX = "{sb64}";
-
-    public final static JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
+    public static final TypedKey<Object> PAC4J_USER_PROFILES = TypedKey.create(Pac4jConstants.USER_PROFILES);
 
     protected final Context context;
 
@@ -39,7 +39,7 @@ public class PlayWebContext implements WebContext {
 
     protected final Session session;
 
-    protected final SessionStore<PlayWebContext> sessionStore;
+    protected SessionStore<PlayWebContext> sessionStore;
 
     protected String responseContent = "";
 
@@ -48,12 +48,22 @@ public class PlayWebContext implements WebContext {
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        assertNotNull("sessionStore", sessionStore);
-        this.sessionStore = sessionStore;
+        setSessionStore(sessionStore);
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
-        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader), sessionStore);
+        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
+    }
+
+    @Override
+    public SessionStore getSessionStore() {
+        return this.sessionStore;
+    }
+
+    @Override
+    public void setSessionStore(final SessionStore sessionStore) {
+        assertNotNull("sessionStore", sessionStore);
+        this.sessionStore = sessionStore;
     }
 
     /**
@@ -73,13 +83,6 @@ public class PlayWebContext implements WebContext {
     public Context getJavaContext() {
         return this.context;
     }
-
-    /**
-     * Return the session store.
-     *
-     * @return the session store
-     */
-    public SessionStore<PlayWebContext> getSessionStore() { return this.sessionStore; }
 
     @Override
     public void setResponseStatus(final int code) {}
@@ -141,21 +144,6 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public Object getSessionIdentifier() {
-        return sessionStore.getOrCreateSessionId(this);
-    }
-
-    @Override
-    public Object getSessionAttribute(final String key) {
-        return sessionStore.get(this, key);
-    }
-
-    @Override
-    public void setSessionAttribute(final String key, final Object value) {
-        sessionStore.set(this, key, value);
-    }
-
-    @Override
     public void setResponseHeader(final String name, final String value) {
         response.setHeader(name, value);
     }
@@ -198,11 +186,11 @@ public class PlayWebContext implements WebContext {
     @Override
     public Object getRequestAttribute(final String name) {
         Object value = context.args.get(name);
-        // this is a hack: we try to get the profiles as a serialized value because of the SecurityFilter
-        if (Pac4jConstants.USER_PROFILES.equals(name) && value != null && value instanceof String) {
-            final String sValue = (String) value;
-            if (sValue.startsWith(SB64_PREFIX)) {
-                value = JAVA_SERIALIZATION_HELPER.unserializeFromBase64(sValue.substring(SB64_PREFIX.length()));
+        // for the user profiles, if we don't get a value from the context.args, we try from the attributes (call after the SecurityFilter)
+        if (Pac4jConstants.USER_PROFILES.equals(name) && value == null) {
+            final Optional<Object> optionalValue = request.attrs().getOptional(PAC4J_USER_PROFILES);
+            if (optionalValue.isPresent()) {
+                value = optionalValue.get();
             }
         }
         return value;
@@ -240,14 +228,20 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
-        response.setCookie(new Http.Cookie(
-            cookie.getName(),
-            cookie.getValue(),
-            cookie.getMaxAge() == -1 ? null : cookie.getMaxAge(),
-            cookie.getPath(),
-            cookie.getDomain(),
-            cookie.isSecure(),
-            cookie.isHttpOnly()));
+        final Http.CookieBuilder cookieBuilder =
+                Http.Cookie.builder(cookie.getName(), cookie.getValue())
+                        .withPath(cookie.getPath())
+                        .withDomain(cookie.getDomain())
+                        .withSecure(cookie.isSecure())
+                        .withHttpOnly(cookie.isHttpOnly());
+        // in Play, maxAge: Cookie duration in seconds (null for a transient cookie [value by default], 0 or less for one that expires now)
+        // in pac4j, maxAge == -1 -> session cookie, 0 -> expires now, > 0, expires in x seconds
+        final int maxAge = cookie.getMaxAge();
+        if (maxAge != -1) {
+            cookieBuilder.withMaxAge(Duration.of(maxAge, ChronoUnit.SECONDS));
+        }
+        final Http.Cookie responseCookie = cookieBuilder.build();
+        response.setCookie(responseCookie);
     }
 
     @Override
