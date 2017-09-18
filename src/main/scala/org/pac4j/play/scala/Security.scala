@@ -7,6 +7,7 @@ import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.store.PlaySessionStore
+import org.pac4j.play.Pac4jExecutionContext
 import org.slf4j.LoggerFactory
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
@@ -35,6 +36,8 @@ trait Security[P<:CommonProfile] extends BaseController {
   protected val config: Config
   @Inject
   protected val playSessionStore: PlaySessionStore
+  @Inject
+  protected val ec: Pac4jExecutionContext
 
   /**
    * Get or create a new sessionId.
@@ -87,7 +90,7 @@ trait Security[P<:CommonProfile] extends BaseController {
         new PlayWebContext(request, playSessionStore)
     }
 
-    val secureAction = new SecureAction(config, playSessionStore)
+    val secureAction = new SecureAction(config, playSessionStore, ec)
     val javaContext = webContext.getJavaContext
     secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {

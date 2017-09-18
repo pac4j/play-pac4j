@@ -9,6 +9,7 @@ import org.pac4j.core.context.Pac4jConstants
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.store.PlaySessionStore
+import org.pac4j.play.Pac4jExecutionContext
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc.Http
@@ -61,7 +62,7 @@ import scala.concurrent.{Future, ExecutionContext}
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, implicit val executionContext: ExecutionContext) extends Filter {
+class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuration, val playSessionStore: PlaySessionStore, val config: Config, val ec: Pac4jExecutionContext, implicit val executionContext: ExecutionContext) extends Filter {
 
   val log = Logger(this.getClass)
 
@@ -74,7 +75,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
       case Some(rule) =>
         log.debug(s"Authentication needed for ${request.uri}")
         val webContext = new PlayWebContext(request, playSessionStore)
-        val securityAction = new SecureAction(config, playSessionStore)
+        val securityAction = new SecureAction(config, playSessionStore, ec)
         val javaContext = webContext.getJavaContext
         val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
           .toScala
