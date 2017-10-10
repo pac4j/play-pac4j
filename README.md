@@ -18,6 +18,8 @@ Several versions of the library are available for the different versions of the 
 | 2.5          | 2.0           | [play-pac4j 3.0.x](https://github.com/pac4j/play-pac4j/tree/3.0.x) (Java & Scala)
 | 2.6          | 2.0           | 4.0.x (Java & Scala)
 
+**Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
+
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
 1) A [**client**](http://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication:
