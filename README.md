@@ -606,11 +606,11 @@ bind(classOf[LogoutController]).toInstance(logoutController)
 
 ## Migration guide
 
-### 3.0 -> 4.0.0 (Play 2.6)
+### 3.0.0 -> 4.0.0 (Play 2.6)
 
 The `Security` trait extends the `BaseController` and thus, the `controllerComponents` must be injected.
 
-### 2.5 / 2.6 -> 3.0.0
+### 2.5.x / 2.6.x -> 3.0.0
 
 The `ApplicationLogoutController` has been renamed as `LogoutController` and the `PlayCacheStore` as `PlayCacheSessionStore`.
 
@@ -665,7 +665,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 4.0.0-SNAPSHOT is under development.
+The version 4.0.1-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
