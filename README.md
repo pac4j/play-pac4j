@@ -672,3 +672,7 @@ Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac
 ```scala
 resolvers ++= Seq(Resolver.mavenLocal, "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/")
 ```
+
+## Supporters
+
+This project is supported by ![](http://www.pac4j.org/img/auth0_logo.svg) [Auth0](https://auth0.com) 
