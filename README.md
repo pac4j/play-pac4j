@@ -673,8 +673,6 @@ Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac
 resolvers ++= Seq(Resolver.mavenLocal, "Sonatype snapshots repository" at "https://oss.sonatype.org/content/repositories/snapshots/")
 ```
 
-## Supporters
+## Supported by [Auth0](https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=pac4j&utm_content=auth) ![Auth0](http://www.pac4j.org/img/auth0_logo.svg)
 
-### Supported by [Auth0](https://auth0.com) ![Auth0](http://www.pac4j.org/img/auth0_logo.svg)
-
-###### If you want to easily add secure authentication to Java apps, feel free to checkout Auth0's Java SDK and free plan at [auth0.com/overview](https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=pac4j&utm_content=auth)
+If you want to easily add secure authentication to Java apps, feel free to checkout Auth0's Java SDK and free plan at [auth0.com/overview](https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=pac4j&utm_content=auth)
