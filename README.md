@@ -14,7 +14,6 @@ Several versions of the library are available for the different versions of the 
 | 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 1.9           | [play-pac4j 2.6.x](https://github.com/pac4j/play-pac4j/tree/2.6.x) (Java & Scala)
 | 2.5          | 2.0           | 3.0.x (Java & Scala)
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
@@ -413,7 +412,6 @@ are used. When not provided, the value will be `null`.
       }}
     ]
 
-==
 
 ### 3c) Working with Deadbolt (only Java)
 
