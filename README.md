@@ -415,7 +415,6 @@ are used. When not provided, the value will be `null`.
       }}
     ]
 
-==
 
 ### 3c) Working with Deadbolt (only Java)
 
