@@ -80,7 +80,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
         val webContext = new PlayWebContext(request, playSessionStore)
         val securityAction = new SecureAction(config, playSessionStore, ec)
         val javaContext = webContext.getJavaContext
-        val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, false)
+        val futureResult = securityAction.internalCall(javaContext, rule.clients, rule.authorizers, rule.matchers, false)
           .toScala
           .flatMap[play.api.mvc.Result]{ requiresAuthenticationResult =>
           if (requiresAuthenticationResult == null) {
@@ -132,7 +132,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
 
   def configurationToRule(c: Configuration): Option[Rule] = {
     c.getConfig("\"" + c.subKeys.head + "\"").flatMap { rule =>
-      val res = new Rule(rule.getString("clients").orNull, rule.getString("authorizers").orNull)
+      val res = new Rule(rule.getString("clients").orNull, rule.getString("authorizers").orNull, rule.getString("matchers").orNull)
       if (res.authorizers == "_anonymous_")
         None
       else if (res.authorizers == "_authenticated_")
@@ -141,7 +141,7 @@ class SecurityFilter @Inject()(val mat:Materializer, configuration: Configuratio
     }
   }
 
-  case class Rule(clients: String, authorizers: String)
+  case class Rule(clients: String, authorizers: String, matchers: String)
 
   def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
     import scala.collection.convert.decorateAsScala._
