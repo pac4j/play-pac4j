@@ -388,7 +388,7 @@ Rules for the security filter can be supplied in application.conf. An example is
 consists of a list of filter rules, where the key is a regular expression that will be used to
 match the url. Make sure that the / is escaped by \\ to make a valid regular expression.
 
-For each regex key, there are two subkeys: `authorizers`, `clients` and `matchers`. Here you can define the
+For each regex key, there are three subkeys: `authorizers`, `clients` and `matchers`. Here you can define the
 correct values, like you would supply to the `RequireAuthentication` method in controllers. There
 two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
 
