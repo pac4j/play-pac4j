@@ -158,6 +158,7 @@ public class SecurityModule extends AbstractModule {
         final Config config = new Config(clients);
         config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
         config.addAuthorizer("custom", new CustomAuthorizer());
+        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.jsp$"));
         config.setHttpActionAdapter(new DemoHttpActionAdapter());
         bind(Config.class).toInstance(config);
 
@@ -249,6 +250,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))
     config.addAuthorizer("custom", new CustomAuthorizer)
+    config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.jsp$"))
     config.setHttpActionAdapter(new DemoHttpActionAdapter())
     bind(classOf[Config]).toInstance(config)
 
@@ -268,7 +270,9 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheSessionStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
 
-Notice that you can also configure a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method of the `Config` object. The default available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+Notice that you can configure a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method of the `Config` object. The default available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
+
+Notice that you can also define [matchers](http://www.pac4j.org/docs/matchers.html) via the `addMatcher(name, Matcher)` method.
 
 You can also define a specific `SecurityLogic` via the `setSecurityLogic` method.
 
@@ -278,11 +282,13 @@ You can also define a specific `SecurityLogic` via the `setSecurityLogic` method
 
 You can protect (authentication + authorizations) the urls of your Play application by using the `Secure` annotation / function. It has the following behaviour:
 
-1) First, if the user is not authenticated (no profile) and if some clients have been defined in the `clients` parameter, a login is tried for the direct clients.
+1) If the HTTP request matches the `matchers` configuration (or no `matchers` are defined), the security is applied. Otherwise, the user is automatically granted access.
 
-2) Then, if the user has a profile, authorizations are checked according to the `authorizers` configuration. If the authorizations are valid, the user is granted access. Otherwise, a 403 error page is displayed.
+2) First, if the user is not authenticated (no profile) and if some clients have been defined in the `clients` parameter, a login is tried for the direct clients.
 
-3) Finally, if the user is still not authenticated (no profile), he is redirected to the appropriate identity provider if the first defined client is an indirect one in the `clients` configuration. Otherwise, a 401 error page is displayed.
+3) Then, if the user has a profile, authorizations are checked according to the `authorizers` configuration. If the authorizations are valid, the user is granted access. Otherwise, a 403 error page is displayed.
+
+4) Finally, if the user is still not authenticated (no profile), he is redirected to the appropriate identity provider if the first defined client is an indirect one in the `clients` configuration. Otherwise, a 401 error page is displayed.
 
 
 The following parameters are available:
@@ -299,6 +305,8 @@ The following parameters are available:
   * `csrfToken` to use the `CsrfTokenGeneratorAuthorizer` with the `DefaultCsrfTokenGenerator` (it generates a CSRF token and saves it as the `pac4jCsrfToken` request attribute and in the `pac4jCsrfToken` cookie), `csrfCheck` to check that this previous token has been sent as the `pac4jCsrfToken` header or parameter in a POST request and `csrf` to use both previous authorizers.
 
 3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+
+4) `matchers` (optional): the list of matcher names (separated by commas) that the request must satisfy to check authentication / authorizations
 
 
 For example in your controllers:
@@ -381,7 +389,7 @@ Rules for the security filter can be supplied in application.conf. An example is
 consists of a list of filter rules, where the key is a regular expression that will be used to
 match the url. Make sure that the / is escaped by \\ to make a valid regular expression.
 
-For each regex key, there are two subkeys: `authorizers` and `clients`. Here you can define the
+For each regex key, there are two subkeys: `authorizers`, `clients` and `matchers`. Here you can define the
 correct values, like you would supply to the `RequireAuthentication` method in controllers. There
 two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
 
@@ -410,6 +418,7 @@ are used. When not provided, the value will be `null`.
       {".*" = {
         authorizers = "_authenticated_"
         clients = "FormClient,TwitterClient"
+        matchers = "excludedPath"
       }}
     ]
 
