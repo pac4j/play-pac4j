@@ -2,16 +2,18 @@ package org.pac4j.play.java;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
+import org.pac4j.play.Pac4jExecutionContext;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import play.core.j.HttpExecutionContext;
 import play.mvc.Action;
 import play.mvc.Http.Context;
 import play.mvc.Result;
@@ -22,7 +24,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-
+import java.util.concurrent.Executor;
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
 
 /**
@@ -39,7 +41,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<Result, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
     
     protected final static Method CLIENTS_METHOD;
 
@@ -60,9 +62,11 @@ public class SecureAction extends Action<Result> {
     final private Config config;
 
     final private SessionStore sessionStore;
+    
+    final private Pac4jExecutionContext ec;
 
     @Inject
-    public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
+    public SecureAction(final Config config, final PlaySessionStore playSessionStore, Pac4jExecutionContext ec) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
         final SecurityLogic configSecurityLogic = config.getSecurityLogic();
@@ -70,6 +74,7 @@ public class SecureAction extends Action<Result> {
             this.securityLogic = configSecurityLogic;
         }
         this.sessionStore = playSessionStore;
+        this.ec = ec;
     }
 
     @Override
@@ -92,17 +97,19 @@ public class SecureAction extends Action<Result> {
 
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
-        final HttpActionAdapter<Result, WebContext> actionAdapter = config.getHttpActionAdapter();
-        final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (code, webCtx) -> CompletableFuture.completedFuture(actionAdapter.adapt(code, webCtx));
-
-        return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+        final HttpActionAdapter<Result, PlayWebContext> actionAdapter = config.getHttpActionAdapter();
+        final Executor pacEc = HttpExecutionContext.fromThread((Executor)ec);
+        
+        return CompletableFuture.supplyAsync(() ->
+        	securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
-	                return CompletableFuture.completedFuture(null);
+	                return null;
 	            } else {
-	                return delegate.call(ctx);
+	                return delegate.call(ctx).toCompletableFuture().get();
 	            }
-            }, actionAdapterWrapper, clients, authorizers, null, multiProfile);
+            }, actionAdapter, clients, authorizers, null, multiProfile), pacEc);
+        
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
@@ -123,11 +130,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<CompletionStage<Result>, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic<Result, PlayWebContext> getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(final SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic<Result, PlayWebContext> securityLogic) {
         this.securityLogic = securityLogic;
     }
 }
