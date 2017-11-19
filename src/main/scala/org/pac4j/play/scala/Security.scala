@@ -50,15 +50,19 @@ trait Security[P<:CommonProfile] extends BaseController {
   }
 
   protected def Secure[A](action: List[P] => Action[AnyContent]): Action[AnyContent] = {
-    Secure(null, null)(action)
+    Secure(null, null, null)(action)
   }
 
   protected def Secure[A](clients: String)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
-    Secure(clients, null)(action)
+    Secure(clients, null, null)(action)
   }
 
-  protected def Secure[A](clients: String, authorizers: String, multiProfile: Boolean = false)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
-    Secure(parse.anyContent, clients, authorizers, multiProfile)(action)
+  protected def Secure[A](clients: String, authorizers: String)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(clients, authorizers, null)(action)
+  }
+
+  protected def Secure[A](clients: String, authorizers: String, matchers: String, multiProfile: Boolean = false)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(parse.anyContent, clients, authorizers, matchers, multiProfile)(action)
   }
 
   /**
@@ -72,7 +76,7 @@ trait Security[P<:CommonProfile] extends BaseController {
    * @tparam A
    * @return
    */
-  protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
+  protected def Secure[A](parser: BodyParser[A], clients: String, authorizers: String, matchers: String, multiProfile: Boolean)(action: List[P] => Action[A]) = Action.async(parser) { request =>
     val webContext = request.body match {
       case content: AnyContentAsFormUrlEncoded =>
         val javaBodyContent = content.asFormUrlEncoded
@@ -89,7 +93,7 @@ trait Security[P<:CommonProfile] extends BaseController {
 
     val secureAction = new SecureAction(config, playSessionStore)
     val javaContext = webContext.getJavaContext
-    secureAction.internalCall(javaContext, clients, authorizers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
+    secureAction.internalCall(javaContext, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         val profileManager = new ProfileManager[P](webContext)
         val profiles = profileManager.getAll(true)
