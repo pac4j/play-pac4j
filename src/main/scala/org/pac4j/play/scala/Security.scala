@@ -61,6 +61,10 @@ trait Security[P<:CommonProfile] extends Controller {
     Secure(clients, null, null)(action)
   }
 
+  protected def Secure[A](clients: String, authorizers: String)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
+    Secure(clients, authorizers, null)(action)
+  }
+
   protected def Secure[A](clients: String, authorizers: String, matchers: String, multiProfile: Boolean = false)(action: List[P] => Action[AnyContent]): Action[AnyContent] = {
     Secure(parse.anyContent, clients, authorizers, matchers, multiProfile)(action)
   }
