@@ -331,7 +331,7 @@ def facebookIndex = Secure("FacebookClient") { profiles =>
 
 ### 3b) Protect urls via the `SecurityFilter`
 
-In order to protect multiple urls at the same tine, you can configure the `SecurityFilter`. You need to configure your application to include the `SecurityFilter` as follows:
+In order to protect multiple urls at the same time, you can configure the `SecurityFilter`. You need to configure your application to include the `SecurityFilter` as follows:
 
 First define a `Filters` class in your application (if you have not yet done so).
 
@@ -382,7 +382,7 @@ Then tell your application to use the filters in `application.conf`:
 
     play.http.filters = "filters.Filters"
 
-See for more information on the use of filters in Play the [Play documentation on Filters](https://www.playframework.com/documentation/2.4.x/ScalaHttpFilters).
+See for more information on the use of filters in Play the [Play documentation on Filters](https://www.playframework.com/documentation/2.5.x/ScalaHttpFilters).
 
 Rules for the security filter can be supplied in application.conf. An example is shown below. It
 consists of a list of filter rules, where the key is a regular expression that will be used to
