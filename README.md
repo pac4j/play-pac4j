@@ -56,176 +56,120 @@ The `Config` is bound for injection in a `SecurityModule` (or whatever the name 
 *In Java:*
 
 ```java
-package modules;
-
-import be.objectify.deadbolt.java.cache.HandlerCache;
-import com.google.inject.AbstractModule;
-import controllers.CustomAuthorizer;
-import controllers.DemoHttpActionAdapter;
-import org.pac4j.cas.client.CasClient;
-import org.pac4j.cas.client.CasProxyReceptor;
-import org.pac4j.cas.config.CasConfiguration;
-import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer;
-import org.pac4j.core.client.Clients;
-import org.pac4j.core.client.direct.AnonymousClient;
-import org.pac4j.core.config.Config;
-import org.pac4j.http.client.direct.DirectBasicAuthClient;
-import org.pac4j.http.client.direct.ParameterClient;
-import org.pac4j.http.client.indirect.FormClient;
-import org.pac4j.http.client.indirect.IndirectBasicAuthClient;
-import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator;
-import org.pac4j.jwt.config.signature.SecretSignatureConfiguration;
-import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator;
-import org.pac4j.oauth.client.FacebookClient;
-import org.pac4j.oauth.client.TwitterClient;
-import org.pac4j.oidc.client.OidcClient;
-import org.pac4j.oidc.config.OidcConfiguration;
-import org.pac4j.play.CallbackController;
-import org.pac4j.play.LogoutController;
-import org.pac4j.play.deadbolt2.Pac4jHandlerCache;
-import org.pac4j.play.deadbolt2.Pac4jRoleHandler;
-import org.pac4j.play.store.PlayCacheSessionStore;
-import org.pac4j.play.store.PlaySessionStore;
-import org.pac4j.saml.client.SAML2Client;
-import org.pac4j.saml.client.SAML2ClientConfiguration;
-import play.Configuration;
-import play.Environment;
-import play.cache.CacheApi;
-
-import java.io.File;
-
 public class SecurityModule extends AbstractModule {
 
-    public final static String JWT_SALT = "12345678901234567890123456789012";
-
-    private final Configuration configuration;
-
-    private static class MyPac4jRoleHandler implements Pac4jRoleHandler { }
-
-    public SecurityModule(final Environment environment, final Configuration configuration) {
-        this.configuration = configuration;
-    }
+    ...
 
     @Override
     protected void configure() {
-
         bind(HandlerCache.class).to(Pac4jHandlerCache.class);
 
         bind(Pac4jRoleHandler.class).to(MyPac4jRoleHandler.class);
-        final PlayCacheSessionStore playCacheSessionStore = new PlayCacheSessionStore(getProvider(CacheApi.class));
-        bind(PlaySessionStore.class).toInstance(playCacheSessionStore);
+        final PlayCacheSessionStore playCacheSessionStore = new PlayCacheSessionStore(getProvider(SyncCacheApi.class));
+        //bind(PlaySessionStore.class).toInstance(playCacheSessionStore);
+        bind(PlaySessionStore.class).to(PlayCacheSessionStore.class);
 
-        final String fbId = configuration.getString("fbId");
-        final String fbSecret = configuration.getString("fbSecret");
-        final String baseUrl = configuration.getString("baseUrl");
-
-        final FacebookClient facebookClient = new FacebookClient(fbId, fbSecret);
-        final TwitterClient twitterClient = new TwitterClient("HVSQGAw2XmiwcKOTvZFbQ", "FSiO9G9VRR4KCuksky0kgGuo8gAVndYymr4Nl7qc8AA");
-        final FormClient formClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator());
-        final IndirectBasicAuthClient indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
-
-        final CasConfiguration casConfiguration = new CasConfiguration("http://localhost:8888/cas/login");
-        final CasProxyReceptor casProxyReceptor = new CasProxyReceptor();
-        casConfiguration.setProxyReceptor(casProxyReceptor);
-        final CasClient casClient = new CasClient(casConfiguration);
-
-        final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks", "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:openidp-feide.xml");
-        cfg.setMaximumAuthenticationLifetime(3600);
-        cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org");
-        cfg.setServiceProviderMetadataPath(new File("target", "sp-metadata.xml").getAbsolutePath());
-        final SAML2Client saml2Client = new SAML2Client(cfg);
-
-        final OidcConfiguration oidcConfiguration = new OidcConfiguration();
-        oidcConfiguration.setClientId("343992089165-i1es0qvej18asl33mvlbeq750i3ko32k.apps.googleusercontent.com");
-        oidcConfiguration.setSecret("unXK_RSCbCXLTic2JACTiAo9");
-        oidcConfiguration.setDiscoveryURI("https://accounts.google.com/.well-known/openid-configuration");
-        oidcConfiguration.addCustomParam("prompt", "consent");
-        final OidcClient oidcClient = new OidcClient(oidcConfiguration);
-        oidcClient.addAuthorizationGenerator((ctx, profile) -> { profile.addRole("ROLE_ADMIN"); return profile; });
-
-        final ParameterClient parameterClient = new ParameterClient("token",
-                new JwtAuthenticator(new SecretSignatureConfiguration(JWT_SALT)));
-        parameterClient.setSupportGetRequest(true);
-        parameterClient.setSupportPostRequest(false);
-
-        final DirectBasicAuthClient directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator());
-
-        final Clients clients = new Clients(baseUrl + "/callback", facebookClient, twitterClient, formClient,
-                indirectBasicAuthClient, casClient, saml2Client, oidcClient, parameterClient, directBasicAuthClient,
-                new AnonymousClient(), casProxyReceptor);
-
-        final Config config = new Config(clients);
-        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
-        config.addAuthorizer("custom", new CustomAuthorizer());
-        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/filter/facebook/notprotected\\.html$"));
-        config.setHttpActionAdapter(new DemoHttpActionAdapter());
-        bind(Config.class).toInstance(config);
-
+        // callback
         final CallbackController callbackController = new CallbackController();
         callbackController.setDefaultUrl("/");
         callbackController.setMultiProfile(true);
         bind(CallbackController.class).toInstance(callbackController);
 
+        // logout
         final LogoutController logoutController = new LogoutController();
         logoutController.setDefaultUrl("/?defaulturlafterlogout");
+        //logoutController.setDestroySession(true);
         bind(LogoutController.class).toInstance(logoutController);
+    }
+
+    @Provides
+    protected FacebookClient provideFacebookClient() {
+        final String fbId = configuration.getString("fbId");
+        final String fbSecret = configuration.getString("fbSecret");
+        return new FacebookClient(fbId, fbSecret);
+    }
+
+    @Provides
+    protected TwitterClient provideTwitterClient() {
+        return new TwitterClient("HVSQGAw2XmiwcKOTvZFbQ", "FSiO9G9VRR4KCuksky0kgGuo8gAVndYymr4Nl7qc8AA");
+    }
+
+    @Provides
+    protected FormClient provideFormClient() {
+        return new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator());
+    }
+
+    ...
+
+    @Provides
+    protected SAML2Client provideSaml2Client() {
+        final SAML2ClientConfiguration cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks",
+                "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:openidp-feide.xml");
+        cfg.setMaximumAuthenticationLifetime(3600);
+        cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org");
+        cfg.setServiceProviderMetadataPath(new File("target", "sp-metadata.xml").getAbsolutePath());
+        return new SAML2Client(cfg);
+    }
+
+    @Provides
+    protected Config provideConfig(FacebookClient facebookClient, TwitterClient twitterClient, FormClient formClient,
+                                   IndirectBasicAuthClient indirectBasicAuthClient, CasClient casClient, SAML2Client saml2Client,
+                                   OidcClient oidcClient, ParameterClient parameterClient, DirectBasicAuthClient directBasicAuthClient,
+                                   CasProxyReceptor casProxyReceptor, DirectFormClient directFormClient) {
+        final Clients clients = new Clients(baseUrl + "/callback", facebookClient, twitterClient, formClient,
+                indirectBasicAuthClient, casClient, saml2Client, oidcClient, parameterClient, directBasicAuthClient,
+                new AnonymousClient(), casProxyReceptor, directFormClient);
+
+        final Config config = new Config(clients);
+        config.addAuthorizer("admin", new RequireAnyRoleAuthorizer<>("ROLE_ADMIN"));
+        config.addAuthorizer("custom", new CustomAuthorizer());
+        config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/facebook/notprotected\\.html$"));
+        config.setHttpActionAdapter(new DemoHttpActionAdapter());
+        return config;
     }
 }
 ```
 
+See a [full example here](https://github.com/pac4j/play-pac4j-java-demo/blob/master/app/modules/SecurityModule.java).
+
 *In Scala:*
 
 ```scala
-package modules
-
-import com.google.inject.AbstractModule
-import controllers.{CustomAuthorizer, DemoHttpActionAdapter, RoleAdminAuthGenerator}
-import org.pac4j.cas.client.{CasClient, CasProxyReceptor}
-import org.pac4j.core.client.Clients
-import org.pac4j.http.client.direct.{DirectBasicAuthClient, ParameterClient}
-import org.pac4j.http.client.indirect.{FormClient, IndirectBasicAuthClient}
-import org.pac4j.http.credentials.authenticator.test.SimpleTestUsernamePasswordAuthenticator
-import org.pac4j.jwt.credentials.authenticator.JwtAuthenticator
-import org.pac4j.oauth.client.{FacebookClient, TwitterClient}
-import org.pac4j.oidc.client.OidcClient
-import org.pac4j.play.{CallbackController, LogoutController}
-import org.pac4j.saml.client.SAML2ClientConfiguration
-import play.api.{Configuration, Environment}
-import java.io.File
-
-import org.pac4j.cas.config.{CasConfiguration, CasProtocol}
-import org.pac4j.play.store.{PlayCacheSessionStore, PlaySessionStore}
-import org.pac4j.core.authorization.authorizer.RequireAnyRoleAuthorizer
-import org.pac4j.core.client.direct.AnonymousClient
-import org.pac4j.core.config.Config
-import org.pac4j.jwt.config.signature.SecretSignatureConfiguration
-import org.pac4j.oidc.config.OidcConfiguration
-import org.pac4j.oidc.profile.OidcProfile
-import org.pac4j.saml.client.SAML2Client
-
 class SecurityModule(environment: Environment, configuration: Configuration) extends AbstractModule {
 
+  val baseUrl = configuration.getString("baseUrl").get
+
   override def configure(): Unit = {
-    val fbId = configuration.getString("fbId").get
-    val fbSecret = configuration.getString("fbSecret").get
-    val baseUrl = configuration.getString("baseUrl").get
 
-    val facebookClient = new FacebookClient(fbId, fbSecret)
-    val twitterClient = new TwitterClient("HVSQGAw2XmiwcKOTvZFbQ", "FSiO9G9VRR4KCuksky0kgGuo8gAVndYymr4Nl7qc8AA")
+    bind(classOf[PlaySessionStore]).to(classOf[PlayCacheSessionStore])
 
-    val formClient = new FormClient(baseUrl + "/loginForm", new SimpleTestUsernamePasswordAuthenticator())
-    val indirectBasicAuthClient = new IndirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator())
+    // callback
+    val callbackController = new CallbackController()
+    callbackController.setDefaultUrl("/?defaulturlafterlogout")
+    callbackController.setMultiProfile(true)
+    bind(classOf[CallbackController]).toInstance(callbackController)
 
-    val casConfiguration = new CasConfiguration("https://casserverpac4j.herokuapp.com/login")
+    // logout
+    val logoutController = new LogoutController()
+    logoutController.setDefaultUrl("/")
+    bind(classOf[LogoutController]).toInstance(logoutController)
+  }
+
+  ...
+
+  @Provides
+  def provideCasProxyReceptor: CasProxyReceptor = new CasProxyReceptor()
+
+  @Provides
+  def provideCasClient(casProxyReceptor: CasProxyReceptor) = {
+    val casConfiguration = new CasConfiguration("http://localhost:8888/cas/login") // ("https://casserverpac4j.herokuapp.com/login")
     casConfiguration.setProtocol(CasProtocol.CAS20)
-    val casClient = new CasClient(casConfiguration)
+    casConfiguration.setProxyReceptor(casProxyReceptor)
+    new CasClient(casConfiguration)
+  }
 
-    val cfg = new SAML2ClientConfiguration("resource:samlKeystore.jks", "pac4j-demo-passwd", "pac4j-demo-passwd", "resource:openidp-feide.xml")
-    cfg.setMaximumAuthenticationLifetime(3600)
-    cfg.setServiceProviderEntityId("urn:mace:saml:pac4j.org")
-    cfg.setServiceProviderMetadataPath(new File("target", "sp-metadata.xml").getAbsolutePath)
-    val saml2Client = new SAML2Client(cfg)
-
+  @Provides
+  def provideOidcClient: OidcClient[OidcProfile] = {
     val oidcConfiguration = new OidcConfiguration()
     oidcConfiguration.setClientId("343992089165-i1es0qvej18asl33mvlbeq750i3ko32k.apps.googleusercontent.com")
     oidcConfiguration.setSecret("unXK_RSCbCXLTic2JACTiAo9")
@@ -233,39 +177,41 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     oidcConfiguration.addCustomParam("prompt", "consent")
     val oidcClient = new OidcClient[OidcProfile](oidcConfiguration)
     oidcClient.addAuthorizationGenerator(new RoleAdminAuthGenerator)
+    oidcClient
+  }
 
+  @Provides
+  def provideParameterClient: ParameterClient = {
     val jwtAuthenticator = new JwtAuthenticator()
     jwtAuthenticator.addSignatureConfiguration(new SecretSignatureConfiguration("12345678901234567890123456789012"))
     val parameterClient = new ParameterClient("token", jwtAuthenticator)
     parameterClient.setSupportGetRequest(true)
     parameterClient.setSupportPostRequest(false)
+    parameterClient
+  }
 
-    val directBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator)
+  @Provides
+  def provideDirectBasicAuthClient: DirectBasicAuthClient = new DirectBasicAuthClient(new SimpleTestUsernamePasswordAuthenticator)
 
+  @Provides
+  def provideConfig(facebookClient: FacebookClient, twitterClient: TwitterClient, formClient: FormClient, indirectBasicAuthClient: IndirectBasicAuthClient,
+                    casClient: CasClient, saml2Client: SAML2Client, oidcClient: OidcClient[OidcProfile], parameterClient: ParameterClient, directBasicAuthClient: DirectBasicAuthClient,
+                    casProxyReceptor: CasProxyReceptor): Config = {
     val clients = new Clients(baseUrl + "/callback", facebookClient, twitterClient, formClient,
       indirectBasicAuthClient, casClient, saml2Client, oidcClient, parameterClient, directBasicAuthClient,
-      new AnonymousClient())
+      new AnonymousClient(), casProxyReceptor)
 
     val config = new Config(clients)
     config.addAuthorizer("admin", new RequireAnyRoleAuthorizer[Nothing]("ROLE_ADMIN"))
     config.addAuthorizer("custom", new CustomAuthorizer)
     config.addMatcher("excludedPath", new PathMatcher().excludeRegex("^/filter/facebook/notprotected\\.html$"))
     config.setHttpActionAdapter(new DemoHttpActionAdapter())
-    bind(classOf[Config]).toInstance(config)
-
-    bind(classOf[PlaySessionStore]).to(classOf[PlayCacheSessionStore])
-
-    val callbackController = new CallbackController()
-    callbackController.setDefaultUrl("/?defaulturlafterlogout")
-    callbackController.setMultiProfile(true)
-    bind(classOf[CallbackController]).toInstance(callbackController)
-
-    val logoutController = new LogoutController()
-    logoutController.setDefaultUrl("/")
-    bind(classOf[LogoutController]).toInstance(logoutController)
+    config
   }
 }
 ```
+
+See a [full example here](https://github.com/pac4j/play-pac4j-scala-demo/blob/master/app/modules/SecurityModule.java).
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheSessionStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
 
