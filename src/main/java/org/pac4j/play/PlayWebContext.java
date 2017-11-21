@@ -6,6 +6,7 @@ import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
+import play.api.mvc.AnyContentAsFormUrlEncoded;
 import play.api.mvc.RequestHeader;
 import play.core.j.JavaHelpers$;
 import play.libs.typedmap.TypedKey;
@@ -14,10 +15,13 @@ import play.mvc.Http.Request;
 import play.mvc.Http.Response;
 import play.mvc.Http.Session;
 import play.mvc.Http.Context;
+import scala.collection.Seq;
+
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
+import static scala.collection.JavaConverters.setAsJavaSet;
 
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
@@ -39,6 +43,8 @@ public class PlayWebContext implements WebContext {
 
     protected final Session session;
 
+    protected Map<String, String[]> formParameters = null;
+
     protected SessionStore<PlayWebContext> sessionStore;
 
     protected String responseContent = "";
@@ -53,6 +59,27 @@ public class PlayWebContext implements WebContext {
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
         this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
+    }
+
+    /**
+     * We retrieve the body apart from the request. Otherwise, there is an issue in casting the body between Scala and Java.
+     *
+     * @param requestHeader the request without the body
+     * @param body the body (maybe)
+     * @param sessionStore the session store
+     */
+    public PlayWebContext(final RequestHeader requestHeader, final Object body, final SessionStore<org.pac4j.play.PlayWebContext> sessionStore) {
+        this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
+        this.formParameters = new HashMap<>();
+        if (body instanceof AnyContentAsFormUrlEncoded) {
+            final scala.collection.immutable.Map<String, Seq<String>> parameters = ((AnyContentAsFormUrlEncoded) body).asFormUrlEncoded().get();
+            for (final String key : setAsJavaSet(parameters.keySet())) {
+                final Seq<String> v = parameters.get(key).get();
+                final String[] values = new String[v.size()];
+                v.copyToArray(values);
+                formParameters.put(key, values);
+            }
+        }
     }
 
     @Override
@@ -125,18 +152,16 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public Map<String, String[]> getRequestParameters() {
-        final Http.RequestBody body = request.body();
-        final Map<String, String[]> formParameters;
-        if (body != null) {
-            formParameters = body.asFormUrlEncoded();
-        } else {
-            formParameters = new HashMap<>();
-        }
-        final Map<String, String[]> urlParameters = request.queryString();
         final Map<String, String[]> parameters = new HashMap<>();
         if (formParameters != null) {
             parameters.putAll(formParameters);
+        } else if (request.hasBody()) {
+            final Map<String, String[]> p = request.body().asFormUrlEncoded();
+            if (p != null) {
+                parameters.putAll(p);
+            }
         }
+        final Map<String, String[]> urlParameters = request.queryString();
         if (urlParameters != null) {
             parameters.putAll(urlParameters);
         }
