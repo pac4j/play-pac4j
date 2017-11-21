@@ -43,7 +43,7 @@ public class PlayWebContext implements WebContext {
 
     protected final Session session;
 
-    protected final Map<String, String[]> formParameters = new HashMap<>();
+    protected Map<String, String[]> formParameters = null;
 
     protected SessionStore<PlayWebContext> sessionStore;
 
@@ -70,6 +70,7 @@ public class PlayWebContext implements WebContext {
      */
     public PlayWebContext(final RequestHeader requestHeader, final Object body, final SessionStore<org.pac4j.play.PlayWebContext> sessionStore) {
         this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
+        this.formParameters = new HashMap<>();
         if (body instanceof AnyContentAsFormUrlEncoded) {
             final scala.collection.immutable.Map<String, Seq<String>> parameters = ((AnyContentAsFormUrlEncoded) body).asFormUrlEncoded().get();
             for (final String key : setAsJavaSet(parameters.keySet())) {
@@ -152,7 +153,7 @@ public class PlayWebContext implements WebContext {
     @Override
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> parameters = new HashMap<>();
-        if (!formParameters.isEmpty()) {
+        if (formParameters != null) {
             parameters.putAll(formParameters);
         } else if (request.hasBody()) {
             final Map<String, String[]> p = request.body().asFormUrlEncoded();
