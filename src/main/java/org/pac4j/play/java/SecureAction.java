@@ -45,12 +45,15 @@ public class SecureAction extends Action<Result> {
 
     protected final static Method AUTHORIZERS_METHOD;
 
+    protected final static Method MATCHERS_METHOD;
+
     protected final static Method MULTI_PROFILE_METHOD;
 
     static {
         try {
             CLIENTS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.CLIENTS);
             AUTHORIZERS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.AUTHORIZERS);
+            MATCHERS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.MATCHERS);
             MULTI_PROFILE_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.MULTI_PROFILE);
         } catch (final SecurityException | NoSuchMethodException e) {
             throw new TechnicalException(e);
@@ -78,15 +81,16 @@ public class SecureAction extends Action<Result> {
           final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
           final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
+            final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
           final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
   
-          return internalCall(ctx, clients, authorizers, multiProfile);
+          return internalCall(ctx, clients, authorizers, matchers, multiProfile);
         }catch(Throwable t){
           throw new RuntimeException(t);
         }        
     }
 
-    public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final boolean multiProfile) throws Throwable {
+    public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
 
         assertNotNull("securityLogic", securityLogic);
 
@@ -102,7 +106,7 @@ public class SecureAction extends Action<Result> {
 	            } else {
 	                return delegate.call(ctx);
 	            }
-            }, actionAdapterWrapper, clients, authorizers, null, multiProfile);
+            }, actionAdapterWrapper, clients, authorizers, matchers, multiProfile);
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
