@@ -13,6 +13,10 @@ import org.pac4j.play.store.PlaySessionStore
 
 case class ClientsHandlerKey(clients: String) extends HandlerKey
 
+/**
+  * @author Zenkie Zhu
+  * @since 4.1.0
+  */
 @Singleton
 class Pac4jHandlerCache @Inject() (config: Config, playSessionStore: PlaySessionStore, roleHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext) extends HandlerCache {
 

@@ -16,7 +16,10 @@ import org.pac4j.play.PlayWebContext
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc.{Request, RequestHeader, Result}
 
-
+/**
+  * @author Zenkie Zhu
+  * @since 4.1.0
+  */
 class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessionStore, rolePermissionsHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext)
     extends DefaultSecurityLogic[Result, PlayWebContext] with DeadboltHandler {
 

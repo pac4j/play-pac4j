@@ -5,7 +5,10 @@ import scala.collection.JavaConversions._
 import be.objectify.deadbolt.scala.models.{Permission, Role, Subject}
 import org.pac4j.core.profile.CommonProfile
 
-
+/**
+  * @author Zenkie Zhu
+  * @since 4.1.0
+  */
 case class Pac4jRole(
   name: String
 ) extends Role
