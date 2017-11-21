@@ -424,7 +424,7 @@ are used. When not provided, the value will be `null`.
     ]
 
 
-### 3c) Working with Deadbolt (only Java)
+### 3c) Working with Deadbolt
 
 While the `play-pac4j` security library can handle authorizations on its own, [Deadbolt](http://deadbolt.ws) is a famous and much used library for authorizations. So you can use it seamlessly with `play-pac4j`.
 
@@ -432,12 +432,29 @@ You need to bind the Deadbolt `HandlerCache` to the `Pac4jHandlerCache` (in your
 
 Also `pac4j` does not require a linked of permissions with roles, you must bind a `Pac4jRoleHandler` handler to correct use of `@RoleBasedPermissions` action.
 
+*In Java:*
+
 ```java
+import org.pac4j.play.deadbolt2.*;
+import be.objectify.deadbolt.java.cache.HandlerCache;
+
 bind(Pac4jRoleHandler.class).to(MyCustomRoleHandler.class);
 bind(HandlerCache.class).to(Pac4jHandlerCache.class);
 ```
 
+*In Scala:*
+
+```scala
+import org.pac4j.play.scala.deadbolt2._
+import be.objectify.deadbolt.scala.cache.HandlerCache
+
+bind(classOf[Pac4jRoleHandler]).to(classOf[SimpleRoleHandler]) // or MyCustomRoleHandler
+bind(classOf[HandlerCache]).to(classOf[Pac4jHandlerCache])
+```
+
 Thus, everytime you use a *Deadbolt* handler, the *Deadbolt* subject will be automatically built from the current *pac4j* authenticated user profile, the key used to get the appropriate handler will represent the `clients` parameter used to perform the *pac4j* authentication (like in the `Secure` annotation).
+
+*In Java:*
 
 Example to secure an action in a controller:
 
@@ -451,6 +468,13 @@ Example to secure an action in a controller and start a Facebook login process i
 @SubjectPresent(handlerKey = "FacebookClient", forceBeforeAuthCheck = true)
 ```
 
+*In Scala:*
+
+```scala
+import org.pac4j.play.scala.deadbolt2.ClientsHandlerKey
+
+somewhereNeeds.key(ClientsHandlerKey("FacebookClient"))
+```
 
 ---
 
