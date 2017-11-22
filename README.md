@@ -15,7 +15,7 @@ Several versions of the library are available for the different versions of the 
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 2.0           | [play-pac4j 3.0.x](https://github.com/pac4j/play-pac4j/tree/3.0.x) (Java & Scala)
-| 2.6          | 2.1           | 4.0.x (Java & Scala)
+| 2.6          | 2.2           | 4.1.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
@@ -44,7 +44,7 @@ Just follow these easy steps to secure your Play 2 web application:
 You need to add a dependency on:
 
 - the `play-pac4j` library (<em>groupId</em>: **org.pac4j**, *version*: **4.1.0**)
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.1.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.2.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -626,7 +626,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/4.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.1.0/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j/4.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.2.0/index.html).
 
 
 ## Need help?
