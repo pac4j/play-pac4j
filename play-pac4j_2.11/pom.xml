@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.pac4j</groupId>
+        <artifactId>play-pac4j-parent</artifactId>
+        <version>5.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>play-pac4j_2.11</artifactId>
+    <packaging>jar</packaging>
+    <name>pac4j implementation for Play framework (Scala 2.11)</name>
+    <description>Security library for Play framework based on pac4j using Scala 2.11</description>
+
+    <properties>
+        <scala.version>2.11</scala.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-cache_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>be.objectify</groupId>
+            <artifactId>deadbolt-java_${scala.version}</artifactId>
+            <version>${deadbolt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>be.objectify</groupId>
+            <artifactId>deadbolt-scala_${scala.version}</artifactId>
+            <version>${deadbolt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- tests -->
+        <dependency>
+            <groupId>com.typesafe.play</groupId>
+            <artifactId>play-test_${scala.version}</artifactId>
+            <version>${play.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
