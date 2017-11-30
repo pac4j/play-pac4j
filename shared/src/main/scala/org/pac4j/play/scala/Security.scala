@@ -1,7 +1,5 @@
 package org.pac4j.play.scala
 
-import javax.inject.Inject
-
 import org.pac4j.core.config.Config
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
@@ -12,8 +10,7 @@ import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.mvc._
 import play.core.j.JavaHelpers
 import play.mvc.Http.RequestBody
-
-import scala.collection.JavaConverters
+import scala.collection.JavaConversions
 import scala.concurrent.Future
 import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
@@ -31,10 +28,9 @@ trait Security[P<:CommonProfile] extends BaseController {
 
   protected val logger = LoggerFactory.getLogger(getClass)
 
-  @Inject
-  protected val config: Config
-  @Inject
-  protected val playSessionStore: PlaySessionStore
+  protected def config: Config
+
+  protected def playSessionStore: PlaySessionStore
 
   /**
    * Get or create a new sessionId.
@@ -45,7 +41,7 @@ trait Security[P<:CommonProfile] extends BaseController {
   protected def getOrCreateSessionId(request: RequestHeader): Session = {
     val webContext = new PlayWebContext(request, playSessionStore)
     webContext.getSessionStore.asInstanceOf[PlaySessionStore].getOrCreateSessionId(webContext)
-    val map = JavaConverters.mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
+    val map = mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
     new Session(map)
   }
 
@@ -98,7 +94,7 @@ trait Security[P<:CommonProfile] extends BaseController {
         val profileManager = new ProfileManager[P](webContext)
         val profiles = profileManager.getAll(true)
         logger.debug("profiles: {}", profiles)
-        action(asScalaBuffer(profiles).toList)(request)
+        action(JavaConversions.asScalaBuffer(profiles).toList)(request)
       } else {
         Future {
           JavaHelpers.createResult(javaContext, r)

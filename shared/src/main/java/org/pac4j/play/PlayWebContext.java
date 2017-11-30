@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
 import static org.pac4j.core.util.CommonHelper.assertNotNull;
-import static scala.collection.JavaConversions.setAsJavaSet;
 
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
@@ -74,7 +73,7 @@ public class PlayWebContext implements WebContext {
         this.formParameters = new HashMap<>();
         if (body instanceof AnyContentAsFormUrlEncoded) {
             final scala.collection.immutable.Map<String, Seq<String>> parameters = ((AnyContentAsFormUrlEncoded) body).asFormUrlEncoded().get();
-            for (final String key : setAsJavaSet(parameters.keySet())) {
+            for (final String key : ScalaCompatibility.scalaSetToJavaSet(parameters.keySet())) {
                 final Seq<String> v = parameters.get(key).get();
                 final String[] values = new String[v.size()];
                 v.copyToArray(values);
