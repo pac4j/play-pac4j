@@ -156,10 +156,13 @@ public class PlayWebContext implements WebContext {
         final Map<String, String[]> parameters = new HashMap<>();
         if (formParameters != null) {
             parameters.putAll(formParameters);
-        } else if (request.hasBody() && request.body() != null) {
-            final Map<String, String[]> p = request.body().asFormUrlEncoded();
-            if (p != null) {
-                parameters.putAll(p);
+        } else if (request.hasBody()) {
+            final Http.RequestBody body = request.body();
+            if (body != null) {
+                final Map<String, String[]> p = body.asFormUrlEncoded();
+                if (p != null) {
+                    parameters.putAll(p);
+                }
             }
         }
         final Map<String, String[]> urlParameters = request.queryString();
