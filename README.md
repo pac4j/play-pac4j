@@ -214,7 +214,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 }
 ```
 
-See a [full example here](https://github.com/pac4j/play-pac4j-scala-demo/blob/master/app/modules/SecurityModule.java).
+See a [full example here](https://github.com/pac4j/play-pac4j-scala-demo/blob/master/app/modules/SecurityModule.scala).
 
 `http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheSessionStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
 
