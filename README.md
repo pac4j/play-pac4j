@@ -270,10 +270,14 @@ public Result facebookIndex() {
 *In Scala:*
 
 ```scala
-def facebookIndex = Secure("FacebookClient") { profiles =>
- Action { request =>
-   Ok(views.html.protectedIndex(profiles))
- }
+import org.pac4j.play.scala.Security
+
+class MyController extends MyBaseController with Security[CommonProfile] {
+  def facebookIndex = Secure("FacebookClient") { profiles =>
+   Action { request =>
+     Ok(views.html.protectedIndex(profiles))
+   }
+  }
 }
 ```
 
@@ -481,14 +485,14 @@ Examples:
 public class Application {
 
     @Inject
-    protected PlaySessionStore playSessionStore;  
+    protected PlaySessionStore playSessionStore;
 
     public Result getUserProfile() {
         PlayWebContext webContext = new PlayWebContext(ctx(), playSessionStore)
         ProfileManager<CommonProfile> profileManager = new ProfileManager(webContext);
         Optional<CommonProfile> profile = profileManager.get(true);
         ....
-    } 
+    }
 
 }
 ```
