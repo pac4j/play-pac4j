@@ -156,6 +156,9 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
     val logoutController = new LogoutController()
     logoutController.setDefaultUrl("/")
     bind(classOf[LogoutController]).toInstance(logoutController)
+
+    // security components used in controllers
+    bind(classOf[SecurityComponents]).to(classOf[DefaultSecurityComponents])
   }
 
   ...
@@ -272,12 +275,10 @@ public Result facebookIndex() {
 ```scala
 import org.pac4j.play.scala.Security
 
-class MyController extends MyBaseController with Security[CommonProfile] {
-  def facebookIndex = Secure("FacebookClient") { profiles =>
-   Action { request =>
-     Ok(views.html.protectedIndex(profiles))
-   }
-  }
+class MyController @Inject()(val controllerComponents: SecurityComponents) extends MyBaseController with Security[CommonProfile] {
+  def facebookIndex = Secure("FacebookClient") { implicit request =>
+    Ok(views.html.protectedIndex(profiles))
+  } 
 }
 ```
 
@@ -500,7 +501,7 @@ public class Application {
 *In Scala:*
 
 ```scala
-class Application @Inject()(sessionStore: PlaySessionStore) extends Controller {
+class Application @Inject()(sessionStore: PlaySessionStore, val controllerComponents: ControllerComponents) extends Controller {
 
     def getUserProfile() = Action { request =>
         val webContext = new PlayWebContext(request, playSessionStore)
@@ -589,6 +590,15 @@ bind(classOf[LogoutController]).toInstance(logoutController)
 ### 4.x -> 5.0.0
 
 The `play-pac4j` library has been renamed as `play-pac4j_2.11` when built with Scala 2.11 and as `play-pac4j_2.12` when built with Scala 2.12.
+
+Scala trait `Security` was revamped to be more consistent with actions and action builders in Play 2.6.
+
+ - removed function `List[P]=>Action[AnyContent]` and replaced by `AuthenticatedRequest` encapsulating the request and the list of profiles
+ - introduced support of any content type not only `AnyContent`
+ - `Secure` method no longer returns an `Action`, it returns instance of `ActionBuilder` instead. That enables use of a standard simple action as well
+   as use of any parser or even produce an asynchronous result.
+ - introduced `SecurityComponents` extending `ControllerComponents` to ease injection of dependencies
+ - for backward compatibility, introduced a method `profiles` accepting implicit `AuthenticatedRequest` and returning `List[P]`
 
 ### 3.0.0 -> 4.0.0 (Play 2.6)
 
