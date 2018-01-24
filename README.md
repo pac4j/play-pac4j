@@ -659,7 +659,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 5.0.0-SNAPSHOT is under development.
+The version 5.0.1-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 
