@@ -97,6 +97,7 @@ public class SecureAction extends Action<Result> {
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
         final HttpActionAdapter<Result, WebContext> actionAdapter = config.getHttpActionAdapter();
+        assertNotNull("actionAdapter", actionAdapter);
         final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (code, webCtx) -> CompletableFuture.completedFuture(actionAdapter.adapt(code, webCtx));
 
         return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
