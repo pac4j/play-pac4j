@@ -54,7 +54,8 @@ public class PlayWebContext implements WebContext {
         this.request = context.request();
         this.response = context.response();
         this.session = context.session();
-        setSessionStore(sessionStore);
+        assertNotNull("sessionStore", sessionStore);
+        this.sessionStore = sessionStore;
     }
 
     public PlayWebContext(final RequestHeader requestHeader, final SessionStore<PlayWebContext> sessionStore) {
@@ -85,12 +86,6 @@ public class PlayWebContext implements WebContext {
     @Override
     public SessionStore getSessionStore() {
         return this.sessionStore;
-    }
-
-    @Override
-    public void setSessionStore(final SessionStore sessionStore) {
-        assertNotNull("sessionStore", sessionStore);
-        this.sessionStore = sessionStore;
     }
 
     /**

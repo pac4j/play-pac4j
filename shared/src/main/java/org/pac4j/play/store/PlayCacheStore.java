@@ -80,6 +80,6 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
     @Override
     public String toString() {
-        return CommonHelper.toString(this.getClass(), "cache", getCache(), "timeout", timeout);
+        return CommonHelper.toNiceString(this.getClass(), "cache", getCache(), "timeout", timeout);
     }
 }

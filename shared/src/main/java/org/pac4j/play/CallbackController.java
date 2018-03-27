@@ -31,7 +31,11 @@ public class CallbackController extends Controller {
 
     private String defaultUrl;
 
+    private Boolean saveInSession;
+
     private Boolean multiProfile;
+
+    private String defaultClient;
 
     @Inject
     protected Config config;
@@ -47,7 +51,7 @@ public class CallbackController extends Controller {
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
-        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.multiProfile, false), ec.current());
+        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.saveInSession, this.multiProfile, false, this.defaultClient), ec.current());
     }
 
     public String getDefaultUrl() {
@@ -58,12 +62,28 @@ public class CallbackController extends Controller {
         this.defaultUrl = defaultUrl;
     }
 
+    public Boolean getSaveInSession() {
+        return saveInSession;
+    }
+
+    public void setSaveInSession(final Boolean saveInSession) {
+        this.saveInSession = saveInSession;
+    }
+
     public boolean isMultiProfile() {
         return multiProfile;
     }
 
     public void setMultiProfile(final boolean multiProfile) {
         this.multiProfile = multiProfile;
+    }
+
+    public String getDefaultClient() {
+        return defaultClient;
+    }
+
+    public void setDefaultClient(final String defaultClient) {
+        this.defaultClient = defaultClient;
     }
 
     public Config getConfig() {

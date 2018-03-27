@@ -3,7 +3,7 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2** web applications which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.6 (and Scala 2.11 or Scala 2.12) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v2**. It's available under the Apache 2 license.
+It's based on Play 2.6 (and Scala 2.11 or Scala 2.12) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v3**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
@@ -15,7 +15,8 @@ Several versions of the library are available for the different versions of the 
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 2.0           | [play-pac4j 3.0.x](https://github.com/pac4j/play-pac4j/tree/3.0.x) (Java & Scala)
-| 2.6          | 2.2           | 5.0.x (Java & Scala)
+| 2.5          | 2.0           | [play-pac4j_2.11 and play-pac4j_2.12 5.0.x](https://github.com/pac4j/play-pac4j/tree/5.0.x) (Java & Scala)
+| 2.6          | 3.0           | 6.0.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
@@ -43,8 +44,8 @@ Just follow these easy steps to secure your Play 2 web application:
 
 You need to add a dependency on:
 
-- the `play-pac4j_2.11` or `play-pac4j_2.12` library: `"org.pac4j" %% "play-pac4j" % "5.0.0"`
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **2.2.1**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the `play-pac4j_2.11` or `play-pac4j_2.12` library: `"org.pac4j" %% "play-pac4j" % "6.0.0-SNASPHOT"`
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0-SNAPSHOT**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -443,7 +444,11 @@ The following parameters are available:
 
 1) `defaultUrl` (optional): it's the default url after login if no url was originally requested (`/` by default)
 
-2) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default).
+2) `saveInSession` (optional) : it indicates whether the profile should be saved into the web session (`true` by default)
+
+3) `multiProfile` (optional): it indicates whether multiple authentications (and thus multiple profiles) must be kept at the same time (`false` by default)
+
+4) `defaultClient` (optional): it defines the default client to use to finish the login process if none is provided on the URL (not defined by default).
 
 
 In the `routes` file:
@@ -644,7 +649,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/5.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/5.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/2.2.1/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/6.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/6.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/3.0.0/index.html).
 
 
 ## Need help?
@@ -659,7 +664,7 @@ If you have any question, please use the following mailing lists:
 
 ## Development
 
-The version 5.0.1-SNAPSHOT is under development.
+The version 6.0.0-SNAPSHOT is under development.
 
 Maven artifacts are built via Travis: [![Build Status](https://travis-ci.org/pac4j/play-pac4j.png?branch=master)](https://travis-ci.org/pac4j/play-pac4j) and available in the [Sonatype snapshots repository](https://oss.sonatype.org/content/repositories/snapshots/org/pac4j). This repository must be added in the `resolvers` of your `build.sbt` file:
 

@@ -52,6 +52,6 @@ class Pac4jHandlerCache @Inject() (config: Config, playSessionStore: PlaySession
 
   protected def buildCustomHandler(handlerKey: HandlerKey): Option[DeadboltHandler] = None
 
-  override def toString() = CommonHelper.toString(this.getClass(), "handlers", handlers, "config", config,
+  override def toString() = CommonHelper.toNiceString(this.getClass(), "handlers", handlers, "config", config,
     "executionContext", ec, "playSessionStore", playSessionStore)
 }
