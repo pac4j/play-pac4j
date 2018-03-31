@@ -35,6 +35,8 @@ public class DefaultHttpActionAdapter implements HttpActionAdapter<Result, PlayW
             final String content = context.getResponseContent();
             logger.debug("render: {}", content);
             return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
+        } else if (code == HttpConstants.NO_CONTENT) {
+            return noContent();
         }
         final String message = "Unsupported HTTP action: " + code;
         logger.error(message);
