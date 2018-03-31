@@ -69,7 +69,7 @@ public class Pac4jHandlerCache implements HandlerCache {
 
     @Override
     public String toString() {
-        return CommonHelper.toString(this.getClass(), "handlers", handlers, "config", config,
+        return CommonHelper.toNiceString(this.getClass(), "handlers", handlers, "config", config,
                 "httpExecutionContext", httpExecutionContext, "playSessionStore", playSessionStore);
     }
 }

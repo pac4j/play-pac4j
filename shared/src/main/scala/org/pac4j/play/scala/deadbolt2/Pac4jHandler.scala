@@ -10,7 +10,7 @@ import be.objectify.deadbolt.scala.models.Subject
 import org.pac4j.core.config.Config
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.core.exception.{HttpAction, TechnicalException}
-import org.pac4j.core.http.HttpActionAdapter
+import org.pac4j.core.http.adapter.HttpActionAdapter
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.store.PlaySessionStore

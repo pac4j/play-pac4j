@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>5.0.1-SNAPSHOT</version>
+    <version>6.0.0-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -75,7 +75,7 @@
     </pluginRepositories>
 
     <properties>
-        <pac4j.version>2.2.1</pac4j.version>
+        <pac4j.version>3.0.0-SNAPSHOT</pac4j.version>
         <play.version>2.6.6</play.version>
         <java.version>1.8</java.version>
         <deadbolt.version>2.6.0</deadbolt.version>
@@ -140,6 +140,15 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

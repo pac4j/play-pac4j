@@ -24,6 +24,6 @@ public class Pac4jRole implements Role {
 
     @Override
     public String toString() {
-        return CommonHelper.toString(this.getClass(), "name", name);
+        return CommonHelper.toNiceString(this.getClass(), "name", name);
     }
 }

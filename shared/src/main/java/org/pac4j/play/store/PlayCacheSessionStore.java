@@ -127,6 +127,6 @@ public class PlayCacheSessionStore implements PlaySessionStore {
 
     @Override
     public String toString() {
-        return CommonHelper.toString(this.getClass(), "store", store, "prefix", prefix, "timeout", getTimeout());
+        return CommonHelper.toNiceString(this.getClass(), "store", store, "prefix", prefix, "timeout", getTimeout());
     }
 }

@@ -24,6 +24,6 @@ public class Pac4jPermission implements Permission {
 
     @Override
     public String toString() {
-        return CommonHelper.toString(this.getClass(), "value", value);
+        return CommonHelper.toNiceString(this.getClass(), "value", value);
     }
 }

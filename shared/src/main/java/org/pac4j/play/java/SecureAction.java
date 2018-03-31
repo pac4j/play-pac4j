@@ -7,7 +7,7 @@ import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
-import org.pac4j.core.http.HttpActionAdapter;
+import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
@@ -100,7 +100,7 @@ public class SecureAction extends Action<Result> {
         assertNotNull("actionAdapter", actionAdapter);
         final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (code, webCtx) -> CompletableFuture.completedFuture(actionAdapter.adapt(code, webCtx));
 
-        return securityLogic.perform(playWebContext, config, (webCtx, parameters) -> {
+        return securityLogic.perform(playWebContext, config, (webCtx, profiles, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);
