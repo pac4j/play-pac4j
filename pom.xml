@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>6.0.0-SNAPSHOT</version>
+    <version>6.0.0-RC1-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -75,7 +75,7 @@
     </pluginRepositories>
 
     <properties>
-        <pac4j.version>3.0.0-SNAPSHOT</pac4j.version>
+        <pac4j.version>3.0.0-RC1</pac4j.version>
         <play.version>2.6.6</play.version>
         <java.version>1.8</java.version>
         <deadbolt.version>2.6.0</deadbolt.version>
