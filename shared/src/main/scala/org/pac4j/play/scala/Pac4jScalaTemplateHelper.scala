@@ -24,6 +24,8 @@ import scala.collection.JavaConverters._
   *
   *
   * @author Sebastian Hardt
+  *         
+  * @since 6.0.0
   */
 class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playCacheSessionStore: PlayCacheSessionStore)  {
 
