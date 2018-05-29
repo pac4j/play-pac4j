@@ -279,7 +279,7 @@ import org.pac4j.play.scala.Security
 class MyController @Inject()(val controllerComponents: SecurityComponents) extends MyBaseController with Security[CommonProfile] {
   def facebookIndex = Secure("FacebookClient") { implicit request =>
     Ok(views.html.protectedIndex(profiles))
-  } 
+  }
 }
 ```
 
@@ -529,6 +529,44 @@ FacebookProfile facebookProfile = (FacebookProfile) commonProfile;
 
 ```scala
 val facebookProfile = commonProfile.asInstanceOf[FacebookProfile]
+```
+
+#### 5.1) Get the user profile (`ProfileManager`) within a twirl template (scala)
+
+To retrive the current profile/profiles or ProfileManager within a twirl template you can inject the: Pac4jScalaTemplateHelper in to your controller or template.
+
+First you have to register the Pac4jScalaTemplateHelper in your SecurityModule like this:
+
+```scala
+bind(classOf[Pac4jScalaTemplateHelper[CommonProfile]])
+```
+
+Than in your Controller inject the Pac4jScalaTemplateHelper as an implicit:
+
+```scala
+class ApplicationWithScalaHelper @Inject()(implicit val pac4jTemplateHelper: Pac4jScalaTemplateHelper[CommonProfile] ...
+```
+
+In your action you must define the request as an implicit:
+
+```scala
+def userView = Secure("FormClient") { implicit request =>
+  Ok(views.html.index())
+}
+```
+
+And finally in your template you can use the Pac4jScalaTemplateHelper to access the current profile:
+
+```scala
+@import org.pac4j.play.scala.Pac4jScalaTemplateHelper
+@import org.pac4j.core.profile.CommonProfile
+@(title: String)(implicit pac4jScalaTemplateHelper: Pac4jScalaTemplateHelper[CommonProfile], requestHeader: RequestHeader)
+
+<h1>@title</h1>
+
+@if(pac4jScalaTemplateHelper.getCurrentProfile.isDefined) {
+  <h2>Hello user: @pac4jScalaTemplateHelper.getCurrentProfile.get.getUsername</h2>
+}
 ```
 
 ---
