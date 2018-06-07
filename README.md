@@ -245,13 +245,13 @@ with an instance of `PlayCookieStore` with an `EncryptionConfiguration`, like th
 *Java:*
 
 ```java
-PlayCookieStore playCookieStore = new PlayCookieStore(new SecretEncryptionConfiguration("YourSecretHere"));
+PlayCookieStore playCookieStore = new PlayCookieStore();
 bind(PlaySessionStore.class).toInstance(playCookieStore);
 ```
 *Scala:*
 
 ```scala
-val playCookieStore = new PlayCookieStore(new SecretEncryptionConfiguration("YourSecretHere"))
+val playCookieStore = new PlayCookieStore()
 bind(classOf[PlaySessionStore]).toInstance(playCookieStore)
 ```
 
