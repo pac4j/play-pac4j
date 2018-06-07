@@ -37,30 +37,6 @@ public class PlayCookieStore implements PlaySessionStore {
 		return tokenName;
 	}
 
-
-	/**
-	 * Read the object from Base64 string.
-	 * https://stackoverflow.com/questions/134492/how-to-serialize-an-object-into-a-string
-	 */
-	private static Object fromString(String s) throws IOException, ClassNotFoundException {
-		byte[] data = Base64.getDecoder().decode(s);
-		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
-		Object o = ois.readObject();
-		ois.close();
-		return o;
-	}
-
-	/**
-	 * Write the object to a Base64 string.
-	 */
-	private static String toString(Serializable o) throws IOException {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		ObjectOutputStream oos = new ObjectOutputStream(baos);
-		oos.writeObject(o);
-		oos.close();
-		return Base64.getEncoder().encodeToString(baos.toByteArray());
-	}
-
 	@Override
 	public Object get(final PlayWebContext context, final String key) {
 		final Http.Session session = context.getJavaSession();
@@ -79,12 +55,11 @@ public class PlayCookieStore implements PlaySessionStore {
 
 	@Override
 	public void set(final PlayWebContext context, final String key, final Object value) {
-		//Map<String, Object> sessionMap = getOrCreateSessionMap(context);
 		Object clearedValue = value;
 		if (key.contentEquals(Pac4jConstants.USER_PROFILES)) {
 			clearedValue = clearUserProfiles(value);
 		}
-		logger.info("PlayCookieStore.set, key = {}, value = {}", key, clearedValue);
+		logger.debug("PlayCookieStore.set, key = {}, value = {}", key, clearedValue);
 		final Http.Session session = context.getJavaSession();
 
 		try {
@@ -92,7 +67,6 @@ public class PlayCookieStore implements PlaySessionStore {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//setSessionToken(context, sessionMap);
 	}
 
 	// FIXME: can we implement this?
@@ -131,4 +105,27 @@ public class PlayCookieStore implements PlaySessionStore {
 			return profile;
 		}
 	}
+
+    /**
+     * Read the object from Base64 string.
+     * https://stackoverflow.com/questions/134492/how-to-serialize-an-object-into-a-string
+     */
+    private static Object fromString(String s) throws IOException, ClassNotFoundException {
+        byte[] data = Base64.getDecoder().decode(s);
+        ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data));
+        Object o = ois.readObject();
+        ois.close();
+        return o;
+    }
+
+    /**
+     * Write the object to a Base64 string.
+     */
+    private static String toString(Serializable o) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(o);
+        oos.close();
+        return Base64.getEncoder().encodeToString(baos.toByteArray());
+    }
 }
