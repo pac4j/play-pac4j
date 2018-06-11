@@ -21,11 +21,10 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * The Cookie storage uses directly the Play Session cookie (JWT encrypted) for
- * storage, allowing for a stateless backend.
+ * A PlaySesssionStore which uses only the Play Session cookie for storage, allowing for a stateless backend.
  *
- * @author Nolan Barth
- * @since 2.6.2
+ * @author Vidmantas Zemleris
+ * @since 6.1.0
  */
 public class PlayCookieStore implements PlaySessionStore {
 
@@ -80,7 +79,6 @@ public class PlayCookieStore implements PlaySessionStore {
         session.put(keyPrefix + key, serialized);
     }
 
-    // FIXME: can we implement this?
     @Override
     public boolean destroySession(PlayWebContext playWebContext) {
         return false;
@@ -96,7 +94,6 @@ public class PlayCookieStore implements PlaySessionStore {
         return null;
     }
 
-    // FIXME
     @Override
     public boolean renewSession(PlayWebContext playWebContext) {
         return false;
@@ -125,7 +122,7 @@ public class PlayCookieStore implements PlaySessionStore {
             zipInputStream = new GZIPInputStream(new ByteArrayInputStream(zippedBytes));
             return IOUtils.toByteArray(zipInputStream);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Unable to uncompress session cookie", e);
             return null;
         } finally {
             IOUtils.closeQuietly(zipInputStream);
@@ -139,7 +136,7 @@ public class PlayCookieStore implements PlaySessionStore {
             zipOutputStream = new GZIPOutputStream(resultBao);
             zipOutputStream.write(srcBytes);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Unable to compress session cookie", e);
             return null;
         }
         IOUtils.closeQuietly(zipOutputStream);

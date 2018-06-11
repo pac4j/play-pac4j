@@ -1,5 +1,11 @@
 package org.pac4j.play.store;
 
+/**
+ * A wrapper with encryption/decryption functions, used in session cookie generation in `PlayCookieStore`.
+ *
+ * @author Vidmantas Zemleris
+ * @since 6.1.0
+ */
 public interface DataEncrypter {
     /**
      * Decrypt

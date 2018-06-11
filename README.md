@@ -230,15 +230,15 @@ You can also define a specific `SecurityLogic` via the `setSecurityLogic` method
 
 In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. It's useful in cases where you want to preserve Play's statelessness.
 
-If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'll need to replace this line:
+If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'll need to bind `PlaySessionStore` to `PlayCookieStore`:
 
 *Java:*
 
-`bind(PlaySessionStore.class).to(PlayCacheStore.class);`
+`bind(PlaySessionStore.class).to(PlayCookieStore.class);`
 
 *Scala:*
 
-`bind(classOf[PlaySessionStore]).to(classOf[PlayCacheStore])`
+`bind(classOf[PlaySessionStore]).to(classOf[PlayCookieStore])`
 
 or if in addition to signing cookie contents, you want to also encrypt the contents, pass a custom `DataEncrypter`:
 
