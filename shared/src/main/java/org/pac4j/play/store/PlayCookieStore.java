@@ -33,11 +33,16 @@ public class PlayCookieStore implements PlaySessionStore {
 
     private final String tokenName = "pac4j";
     private final String keyPrefix = "pac4j_";
+    private DataEncrypter dataEncrypter = new NoOpDataEncrypter();
 
-    public static final JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
+    public static final JavaSerializationHelper JAVA_SER_HELPER = new JavaSerializationHelper();
 
     @Inject
-    public PlayCookieStore() {
+    public PlayCookieStore(){
+    }
+
+    public PlayCookieStore(DataEncrypter dataEncrypter) {
+        this.dataEncrypter = dataEncrypter;
     }
 
     @Override
@@ -52,7 +57,8 @@ public class PlayCookieStore implements PlaySessionStore {
         if (sessionValue == null) {
             return null;
         } else {
-            return JAVA_SERIALIZATION_HELPER.unserializeFromBytes(uncompressBase64ToBytes(sessionValue)); // FIXME: add IEncoder
+            byte[] inputBytes = Base64.decodeBase64(sessionValue);
+            return JAVA_SER_HELPER.unserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
         }
     }
 
@@ -65,7 +71,9 @@ public class PlayCookieStore implements PlaySessionStore {
         logger.debug("PlayCookieStore.set, key = {}, value = {}", key, clearedValue);
 
         final Http.Session session = context.getJavaSession();
-        String serialized = compressBytesToBase64(JAVA_SERIALIZATION_HELPER.serializeToBytes((Serializable) clearedValue)); // FIXME: add IEncoder
+
+        byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
+        String serialized = Base64.encodeBase64String(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
             logger.debug("PlayCookieStore.set, key = {}, serialized token size = {}", key, serialized.length());
         }
@@ -109,44 +117,34 @@ public class PlayCookieStore implements PlaySessionStore {
         }
     }
 
-    // http://lifelongprogrammer.blogspot.com/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
-    /**
-     * When client receives the zipped base64 string, it first decode base64
-     * String to byte array, then use ZipInputStream to revert the byte array to a
-     * string.
-     */
-    public static byte[] uncompressBase64ToBytes(String zippedBase64Str) {
-        byte[] bytes = Base64.decodeBase64(zippedBase64Str);
-        GZIPInputStream zi = null;
+
+    // based on http://lifelongprogrammer.blogspot.com/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
+    public static byte[] uncompressBytes(byte [] zippedBytes) {
+        GZIPInputStream zipInputStream = null;
         try {
-            zi = new GZIPInputStream(new ByteArrayInputStream(bytes));
-            return IOUtils.toByteArray(zi);
+            zipInputStream = new GZIPInputStream(new ByteArrayInputStream(zippedBytes));
+            return IOUtils.toByteArray(zipInputStream);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         } finally {
-            IOUtils.closeQuietly(zi);
+            IOUtils.closeQuietly(zipInputStream);
         }
     }
 
-    /**
-     * At server side, use ZipOutputStream to zip text to byte array, then convert
-     * byte array to base64 string, so it can be trasnfered via http request.
-     */
-    public static String compressBytesToBase64(byte[] srcBytes) {
-        ByteArrayOutputStream rstBao = new ByteArrayOutputStream();
-        GZIPOutputStream zos = null;
+    public static byte[] compressBytes(byte[] srcBytes) {
+        ByteArrayOutputStream resultBao = new ByteArrayOutputStream();
+        GZIPOutputStream zipOutputStream = null;
         try {
-            zos = new GZIPOutputStream(rstBao);
-            zos.write(srcBytes);
+            zipOutputStream = new GZIPOutputStream(resultBao);
+            zipOutputStream.write(srcBytes);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        IOUtils.closeQuietly(zos);
+        IOUtils.closeQuietly(zipOutputStream);
 
-        byte[] bytes = rstBao.toByteArray();
-        return Base64.encodeBase64String(bytes);
+        return resultBao.toByteArray();
     }
 
 

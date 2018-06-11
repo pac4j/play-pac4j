@@ -228,7 +228,7 @@ Notice that you can also define [matchers](http://www.pac4j.org/docs/matchers.ht
 
 You can also define a specific `SecurityLogic` via the `setSecurityLogic` method.
 
-In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. Since this method uses encryption to secure the session inside the cookie, it is likely less efficient for some solutions. However, in cases where you want to preserve Play's statelessness, you can opt to use it instead of the `PlayCacheStore`.
+In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. It's useful in cases where you want to preserve Play's statelessness.
 
 If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'll need to replace this line:
 
@@ -240,18 +240,20 @@ If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'
 
 `bind(classOf[PlaySessionStore]).to(classOf[PlayCacheStore])`
 
-with an instance of `PlayCookieStore` with an `EncryptionConfiguration`, like this:
+or if in addition to signing cookie contents, you want to also encrypt the contents, pass a custom `DataEncrypter`:
 
 *Java:*
 
 ```java
-PlayCookieStore playCookieStore = new PlayCookieStore();
+DataEncrypter encrypter = NoOpDataEncrypter();
+PlayCookieStore playCookieStore = new PlayCookieStore(encrypter);
 bind(PlaySessionStore.class).toInstance(playCookieStore);
 ```
 *Scala:*
 
 ```scala
-val playCookieStore = new PlayCookieStore()
+val encrypter = new NoOpDataEncrypter()
+val playCookieStore = new PlayCookieStore(encrypter)
 bind(classOf[PlaySessionStore]).toInstance(playCookieStore)
 ```
 
