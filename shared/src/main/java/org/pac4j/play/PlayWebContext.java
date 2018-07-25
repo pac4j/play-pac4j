@@ -179,8 +179,10 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public int getServerPort() {
+        String defaultPort = request.secure() ? "443" : "80";
+
         String[] split = request.host().split(":");
-        String portStr = split.length > 1 ? split[1] : "80";
+        String portStr = split.length > 1 ? split[1] : defaultPort;
         return Integer.parseInt(portStr);
     }
 
