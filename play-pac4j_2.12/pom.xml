@@ -54,6 +54,11 @@
 
     <build>
         <testSourceDirectory>../shared/src/test/java</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>../shared/src/test/resources</directory>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>

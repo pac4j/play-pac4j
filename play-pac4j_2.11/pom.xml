@@ -50,11 +50,22 @@
             <version>${play.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.version}</artifactId>
+            <version>3.0.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
     <build>
         <testSourceDirectory>../shared/src/test/java</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>../shared/src/test/resources</directory>
+            </testResource>
+        </testResources>
 
         <plugins>
             <plugin>
