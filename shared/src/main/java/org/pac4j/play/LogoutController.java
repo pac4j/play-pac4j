@@ -104,4 +104,12 @@ public class LogoutController extends Controller {
     public void setCentralLogout(final Boolean centralLogout) {
         this.centralLogout = centralLogout;
     }
+
+    /**
+     * Please be aware that {@link Config#getLogoutLogic()} ()} of {@linkplain #config} field is ignored because it uses
+     * raw types instead of generics. We would like to avoid runtime type casts.
+     */
+    public void setCallbackLogic(final LogoutLogic<Result, PlayWebContext> logoutLogic) {
+        this.logoutLogic = logoutLogic;
+    }
 }
