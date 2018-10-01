@@ -14,9 +14,9 @@ Several versions of the library are available for the different versions of the 
 | 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 2.0           | [play-pac4j 3.0.x](https://github.com/pac4j/play-pac4j/tree/3.0.x) (Java & Scala)
 | 2.5          | 2.0           | [play-pac4j_2.11 and play-pac4j_2.12 5.0.x](https://github.com/pac4j/play-pac4j/tree/5.0.x) (Java & Scala)
-| 2.6          | 3.0           | 6.0.x (Java & Scala)
+| 2.6          | 3.0           | [play-pac4j_2.11 and play-pac4j_2.12 6.0.x](https://github.com/pac4j/play-pac4j/tree/6.0.x) (Java & Scala)
+| 2.6          | 3.2           | 6.1.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
@@ -44,8 +44,8 @@ Just follow these easy steps to secure your Play 2 web application:
 
 You need to add a dependency on:
 
-- the `play-pac4j_2.11` or `play-pac4j_2.12` library: `"org.pac4j" %% "play-pac4j" % "6.0.0"`
-- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **3.0.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
+- the `play-pac4j_2.11` or `play-pac4j_2.12` library: `"org.pac4j" %% "play-pac4j" % "6.1.0-SNAPSHOT"`
+- the appropriate `pac4j` [submodules](http://www.pac4j.org/docs/clients.html) (<em>groupId</em>: **org.pac4j**, *version*: **3.2.0**): `pac4j-oauth` for OAuth support (Facebook, Twitter...), `pac4j-cas` for CAS support, `pac4j-ldap` for LDAP authentication, etc.
 
 All released artifacts are available in the [Maven central repository](http://search.maven.org/#search%7Cga%7C1%7Cpac4j).
 
@@ -230,31 +230,33 @@ You can also define a specific `SecurityLogic` via the `setSecurityLogic` method
 
 In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. It's useful in cases where you want to preserve Play's statelessness.
 
-If you choose to use the `PlayCookieStore` instead of the `PlayCacheStore`, you'll need to bind `PlaySessionStore` to `PlayCookieStore`:
+If you choose to use the `PlayCookieSessionStore` instead of the `PlayCacheSessionStore`, you'll need to bind `PlaySessionStore` to `PlayCookieSessionStore`:
 
 *Java:*
 
-`bind(PlaySessionStore.class).to(PlayCookieStore.class);`
+`bind(PlaySessionStore.class).to(PlayCookieSessionStore.class);`
 
 *Scala:*
 
-`bind(classOf[PlaySessionStore]).to(classOf[PlayCookieStore])`
+`bind(classOf[PlaySessionStore]).to(classOf[PlayCookieSessionStore])`
 
-or if in addition to signing cookie contents, you want to also encrypt the contents, pass a custom `DataEncrypter`:
+By default, the `PlayCookieSessionStore` internally uses a `ShiroAesDataEncrypter`, which requires the `shiro-core` dependency to be explicitly declared.
+
+You can use your own `DataEncrypter` via:
 
 *Java:*
 
 ```java
-DataEncrypter encrypter = NoOpDataEncrypter();
-PlayCookieStore playCookieStore = new PlayCookieStore(encrypter);
-bind(PlaySessionStore.class).toInstance(playCookieStore);
+DataEncrypter encrypter = new MyDataEncrypter();
+PlayCookieSessionStore playCookieSessionStore = new PlayCookieSessionStore(encrypter);
+bind(PlaySessionStore.class).toInstance(playCookieSessionStore);
 ```
 *Scala:*
 
 ```scala
-val encrypter = new NoOpDataEncrypter()
-val playCookieStore = new PlayCookieStore(encrypter)
-bind(classOf[PlaySessionStore]).toInstance(playCookieStore)
+val encrypter = new MyDataEncrypter()
+val playCookieSessionStore = new PlayCookieSessionStore(encrypter)
+bind(classOf[PlaySessionStore]).toInstance(playCookieSessionStore)
 ```
 
 ---
@@ -716,7 +718,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Release notes
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/6.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/6.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/3.0.0/index.html).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/6.1.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/6.1.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/3.1.0/index.html).
 
 
 ## Need help?

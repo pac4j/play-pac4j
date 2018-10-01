@@ -1,6 +1,5 @@
 package org.pac4j.play.store;
 
-import com.google.inject.Inject;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.pac4j.core.context.Pac4jConstants;
@@ -12,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Http;
 
+import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,26 +21,25 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * A PlaySesssionStore which uses only the Play Session cookie for storage, allowing for a stateless backend.
+ * A PlaySesssionStore which only uses the Play Session cookie for storage, allowing for a stateless backend.
  *
  * @author Vidmantas Zemleris
  * @since 6.1.0
  */
-public class PlayCookieStore implements PlaySessionStore {
+@Singleton
+public class PlayCookieSessionStore implements PlaySessionStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(PlayCookieStore.class);
+    private static final Logger logger = LoggerFactory.getLogger(PlayCookieSessionStore.class);
 
     private final String tokenName = "pac4j";
     private final String keyPrefix = "pac4j_";
-    private DataEncrypter dataEncrypter = new NoOpDataEncrypter();
+    private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
 
     public static final JavaSerializationHelper JAVA_SER_HELPER = new JavaSerializationHelper();
 
-    @Inject
-    public PlayCookieStore(){
-    }
+    public PlayCookieSessionStore() {}
 
-    public PlayCookieStore(DataEncrypter dataEncrypter) {
+    public PlayCookieSessionStore(final DataEncrypter dataEncrypter) {
         this.dataEncrypter = dataEncrypter;
     }
 
@@ -67,14 +66,13 @@ public class PlayCookieStore implements PlaySessionStore {
         if (key.contentEquals(Pac4jConstants.USER_PROFILES)) {
             clearedValue = clearUserProfiles(value);
         }
-        logger.debug("PlayCookieStore.set, key = {}, value = {}", key, clearedValue);
 
         final Http.Session session = context.getJavaSession();
 
         byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
         String serialized = Base64.encodeBase64String(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
-            logger.debug("PlayCookieStore.set, key = {}, serialized token size = {}", key, serialized.length());
+            logger.debug("set, key = {}, serialized token size = {}", key, serialized.length());
         }
         session.put(keyPrefix + key, serialized);
     }
@@ -99,21 +97,18 @@ public class PlayCookieStore implements PlaySessionStore {
         return false;
     }
 
-    private Object clearUserProfiles(Object value) {
+    protected Object clearUserProfiles(Object value) {
         if (value instanceof LinkedHashMap<?, ?>) {
             @SuppressWarnings("unchecked")
             LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) value;
-            profiles.forEach((name, profile) -> {
-                profile.clearSensitiveData();
-            });
+            profiles.forEach((name, profile) -> profile.clearSensitiveData());
             return profiles;
         } else {
-            CommonProfile profile = ((CommonProfile) value);
+            CommonProfile profile = (CommonProfile) value;
             profile.clearSensitiveData();
             return profile;
         }
     }
-
 
     // based on http://lifelongprogrammer.blogspot.com/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
     public static byte[] uncompressBytes(byte [] zippedBytes) {
@@ -143,6 +138,4 @@ public class PlayCookieStore implements PlaySessionStore {
 
         return resultBao.toByteArray();
     }
-
-
 }
