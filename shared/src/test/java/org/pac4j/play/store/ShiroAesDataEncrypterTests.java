@@ -3,6 +3,8 @@ package org.pac4j.play.store;
 import org.junit.Test;
 import org.pac4j.core.util.TestsConstants;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.junit.Assert.*;
 
 /**
@@ -17,9 +19,9 @@ public class ShiroAesDataEncrypterTests implements TestsConstants {
 
     @Test
     public void testOK() {
-        final byte[] encrypted = encrypter.encrypt(VALUE.getBytes());
+        final byte[] encrypted = encrypter.encrypt(VALUE.getBytes(StandardCharsets.UTF_8));
         final byte[] decrypted = encrypter.decrypt(encrypted);
-        assertEquals(VALUE, new String(decrypted));
+        assertEquals(VALUE, new String(decrypted, StandardCharsets.UTF_8));
     }
 
     @Test
