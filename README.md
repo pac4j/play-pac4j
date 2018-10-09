@@ -220,7 +220,7 @@ class SecurityModule(environment: Environment, configuration: Configuration) ext
 
 See a [full example here](https://github.com/pac4j/play-pac4j-scala-demo/blob/master/app/modules/SecurityModule.scala).
 
-`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients. The `PlayCacheSessionStore` is defined as the implementation for the session store: profiles will be saved in the Play Cache.
+`http://localhost:8080/callback` is the url of the callback endpoint, which is only necessary for indirect clients.
 
 Notice that you can also configure a specific `HttpActionAdapter` to handle specific HTTP actions (like redirections, forbidden / unauthorized pages) via the `setHttpActionAdapter` method of the `Config` object. The default available implementation is the `DefaultHttpActionAdapter`, but you can subclass it to define your own HTTP 401 / 403 error pages for example.
 
@@ -228,21 +228,35 @@ Notice that you can also define [matchers](http://www.pac4j.org/docs/matchers.ht
 
 You can also define a specific `SecurityLogic` via the `setSecurityLogic` method.
 
-In addition to the `PlayCacheStore`, the `play-pac4j` project allows you the option to store your session into the native Play Session Cookie with the `PlayCookieStore`. It's useful in cases where you want to preserve Play's statelessness.
+#### `PlaySessionStore`
 
-If you choose to use the `PlayCookieSessionStore` instead of the `PlayCacheSessionStore`, you'll need to bind `PlaySessionStore` to `PlayCookieSessionStore`:
+You have two options to store the profiles of your authenticated users:
+
+1) the `PlayCacheSessionStore` saves your data in the Play cache
+
+2) the `PlayCookieSessionStore` saves your data in the Play session (somehow preserving Play's statelessness).
+
+Bind the session store you want with the `PlaySessionStore`:
 
 *Java:*
+
+`bind(PlaySessionStore.class).to(PlayCacheSessionStore.class);`
+
+or
 
 `bind(PlaySessionStore.class).to(PlayCookieSessionStore.class);`
 
 *Scala:*
 
+`bind(classOf[PlaySessionStore]).to(classOf[PlayCacheSessionStore])`
+
+or
+
 `bind(classOf[PlaySessionStore]).to(classOf[PlayCookieSessionStore])`
 
-By default, the `PlayCookieSessionStore` internally uses a `ShiroAesDataEncrypter`, which requires the `shiro-core` dependency to be explicitly declared.
+By default, the `PlayCookieSessionStore` internally uses a `ShiroAesDataEncrypter` to encrypt your data, which requires the `shiro-core` dependency to be explicitly declared.
 
-You can use your own `DataEncrypter` via:
+You can use your own `DataEncrypter` (or the `ShiroAesDataEncrypter` with your specific key) via:
 
 *Java:*
 
