@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Tests {@link DefaultHttpActionAdapter}.
+ * Tests {@link PlayHttpActionAdapter}.
  *
  * @author Jerome Leleu
  * @since 2.3.0
@@ -34,7 +34,7 @@ public final class DefaultHttpActionAdapterTests implements TestsConstants {
     
     @Before
     public void setUp() {
-        adapter = new DefaultHttpActionAdapter();
+        adapter = new PlayHttpActionAdapter();
         context = mock(PlayWebContext.class);
     }
     
