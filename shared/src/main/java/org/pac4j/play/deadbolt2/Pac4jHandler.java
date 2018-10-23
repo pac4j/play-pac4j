@@ -61,7 +61,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return CompletableFuture.supplyAsync(() -> {
             final Optional<CommonProfile> profile = getProfile(context);
             if (profile.isPresent()) {
-                logger.debug("no profile found -> returning empty");
+                logger.debug("profile found -> returning empty");
                 return Optional.empty();
             } else {
                 final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
