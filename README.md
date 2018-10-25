@@ -63,7 +63,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 
 ## Versions
 
-The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
+The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The next version is [under development](https://github.com/pac4j/play-pac4j/wiki/Under-development).
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/7.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/7.0.0) and the [pac4j Javadoc](http://www.pac4j.org/apidocs/pac4j/3.3.0/index.html).
