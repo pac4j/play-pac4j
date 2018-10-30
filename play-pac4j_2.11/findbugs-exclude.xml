@@ -8,4 +8,7 @@
     <Match>
         <Package name="org.pac4j.play.scala.deadbolt2" />
     </Match>
+    <Match>
+        <Class name="~.*MockInMemoryAsyncCacheApi.*" />
+    </Match>
 </FindBugsFilter>
