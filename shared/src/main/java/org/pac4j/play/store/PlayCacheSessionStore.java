@@ -1,6 +1,8 @@
 package org.pac4j.play.store;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import com.google.inject.Provider;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.context.session.SessionStore;
@@ -11,12 +13,16 @@ import org.slf4j.LoggerFactory;
 import play.cache.SyncCacheApi;
 import play.mvc.Http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This session store internally uses the {@link PlayCacheStore} which uses the Play Cache, only an identifier is saved into the Play session.
  *
  * @author Jerome Leleu
  * @since 2.0.0
  */
+@Singleton
 public class PlayCacheSessionStore implements PlaySessionStore {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheSessionStore.class);
@@ -27,7 +33,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     private String prefix = "";
 
     // store
-    private final PlayCacheStore<String, Object> store;
+    private final PlayCacheStore<String, Map<String, Object>> store;
 
     @Inject
     public PlayCacheSessionStore(final SyncCacheApi cache) {
@@ -64,13 +70,22 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public Object get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
-        return store.get(getKey(sessionId, key));
+        final Map<String, Object> values = store.get(sessionId);
+        if (values != null) {
+            return values.get(key);
+        }
+        return null;
     }
 
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
         final String sessionId = getOrCreateSessionId(context);
-        store.set(getKey(sessionId, key), value);
+        Map<String, Object> values = store.get(sessionId);
+        if (values == null) {
+            values = new HashMap<>();
+        }
+        values.put(key, value);
+        store.set(sessionId, values);
     }
 
     @Override
@@ -97,7 +112,19 @@ public class PlayCacheSessionStore implements PlaySessionStore {
 
     @Override
     public boolean renewSession(final PlayWebContext context) {
-        return false;
+        final String oldSessionId = this.getOrCreateSessionId(context);
+        final Map<String, Object> oldData = store.get(oldSessionId);
+
+        final Http.Session session = context.getJavaSession();
+        session.remove(Pac4jConstants.SESSION_ID);
+
+        final String newSessionId = this.getOrCreateSessionId(context);
+        if (oldData != null) {
+            store.set(newSessionId, oldData);
+        }
+
+        logger.debug("Renewing session: {} -> {}", oldSessionId, newSessionId);
+        return true;
     }
 
     public String getPrefix() {
@@ -116,7 +143,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
         this.store.setTimeout(timeout);
     }
 
-    public PlayCacheStore<String, Object> getStore() {
+    public PlayCacheStore<String, Map<String, Object>> getStore() {
         return store;
     }
 

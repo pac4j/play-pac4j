@@ -11,6 +11,9 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import play.cache.SyncCacheApi;
 import play.mvc.Http;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
@@ -52,7 +55,9 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
     @PrepareForTest(SyncCacheApi.class)
     public void testGetSet() {
         mockStatic(SyncCacheApi.class);
-        PowerMockito.when(cacheApiMock.get(any(String.class))).thenReturn(VALUE);
+        final Map<String, Object> data = new HashMap<>();
+        data.put(KEY, VALUE);
+        PowerMockito.when(cacheApiMock.get(any(String.class))).thenReturn(data);
         store.setPrefix(KEY);
         store.set(context, KEY, VALUE);
         assertEquals(VALUE, store.get(context, KEY));

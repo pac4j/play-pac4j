@@ -35,6 +35,8 @@ public class CallbackController extends Controller {
 
     private Boolean multiProfile;
 
+    private Boolean renewSession;
+
     private String defaultClient;
 
     @Inject
@@ -51,7 +53,8 @@ public class CallbackController extends Controller {
         assertNotNull("config", config);
         final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
 
-        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl, this.saveInSession, this.multiProfile, false, this.defaultClient), ec.current());
+        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(),
+                this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient), ec.current());
     }
 
     public String getDefaultUrl() {
@@ -76,6 +79,14 @@ public class CallbackController extends Controller {
 
     public void setMultiProfile(final boolean multiProfile) {
         this.multiProfile = multiProfile;
+    }
+
+    public Boolean getRenewSession() {
+        return renewSession;
+    }
+
+    public void setRenewSession(final Boolean renewSession) {
+        this.renewSession = renewSession;
     }
 
     public String getDefaultClient() {
