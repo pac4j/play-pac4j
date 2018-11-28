@@ -53,19 +53,19 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         final Http.Session session = context.getJavaSession();
         String sessionValue = session.get(keyPrefix + key);
         if (sessionValue == null) {
-            logger.debug("get, key = {} -> null", key);
+            logger.trace("get, key = {} -> null", key);
             return null;
         } else {
             byte[] inputBytes = Base64.decodeBase64(sessionValue);
             final Object value = JAVA_SER_HELPER.unserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
-            logger.debug("get, key = {} -> value = {}", key, value);
+            logger.trace("get, key = {} -> value = {}", key, value);
             return value;
         }
     }
 
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
-        logger.debug("set, key = {}, value = {}", key, value);
+        logger.trace("set, key = {}, value = {}", key, value);
         Object clearedValue = value;
         if (key.contentEquals(Pac4jConstants.USER_PROFILES)) {
             clearedValue = clearUserProfiles(value);
@@ -76,9 +76,9 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
         String serialized = Base64.encodeBase64String(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
-            logger.debug("set, key = {} -> serialized token size = {}", key, serialized.length());
+            logger.trace("set, key = {} -> serialized token size = {}", key, serialized.length());
         } else {
-            logger.debug("set, key = {} -> null serialized token", key);
+            logger.trace("set, key = {} -> null serialized token", key);
         }
         session.put(keyPrefix + key, serialized);
     }
