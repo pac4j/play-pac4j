@@ -118,29 +118,22 @@ public class PlayCookieSessionStore implements PlaySessionStore {
 
     // based on http://lifelongprogrammer.blogspot.com/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
     public static byte[] uncompressBytes(byte [] zippedBytes) {
-        GZIPInputStream zipInputStream = null;
-        try {
-            zipInputStream = new GZIPInputStream(new ByteArrayInputStream(zippedBytes));
+        try (final GZIPInputStream zipInputStream = new GZIPInputStream(new ByteArrayInputStream(zippedBytes))) {
             return IOUtils.toByteArray(zipInputStream);
         } catch (IOException e) {
             logger.error("Unable to uncompress session cookie", e);
             return null;
-        } finally {
-            IOUtils.closeQuietly(zipInputStream);
         }
     }
 
     public static byte[] compressBytes(byte[] srcBytes) {
-        ByteArrayOutputStream resultBao = new ByteArrayOutputStream();
-        GZIPOutputStream zipOutputStream = null;
-        try {
-            zipOutputStream = new GZIPOutputStream(resultBao);
+        final ByteArrayOutputStream resultBao = new ByteArrayOutputStream();
+        try (final GZIPOutputStream zipOutputStream = new GZIPOutputStream(resultBao)) {
             zipOutputStream.write(srcBytes);
         } catch (IOException e) {
             logger.error("Unable to compress session cookie", e);
             return null;
         }
-        IOUtils.closeQuietly(zipOutputStream);
 
         return resultBao.toByteArray();
     }
