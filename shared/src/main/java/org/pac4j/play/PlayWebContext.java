@@ -127,7 +127,7 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public String getRequestHeader(final String name) {
-        return request.getHeader(name);
+        return request.header(name).orElse(null);
     }
 
     @Override
@@ -233,7 +233,7 @@ public class PlayWebContext implements WebContext {
         httpCookies.forEach(httpCookie -> {
             final Cookie cookie = new Cookie(httpCookie.name(), httpCookie.value());
             if(httpCookie.domain() != null) {
-            	cookie.setDomain(httpCookie.domain());
+                cookie.setDomain(httpCookie.domain());
             }
             cookie.setHttpOnly(httpCookie.httpOnly());
             if(httpCookie.maxAge() != null) {
