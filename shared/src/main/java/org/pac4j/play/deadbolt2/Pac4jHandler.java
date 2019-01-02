@@ -5,7 +5,10 @@ import be.objectify.deadbolt.java.DynamicResourceHandler;
 import be.objectify.deadbolt.java.models.Permission;
 import be.objectify.deadbolt.java.models.Subject;
 import org.pac4j.core.client.Client;
+import org.pac4j.core.client.DirectClient;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.Pac4jConstants;
+import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.exception.HttpAction;
 import org.pac4j.core.exception.TechnicalException;
@@ -23,6 +26,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+
+import static org.pac4j.core.util.CommonHelper.isNotEmpty;
 
 /**
  * This is the deadbolt handler for pac4j: the deadbolt subject is built from the pac4j user profile.
@@ -71,7 +76,20 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
                 HttpAction action;
                 try {
-                    if (startAuthentication(playWebContext, currentClients)) {
+                    if (startDirectAuthentication(currentClients)) {
+                        logger.debug("Starting direct authentication");
+                        DirectClient client = (DirectClient) currentClients.get(0);
+                        Credentials credentials = client.getCredentials(playWebContext);
+                        if (credentials != null) {
+                            CommonProfile userProfile = credentials.getUserProfile();
+                            if (userProfile != null) {
+                                setProfile(context, userProfile);
+                                return Optional.empty();
+                            }
+                        }
+                        logger.debug("unauthorized");
+                        action = unauthorized(playWebContext, currentClients);
+                    } else if (startAuthentication(playWebContext, currentClients)) {
                         logger.debug("Starting authentication");
                         saveRequestedUrl(playWebContext, currentClients);
                         action = redirectToIdentityProvider(playWebContext, currentClients);
@@ -112,6 +130,11 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return manager.get(true);
     }
 
+    private void setProfile(final Http.Context context, CommonProfile profile) {
+        final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
+        playWebContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profile);
+    }
+
     @Override
     public CompletionStage<Result> onAuthFailure(final Http.Context context, final Optional<String> content) {
         return CompletableFuture.supplyAsync(() -> {
@@ -124,5 +147,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     @Override
     public CompletionStage<Optional<DynamicResourceHandler>> getDynamicResourceHandler(final Http.Context context) {
         throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler");
+    }
+
+    private boolean startDirectAuthentication(final List<Client> currentClients) {
+        return isNotEmpty(currentClients) && currentClients.get(0) instanceof DirectClient;
     }
 }

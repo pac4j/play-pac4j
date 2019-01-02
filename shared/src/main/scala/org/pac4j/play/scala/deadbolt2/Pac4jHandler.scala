@@ -4,14 +4,17 @@ import java.util.Optional
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.implicitConversions
-
 import be.objectify.deadbolt.scala.{AuthenticatedRequest, DeadboltHandler, DynamicResourceHandler}
 import be.objectify.deadbolt.scala.models.Subject
+import org.pac4j.core.client.{Client, DirectClient}
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.Pac4jConstants
+import org.pac4j.core.credentials.Credentials
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.core.exception.{HttpAction, TechnicalException}
 import org.pac4j.core.http.adapter.HttpActionAdapter
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
+import org.pac4j.core.util.CommonHelper.isNotEmpty
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc.{Request, RequestHeader, Result}
@@ -37,7 +40,20 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
       logger.debug("currentClients: {}", currentClients)
 
       val action = try {
-        if (startAuthentication(playWebContext, currentClients)) {
+        if (startDirectAuthentication(currentClients)) {
+          logger.debug("Starting direct authentication")
+          val client = currentClients.get(0).asInstanceOf[DirectClient[_ <: Credentials, _ <: CommonProfile]]
+          val credentials = client.getCredentials(playWebContext)
+          if (credentials != null) {
+            val userProfile = credentials.getUserProfile
+            if (userProfile != null) {
+              setProfile(request, userProfile)
+              return Future { None }
+            }
+          }
+          logger.debug("unauthorized")
+          unauthorized(playWebContext, currentClients)
+        } else if (startAuthentication(playWebContext, currentClients)) {
           logger.debug("Starting authentication")
           saveRequestedUrl(playWebContext, currentClients)
           redirectToIdentityProvider(playWebContext, currentClients)
@@ -66,6 +82,11 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
     profileManager.get(true)
   }
 
+  private def setProfile(request: RequestHeader, profile: CommonProfile): Unit = {
+    val playWebContext = new PlayWebContext(request, playSessionStore)
+    playWebContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profile)
+  }
+
   override def onAuthFailure[A](request: AuthenticatedRequest[A]): Future[Result] = Future {
     val playWebContext = new PlayWebContext(request, playSessionStore)
     httpActionAdapter.adapt(403, playWebContext).asScala()
@@ -76,4 +97,7 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
 
   override def getDynamicResourceHandler[A](request: Request[A]): Future[Option[DynamicResourceHandler]] =
     throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler")
+
+  private def startDirectAuthentication(currentClients: java.util.List[Client[_ <: Credentials, _ <: CommonProfile]]): Boolean =
+    isNotEmpty(currentClients) && currentClients.get(0).isInstanceOf[DirectClient[_ <: Credentials, _ <: CommonProfile]]
 }
