@@ -71,10 +71,12 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     public Object get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
         final Map<String, Object> values = store.get(sessionId);
+        Object value = null;
         if (values != null) {
-            return values.get(key);
+            value = values.get(key);
         }
-        return null;
+        logger.trace("get, sessionId = {}, key = {} -> {}", sessionId, key, value);
+        return value;
     }
 
     @Override
@@ -84,6 +86,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
         if (values == null) {
             values = new HashMap<>();
         }
+        logger.trace("set, sessionId = {}, key = {}, value = {}", sessionId, key, value);
         values.put(key, value);
         store.set(sessionId, values);
     }
