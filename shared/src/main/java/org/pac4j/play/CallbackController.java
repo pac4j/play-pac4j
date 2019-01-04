@@ -108,6 +108,8 @@ public class CallbackController extends Controller {
     /**
      * Please be aware that {@link Config#getCallbackLogic()} of {@linkplain #config} field is ignored because it uses
      * raw types instead of generics. We would like to avoid runtime type casts.
+     *
+     * @param callbackLogic the new callback logic
      */
     public void setCallbackLogic(final CallbackLogic<Result, PlayWebContext> callbackLogic) {
         this.callbackLogic = callbackLogic;

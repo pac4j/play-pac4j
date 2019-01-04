@@ -27,10 +27,8 @@ public class PlayCacheSessionStore implements PlaySessionStore {
 
     private static final Logger logger = LoggerFactory.getLogger(PlayCacheSessionStore.class);
 
-    private final static String SEPARATOR = "$";
-
     // prefix for the cache
-    private String prefix = "";
+    private String prefix = null;
 
     // store
     private final PlayCacheStore<String, Map<String, Object>> store;
@@ -46,8 +44,12 @@ public class PlayCacheSessionStore implements PlaySessionStore {
         setDefaultTimeout();
     }
 
-    String getKey(final String sessionId, final String key) {
-        return prefix + SEPARATOR + sessionId + SEPARATOR + key;
+    String getPrefixedSessionKey(final String sessionId) {
+        if (this.prefix != null) {
+            return this.prefix + sessionId;
+        } else {
+            return sessionId;
+        }
     }
 
     @Override
@@ -70,7 +72,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public Object get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
-        final Map<String, Object> values = store.get(sessionId);
+        final Map<String, Object> values = store.get(getPrefixedSessionKey(sessionId));
         Object value = null;
         if (values != null) {
             value = values.get(key);
@@ -82,7 +84,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
         final String sessionId = getOrCreateSessionId(context);
-        Map<String, Object> values = store.get(sessionId);
+        Map<String, Object> values = store.get(getPrefixedSessionKey(sessionId));
         if (values == null) {
             values = new HashMap<>();
         }
@@ -116,14 +118,14 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public boolean renewSession(final PlayWebContext context) {
         final String oldSessionId = this.getOrCreateSessionId(context);
-        final Map<String, Object> oldData = store.get(oldSessionId);
+        final Map<String, Object> oldData = store.get(getPrefixedSessionKey(oldSessionId));
 
         final Http.Session session = context.getJavaSession();
         session.remove(Pac4jConstants.SESSION_ID);
 
         final String newSessionId = this.getOrCreateSessionId(context);
         if (oldData != null) {
-            store.set(newSessionId, oldData);
+            store.set(getPrefixedSessionKey(newSessionId), oldData);
         }
 
         logger.debug("Renewing session: {} -> {}", oldSessionId, newSessionId);

@@ -42,8 +42,14 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
     }
 
     @Test
-    public void testKey() {
-        assertEquals("$id$key", store.getKey(ID, KEY));
+    public void testNoPrefixSessionKey() {
+        assertEquals(ID, store.getPrefixedSessionKey(ID));
+    }
+
+    @Test
+    public void testPrefixedSessionKey() {
+        store.setPrefix(VALUE);
+        assertEquals(VALUE + ID, store.getPrefixedSessionKey(ID));
     }
 
     @Test

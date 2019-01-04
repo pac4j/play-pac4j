@@ -108,8 +108,10 @@ public class LogoutController extends Controller {
     /**
      * Please be aware that {@link Config#getLogoutLogic()} ()} of {@linkplain #config} field is ignored because it uses
      * raw types instead of generics. We would like to avoid runtime type casts.
+     *
+     * @param logoutLogic the new logout logic
      */
-    public void setCallbackLogic(final LogoutLogic<Result, PlayWebContext> logoutLogic) {
+    public void setLogoutLogic(final LogoutLogic<Result, PlayWebContext> logoutLogic) {
         this.logoutLogic = logoutLogic;
     }
 }
