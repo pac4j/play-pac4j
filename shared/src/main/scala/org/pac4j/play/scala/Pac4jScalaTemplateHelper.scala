@@ -5,7 +5,7 @@ import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker
 import org.pac4j.core.config.Config
 import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.store.PlayCacheSessionStore
+import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc.RequestHeader
 
 import scala.collection.JavaConverters._
@@ -29,7 +29,7 @@ import scala.collection.JavaConverters._
   *
   * @since 6.0.0
   */
-class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playCacheSessionStore: PlayCacheSessionStore, config: Config)  {
+class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playSessionStore: PlaySessionStore, config: Config)  {
 
   private val authorizationChecker = new DefaultAuthorizationChecker()
 
@@ -68,12 +68,12 @@ class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playCacheSessionStore
     * @return the newly creates [[ProfileManager]]
     */
   def createProfileManager(implicit request: RequestHeader) : ProfileManager[P] = {
-    val webContext = new PlayWebContext(request, playCacheSessionStore)
+    val webContext = new PlayWebContext(request, playSessionStore)
     new ProfileManager[P](webContext)
   }
 
   def isAuthorized(authorizers: String)(implicit request: RequestHeader): Boolean = {
-    val context = new PlayWebContext(request, playCacheSessionStore)
+    val context = new PlayWebContext(request, playSessionStore)
     val profiles = getCurrentProfiles.asInstanceOf[List[CommonProfile]].asJava
     authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers)
   }
