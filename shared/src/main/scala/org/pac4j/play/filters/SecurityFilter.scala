@@ -142,7 +142,7 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
     val scalaResult = javaResult.asScala
     scalaResult
       .withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
-      .withSession(javaContext.session().asScala.toSeq: _*)
+      .withSession(javaContext.session().asScala.data.toSeq: _*)
   }
 }
 
