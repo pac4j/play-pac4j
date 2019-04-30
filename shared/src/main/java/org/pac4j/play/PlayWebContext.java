@@ -271,7 +271,7 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void setResponseContentType(final String content) {
-        response.setContentType(content);
+        response.setHeader("Content-Type", content);
     }
 
     public String getLocation() {
