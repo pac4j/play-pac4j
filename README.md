@@ -15,8 +15,8 @@ Several versions of the library are available for the different versions of the 
 | 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
-| 2.6          | 3.3           | [play-pac4j_2.11 and play-pac4j_2.12 7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
-| 2.7          | 3.6           | 8.0.x (Java & Scala)
+| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
+| 2.7          | 3.7           | 8.0.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
@@ -66,7 +66,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The [next version](https://github.com/pac4j/play-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](http://www.pac4j.org/3.6.x/docs/index.html) and the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/7.0.1) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/7.0.1).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](http://www.pac4j.org/3.7.0/docs/index.html) and the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/8.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/8.0.0).
 
 See the [migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-guide) as well.
 
