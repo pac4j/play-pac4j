@@ -84,13 +84,14 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
         final String sessionId = getOrCreateSessionId(context);
-        Map<String, Object> values = store.get(getPrefixedSessionKey(sessionId));
+        String prefixedSessionKey = getPrefixedSessionKey(sessionId);
+        Map<String, Object> values = store.get(prefixedSessionKey);
         if (values == null) {
             values = new HashMap<>();
         }
         logger.trace("set, sessionId = {}, key = {}, value = {}", sessionId, key, value);
         values.put(key, value);
-        store.set(sessionId, values);
+        store.set(prefixedSessionKey, values);
     }
 
     @Override
