@@ -3,7 +3,7 @@ package org.pac4j.play.scala
 import javax.inject.Inject
 import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker
 import org.pac4j.core.config.Config
-import org.pac4j.core.profile.{CommonProfile, ProfileManager}
+import org.pac4j.core.profile.{CommonProfile, ProfileManager, UserProfile}
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc.RequestHeader
@@ -74,7 +74,7 @@ class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playSessionStore: Pla
 
   def isAuthorized(authorizers: String)(implicit request: RequestHeader): Boolean = {
     val context = new PlayWebContext(request, playSessionStore)
-    val profiles = getCurrentProfiles.asInstanceOf[List[CommonProfile]].asJava
+    val profiles = getCurrentProfiles.asInstanceOf[List[UserProfile]].asJava
     authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers)
   }
 }

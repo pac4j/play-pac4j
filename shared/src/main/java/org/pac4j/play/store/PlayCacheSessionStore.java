@@ -15,6 +15,7 @@ import play.mvc.Http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * This session store internally uses the {@link PlayCacheStore} which uses the Play Cache, only an identifier is saved into the Play session.
@@ -70,24 +71,25 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     }
 
     @Override
-    public Object get(final PlayWebContext context, final String key) {
+    public Optional<Object> get(final PlayWebContext context, final String key) {
         final String sessionId = getOrCreateSessionId(context);
-        final Map<String, Object> values = store.get(getPrefixedSessionKey(sessionId));
+        final Optional<Map<String, Object>> values = store.get(getPrefixedSessionKey(sessionId));
         Object value = null;
-        if (values != null) {
-            value = values.get(key);
+        if (values != null && values.isPresent()) {
+            value = values.get().get(key);
         }
         logger.trace("get, sessionId = {}, key = {} -> {}", sessionId, key, value);
-        return value;
+        return Optional.ofNullable(value);
     }
 
     @Override
     public void set(final PlayWebContext context, final String key, final Object value) {
         final String sessionId = getOrCreateSessionId(context);
         String prefixedSessionKey = getPrefixedSessionKey(sessionId);
-        Map<String, Object> values = store.get(prefixedSessionKey);
-        if (values == null) {
-            values = new HashMap<>();
+        Optional<Map<String, Object>> oldValues = store.get(prefixedSessionKey);
+        Map<String, Object> values = new HashMap<>();
+        if (oldValues != null && oldValues.isPresent()) {
+            values = oldValues.get();
         }
         logger.trace("set, sessionId = {}, key = {}, value = {}", sessionId, key, value);
         values.put(key, value);
@@ -106,27 +108,27 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     }
 
     @Override
-    public Object getTrackableSession(final PlayWebContext context) {
-        return context.getJavaSession().get(Pac4jConstants.SESSION_ID);
+    public Optional<Object> getTrackableSession(final PlayWebContext context) {
+        return Optional.ofNullable(context.getJavaSession().get(Pac4jConstants.SESSION_ID));
     }
 
     @Override
-    public SessionStore<PlayWebContext> buildFromTrackableSession(final PlayWebContext context, final Object trackableSession) {
+    public Optional<SessionStore<PlayWebContext>> buildFromTrackableSession(final PlayWebContext context, final Object trackableSession) {
         context.getJavaSession().put(Pac4jConstants.SESSION_ID, (String) trackableSession);
-        return this;
+        return Optional.of(this);
     }
 
     @Override
     public boolean renewSession(final PlayWebContext context) {
         final String oldSessionId = this.getOrCreateSessionId(context);
-        final Map<String, Object> oldData = store.get(getPrefixedSessionKey(oldSessionId));
+        final Optional<Map<String, Object>> oldData = store.get(getPrefixedSessionKey(oldSessionId));
 
         final Http.Session session = context.getJavaSession();
         session.remove(Pac4jConstants.SESSION_ID);
 
         final String newSessionId = this.getOrCreateSessionId(context);
-        if (oldData != null) {
-            store.set(getPrefixedSessionKey(newSessionId), oldData);
+        if (oldData.isPresent()) {
+            store.set(getPrefixedSessionKey(newSessionId), oldData.get());
         }
 
         logger.debug("Renewing session: {} -> {}", oldSessionId, newSessionId);

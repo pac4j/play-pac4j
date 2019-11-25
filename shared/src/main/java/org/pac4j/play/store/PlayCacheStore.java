@@ -9,6 +9,7 @@ import org.pac4j.core.util.JavaSerializationHelper;
 import play.cache.SyncCacheApi;
 
 import java.io.Serializable;
+import java.util.Optional;
 
 /**
  * Store using the Play Cache.
@@ -44,8 +45,8 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
     }
 
     @Override
-    protected O internalGet(final K key) {
-        return getCache().get(computeKey(key));
+    protected Optional<O> internalGet(final K key) {
+        return getCache().getOptional(computeKey(key));
     }
 
     @Override

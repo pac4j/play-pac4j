@@ -7,6 +7,7 @@ import play.mvc.Http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -31,7 +32,7 @@ public final class PlayCookieSessionStoreTests implements TestsConstants {
 
         store.set(context, KEY, PAC4J_URL);
 
-        final String value = (String) store.get(context, KEY);
-        assertEquals(PAC4J_URL, value);
+        final Optional<Object> value = store.get(context, KEY);
+        assertEquals(Optional.of(PAC4J_URL), value);
     }
 }

@@ -2,13 +2,18 @@ package org.pac4j.play.http;
 
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.exception.http.HttpAction;
+import org.pac4j.core.exception.http.WithContentAction;
+import org.pac4j.core.exception.http.WithLocationAction;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import play.http.HttpEntity;
 import play.mvc.Result;
 
-import static play.mvc.Results.*;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Specific {@link HttpActionAdapter} for Play.
@@ -20,26 +25,29 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Override
-    public Result adapt(final int code, final PlayWebContext context) {
-        logger.debug("requires HTTP action: {}", code);
-        if (code == HttpConstants.UNAUTHORIZED) {
-            return unauthorized("authentication required");
-        } else if (code == HttpConstants.FORBIDDEN) {
-            return forbidden("forbidden");
-        } else if (code == HttpConstants.TEMP_REDIRECT) {
-            return redirect(context.getLocation());
-        } else if (code == HttpConstants.BAD_REQUEST) {
-            return badRequest("bad request");
-        } else if (code == HttpConstants.OK) {
-            final String content = context.getResponseContent();
-            logger.debug("render: {}", content);
-            return ok(content).as(HttpConstants.HTML_CONTENT_TYPE);
-        } else if (code == HttpConstants.NO_CONTENT) {
-            return noContent();
+    @Override public Result adapt(HttpAction action, final PlayWebContext context){
+        if (action != null) {
+            int code = action.getCode();
+            logger.debug("requires HTTP action: {}", code);
+            Map<String, String> headers = new HashMap<>();
+            HttpEntity httpEntity = HttpEntity.NO_ENTITY;
+
+            if (action instanceof WithLocationAction) {
+                final WithLocationAction withLocationAction = (WithLocationAction) action;
+                headers.put(HttpConstants.LOCATION_HEADER, withLocationAction.getLocation());
+            } else if (action instanceof WithContentAction) {
+                final WithContentAction withContentAction = (WithContentAction) action;
+                final String content = withContentAction.getContent();
+
+                if (content != null) {
+                    logger.debug("render: {}", content);
+                    httpEntity = HttpEntity.fromString(content, "UTF-8");
+                }
+            }
+
+            return new Result(code, headers, httpEntity);
         }
-        final String message = "Unsupported HTTP action: " + code;
-        logger.error(message);
-        throw new TechnicalException(message);
+
+        throw new TechnicalException("No action provided");
     }
 }

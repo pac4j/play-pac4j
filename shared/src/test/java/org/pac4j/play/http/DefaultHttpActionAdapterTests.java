@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.exception.http.*;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 
 import org.pac4j.core.util.TestsConstants;
@@ -48,43 +49,48 @@ public final class DefaultHttpActionAdapterTests implements TestsConstants {
 
     @Test
     public void testUnauthorized() throws IOException {
-        final Result result = adapter.adapt(HttpConstants.UNAUTHORIZED, null);
+        final Result result = adapter.adapt(new StatusAction(HttpConstants.UNAUTHORIZED), null);
         assertEquals(401, result.status());
-        assertEquals("authentication required", getBody(result));
     }
 
     @Test
     public void testForbidden() throws IOException {
-        final Result result = adapter.adapt(HttpConstants.FORBIDDEN, null);
+        final Result result = adapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), null);
         assertEquals(403, result.status());
-        assertEquals("forbidden", getBody(result));
     }
 
     @Test
-    public void testRedirect() throws IOException {
+    public void testRedirectFound() throws IOException {
         when(context.getLocation()).thenReturn(PAC4J_URL);
-        final Result result = adapter.adapt(HttpConstants.TEMP_REDIRECT, context);
-        assertEquals(303, result.status());
+        final Result result = adapter.adapt(new FoundAction(PAC4J_URL), context);
+        assertEquals(HttpConstants.FOUND, result.status());
+        assertEquals(PAC4J_URL, result.redirectLocation().get());
+    }
+
+    @Test
+    public void testRedirectSeeOther() throws IOException {
+        when(context.getLocation()).thenReturn(PAC4J_URL);
+        final Result result = adapter.adapt(new SeeOtherAction(PAC4J_URL), context);
+        assertEquals(HttpConstants.SEE_OTHER, result.status());
         assertEquals(PAC4J_URL, result.redirectLocation().get());
     }
 
     @Test
     public void testBadRequest() throws IOException {
-        final Result result = adapter.adapt(HttpConstants.BAD_REQUEST, context);
+        final Result result = adapter.adapt(new StatusAction(HttpConstants.BAD_REQUEST), context);
         assertEquals(400, result.status());
-        assertEquals("bad request", getBody(result));
     }
 
     @Test
     public void testOk() throws IOException {
         when(context.getResponseContent()).thenReturn(VALUE);
-        final Result result = adapter.adapt(HttpConstants.OK, context);
+        final Result result = adapter.adapt(new OkAction(VALUE), context);
         assertEquals(200, result.status());
         assertEquals(VALUE, getBody(result));
     }
 
     @Test
-    public void testUnsupported() throws IOException {
-        TestsHelper.expectException(() -> adapter.adapt(HttpConstants.CREATED, null), TechnicalException.class, "Unsupported HTTP action: " + HttpConstants.CREATED);
+    public void testNoActionProvided() throws IOException {
+        TestsHelper.expectException(() -> adapter.adapt(null, null), TechnicalException.class, "No action provided");
     }
 }
