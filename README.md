@@ -66,7 +66,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The [next version](https://github.com/pac4j/play-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](http://www.pac4j.org/3.7.0/docs/index.html) and the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/8.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/8.0.0).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](http://www.pac4j.org/3.7.0/docs/index.html) and the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/8.0.2) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/8.0.2).
 
 See the [migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-guide) as well.
 
