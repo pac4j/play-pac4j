@@ -106,16 +106,6 @@ public class PlayWebContext implements WebContext {
         return this.context;
     }
 
-    @Override
-    public void setResponseStatus(final int code) {}
-
-    @Override
-    public void writeResponseContent(final String content) {
-        if (content != null) {
-            this.responseContent += content;
-        }
-    }
-
     /**
      * Get the response content.
      *
@@ -126,8 +116,8 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public String getRequestHeader(final String name) {
-        return request.header(name).orElse(null);
+    public Optional<String> getRequestHeader(final String name) {
+        return request.header(name);
     }
 
     @Override
@@ -136,13 +126,13 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public String getRequestParameter(final String name) {
+    public Optional<String> getRequestParameter(final String name) {
         final Map<String, String[]> parameters = getRequestParameters();
         final String[] values = parameters.get(name);
         if (values != null && values.length > 0) {
-            return values[0];
+            return Optional.of(values[0]);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
@@ -209,14 +199,11 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public Object getRequestAttribute(final String name) {
-        Object value = context.args.get(name);
+    public Optional<Object> getRequestAttribute(final String name) {
+        Optional<Object> value = Optional.ofNullable(context.args.get(name));
         // for the user profiles, if we don't get a value from the context.args, we try from the attributes (call after the SecurityFilter)
-        if (Pac4jConstants.USER_PROFILES.equals(name) && value == null) {
-            final Optional<Object> optionalValue = request.attrs().getOptional(PAC4J_USER_PROFILES);
-            if (optionalValue.isPresent()) {
-                value = optionalValue.get();
-            }
+        if (Pac4jConstants.USER_PROFILES.equals(name) && !value.isPresent()) {
+            value = request.attrs().getOptional(PAC4J_USER_PROFILES);
         }
         return value;
     }

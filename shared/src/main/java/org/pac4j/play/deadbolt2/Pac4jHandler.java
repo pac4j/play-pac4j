@@ -7,11 +7,13 @@ import be.objectify.deadbolt.java.models.Subject;
 import org.pac4j.core.client.Client;
 import org.pac4j.core.client.DirectClient;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.HttpConstants;
 import org.pac4j.core.context.Pac4jConstants;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.engine.DefaultSecurityLogic;
-import org.pac4j.core.exception.HttpAction;
 import org.pac4j.core.exception.TechnicalException;
+import org.pac4j.core.exception.http.HttpAction;
+import org.pac4j.core.exception.http.StatusAction;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
@@ -79,9 +81,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                     if (startDirectAuthentication(currentClients)) {
                         logger.debug("Starting direct authentication");
                         DirectClient client = (DirectClient) currentClients.get(0);
-                        Credentials credentials = client.getCredentials(playWebContext);
-                        if (credentials != null) {
-                            CommonProfile userProfile = credentials.getUserProfile();
+                        Optional<Credentials> credentials = client.getCredentials(playWebContext);
+                        if (credentials.isPresent()) {
+                            CommonProfile userProfile = credentials.get().getUserProfile();
                             if (userProfile != null) {
                                 setProfile(context, userProfile);
                                 return Optional.empty();
@@ -91,7 +93,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                         action = unauthorized(playWebContext, currentClients);
                     } else if (startAuthentication(playWebContext, currentClients)) {
                         logger.debug("Starting authentication");
-                        saveRequestedUrl(playWebContext, currentClients);
+                        saveRequestedUrl(playWebContext, currentClients, null);
                         action = redirectToIdentityProvider(playWebContext, currentClients);
                     } else {
                         logger.debug("unauthorized");
@@ -100,7 +102,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                 } catch (final HttpAction e) {
                     action = e;
                 }
-                return Optional.of(httpActionAdapter.adapt(action.getCode(), playWebContext));
+                return Optional.of(httpActionAdapter.adapt(action, playWebContext));
             }
         }, httpExecutionContext.current());
     }
@@ -140,7 +142,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return CompletableFuture.supplyAsync(() -> {
             final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
             final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
-            return httpActionAdapter.adapt(403, playWebContext);
+            return httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext);
         }, httpExecutionContext.current());
     }
 

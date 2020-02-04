@@ -13,6 +13,7 @@ import play.mvc.Http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -63,9 +64,10 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
         mockStatic(SyncCacheApi.class);
         final Map<String, Object> data = new HashMap<>();
         data.put(KEY, VALUE);
-        PowerMockito.when(cacheApiMock.get(any(String.class))).thenReturn(data);
+        PowerMockito.when(cacheApiMock.getOptional(any(String.class))).thenReturn(Optional.of(data));
         store.setPrefix(KEY);
         store.set(context, KEY, VALUE);
-        assertEquals(VALUE, store.get(context, KEY));
+        Optional<Object> value = store.get(context, KEY);
+        assertEquals(Optional.of(VALUE), value);
     }
 }

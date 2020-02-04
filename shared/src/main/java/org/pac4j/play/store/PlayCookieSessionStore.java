@@ -17,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
+import java.util.Optional;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -49,17 +50,17 @@ public class PlayCookieSessionStore implements PlaySessionStore {
     }
 
     @Override
-    public Object get(final PlayWebContext context, final String key) {
+    public Optional<Object> get(final PlayWebContext context, final String key) {
         final Http.Session session = context.getJavaSession();
         String sessionValue = session.get(keyPrefix + key);
         if (sessionValue == null) {
             logger.trace("get, key = {} -> null", key);
-            return null;
+            return Optional.empty();
         } else {
             byte[] inputBytes = Base64.decodeBase64(sessionValue);
-            final Object value = JAVA_SER_HELPER.unserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            final Object value = JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
             logger.trace("get, key = {} -> value = {}", key, value);
-            return value;
+            return Optional.of(value);
         }
     }
 
@@ -89,13 +90,13 @@ public class PlayCookieSessionStore implements PlaySessionStore {
     }
 
     @Override
-    public Object getTrackableSession(PlayWebContext playWebContext) {
-        return null;
+    public Optional<Object> getTrackableSession(PlayWebContext playWebContext) {
+        return Optional.empty();
     }
 
     @Override
-    public SessionStore<PlayWebContext> buildFromTrackableSession(PlayWebContext playWebContext, Object o) {
-        return null;
+    public Optional<SessionStore<PlayWebContext>> buildFromTrackableSession(PlayWebContext playWebContext, Object o) {
+        return Optional.empty();
     }
 
     @Override
