@@ -17,7 +17,6 @@ import play.mvc.Http.Context;
 import java.io.IOException;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 /**

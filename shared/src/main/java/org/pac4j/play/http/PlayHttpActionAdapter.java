@@ -25,7 +25,10 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
-    @Override public Result adapt(HttpAction action, final PlayWebContext context){
+    public static final PlayHttpActionAdapter INSTANCE = new PlayHttpActionAdapter();
+
+    @Override
+    public Result adapt(final HttpAction action, final PlayWebContext context) {
         if (action != null) {
             int code = action.getCode();
             logger.debug("requires HTTP action: {}", code);

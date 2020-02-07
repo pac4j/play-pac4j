@@ -2,13 +2,14 @@ package org.pac4j.play.java;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.util.FindBest;
 import org.pac4j.play.PlayWebContext;
+import org.pac4j.play.http.PlayHttpActionAdapter;
 import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,13 +24,8 @@ import java.lang.reflect.Proxy;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import static org.pac4j.core.util.CommonHelper.assertNotNull;
-
 /**
- * <p>This filter protects an url, based on the {@link #securityLogic}.</p>
- *
- * <p>The configuration can be provided via annotation parameters: <code>clients</code> (list of clients for authentication), <code>authorizers</code> (list of authorizers)
- * and <code>multiProfile</code> (whether multiple profiles should be kept).</p>
+ * <p>This filter protects an url.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -39,7 +35,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic = new DefaultSecurityLogic<>();
+    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic;
     
     protected final static Method CLIENTS_METHOD;
 
@@ -68,39 +64,33 @@ public class SecureAction extends Action<Result> {
     public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
         this.config = config;
         this.config.setSessionStore(playSessionStore);
-        final SecurityLogic configSecurityLogic = config.getSecurityLogic();
-        if (configSecurityLogic != null) {
-            this.securityLogic = configSecurityLogic;
-        }
         this.sessionStore = playSessionStore;
     }
 
     @Override
     public CompletionStage<Result> call(final Context ctx) {
-        try{
+        try {
           final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
           final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
-            final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
+          final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
           final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
   
           return internalCall(ctx, clients, authorizers, matchers, multiProfile);
-        }catch(Throwable t){
+        } catch(Throwable t) {
           throw new RuntimeException(t);
         }        
     }
 
     public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
 
-        assertNotNull("securityLogic", securityLogic);
+        final SessionStore<PlayWebContext> bestSessionStore = FindBest.sessionStore(null, config, sessionStore);
+        final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
+        final SecurityLogic<CompletionStage<Result>, PlayWebContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx, sessionStore);
-        final HttpActionAdapter<Result, WebContext> actionAdapter = config.getHttpActionAdapter();
-        assertNotNull("actionAdapter", actionAdapter);
-        final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (code, webCtx) -> CompletableFuture.completedFuture(actionAdapter.adapt(code, webCtx));
-
-        return securityLogic.perform(playWebContext, config, (webCtx, profiles, parameters) -> {
+        final PlayWebContext playWebContext = new PlayWebContext(ctx, bestSessionStore);
+        final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
+        return bestLogic.perform(playWebContext, config, (webCtx, profiles, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);

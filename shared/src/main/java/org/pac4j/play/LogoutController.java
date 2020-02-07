@@ -1,8 +1,12 @@
 package org.pac4j.play;
 
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
+import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.play.http.PlayHttpActionAdapter;
 import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -13,21 +17,15 @@ import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
-import static org.pac4j.core.util.CommonHelper.assertNotNull;
-
 /**
- * <p>This filter handles the (application + identity provider) logout process, based on the {@link #logoutLogic}.</p>
- *
- * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} (default logourl url), {@link #setLogoutUrlPattern(String)} (pattern that logout urls must match),
- * {@link #setLocalLogout(Boolean)} (whether the application logout must be performed), {@link #setDestroySession(Boolean)} (whether we must destroy the web session during the local logout)
- * and {@link #setCentralLogout(Boolean)} (whether the centralLogout must be performed).</p>
+ * <p>This filter handles the (application + identity provider) logout process.</p>
  *
  * @author Jerome Leleu
  * @since 2.0.0
  */
 public class LogoutController extends Controller {
 
-    private LogoutLogic<Result, PlayWebContext> logoutLogic = new DefaultLogoutLogic<>();
+    private LogoutLogic<Result, PlayWebContext> logoutLogic;
 
     private String defaultUrl;
 
@@ -48,12 +46,12 @@ public class LogoutController extends Controller {
 
     public CompletionStage<Result> logout() {
 
-        assertNotNull("logoutLogic", logoutLogic);
+        final SessionStore<PlayWebContext> bestSessionStore = FindBest.sessionStore(null, config, playSessionStore);
+        final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
+        final LogoutLogic<Result, PlayWebContext> bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-        assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
-
-        return CompletableFuture.supplyAsync(() -> logoutLogic.perform(playWebContext, config, config.getHttpActionAdapter(), this.defaultUrl,
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), bestSessionStore);
+        return CompletableFuture.supplyAsync(() -> bestLogic.perform(playWebContext, config, bestAdapter, this.defaultUrl,
                 this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout), ec.current());
     }
 
@@ -105,12 +103,14 @@ public class LogoutController extends Controller {
         this.centralLogout = centralLogout;
     }
 
-    /**
-     * Please be aware that {@link Config#getLogoutLogic()} ()} of {@linkplain #config} field is ignored because it uses
-     * raw types instead of generics. We would like to avoid runtime type casts.
-     *
-     * @param logoutLogic the new logout logic
-     */
+    public LogoutLogic<Result, PlayWebContext> getLogoutLogic() {
+        return logoutLogic;
+    }
+
+    public PlaySessionStore getPlaySessionStore() {
+        return playSessionStore;
+    }
+
     public void setLogoutLogic(final LogoutLogic<Result, PlayWebContext> logoutLogic) {
         this.logoutLogic = logoutLogic;
     }

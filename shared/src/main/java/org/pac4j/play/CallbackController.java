@@ -1,8 +1,12 @@
 package org.pac4j.play;
 
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
+import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.util.FindBest;
+import org.pac4j.play.http.PlayHttpActionAdapter;
 import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -13,13 +17,8 @@ import java.util.concurrent.CompletionStage;
 
 import javax.inject.Inject;
 
-import static org.pac4j.core.util.CommonHelper.assertNotNull;
-
 /**
- * <p>This filter finishes the login process for an indirect client, based on the {@link #callbackLogic}.</p>
- *
- * <p>The configuration can be provided via setters: {@link #setDefaultUrl(String)} (default url after login if none was requested) and
- * {@link #setMultiProfile(boolean)} (whether multiple profiles should be kept).</p>
+ * <p>This filter finishes the login process for an indirect client.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -27,7 +26,7 @@ import static org.pac4j.core.util.CommonHelper.assertNotNull;
  */
 public class CallbackController extends Controller {
 
-    private CallbackLogic<Result, PlayWebContext> callbackLogic = new DefaultCallbackLogic<>();
+    private CallbackLogic<Result, PlayWebContext> callbackLogic;
 
     private String defaultUrl;
 
@@ -48,12 +47,12 @@ public class CallbackController extends Controller {
 
     public CompletionStage<Result> callback() {
 
-        assertNotNull("callbackLogic", callbackLogic);
+        final SessionStore<PlayWebContext> bestSessionStore = FindBest.sessionStore(null, config, playSessionStore);
+        final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
+        final CallbackLogic<Result, PlayWebContext> bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
 
-        assertNotNull("config", config);
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), playSessionStore);
-
-        return CompletableFuture.supplyAsync(() -> callbackLogic.perform(playWebContext, config, config.getHttpActionAdapter(),
+        final PlayWebContext playWebContext = new PlayWebContext(ctx(), bestSessionStore);
+        return CompletableFuture.supplyAsync(() -> bestLogic.perform(playWebContext, config, bestAdapter,
                 this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient), ec.current());
     }
 
@@ -105,12 +104,18 @@ public class CallbackController extends Controller {
         this.config = config;
     }
 
-    /**
-     * Please be aware that {@link Config#getCallbackLogic()} of {@linkplain #config} field is ignored because it uses
-     * raw types instead of generics. We would like to avoid runtime type casts.
-     *
-     * @param callbackLogic the new callback logic
-     */
+    public CallbackLogic<Result, PlayWebContext> getCallbackLogic() {
+        return callbackLogic;
+    }
+
+    public Boolean getMultiProfile() {
+        return multiProfile;
+    }
+
+    public PlaySessionStore getPlaySessionStore() {
+        return playSessionStore;
+    }
+
     public void setCallbackLogic(final CallbackLogic<Result, PlayWebContext> callbackLogic) {
         this.callbackLogic = callbackLogic;
     }

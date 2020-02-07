@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
  * @author Jerome Leleu
  * @since 2.3.0
  */
-public final class DefaultHttpActionAdapterTests implements TestsConstants {
+public final class PlayHttpActionAdapterTests implements TestsConstants {
 
     private HttpActionAdapter<Result, PlayWebContext> adapter;
 

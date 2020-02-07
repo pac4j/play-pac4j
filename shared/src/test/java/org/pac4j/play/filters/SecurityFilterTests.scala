@@ -10,7 +10,7 @@ import org.pac4j.core.client.{Clients, MockDirectClient}
 import org.pac4j.core.config.Config
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.play.filters.SecurityFilter.{Rule, RuleData}
-import org.pac4j.play.http.DefaultHttpActionAdapter
+import org.pac4j.play.http.PlayHttpActionAdapter
 import org.pac4j.play.store.PlayCacheSessionStore
 import org.scalatest.Matchers._
 import org.scalatest.concurrent.ScalaFutures
@@ -90,8 +90,8 @@ class SecurityFilterTests extends ScalaFutures with Results {
   private def prepareSecurityFilter(configString: String)
                                    (implicit ec: ExecutionContext, mat: Materializer): SecurityFilter = {
     val pack4jConfig = new Config
-    pack4jConfig.setSecurityLogic(new DefaultSecurityLogic)
-    pack4jConfig.setHttpActionAdapter(new DefaultHttpActionAdapter)
+    pack4jConfig.setSecurityLogic(DefaultSecurityLogic.INSTANCE)
+    pack4jConfig.setHttpActionAdapter(PlayHttpActionAdapter.INSTANCE)
     pack4jConfig.setClients(new Clients(Seq(
       new MockDirectClient("client1")
     )))
@@ -103,6 +103,3 @@ class SecurityFilterTests extends ScalaFutures with Results {
   }
 
 }
-
-
-
