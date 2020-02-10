@@ -49,6 +49,10 @@ public class PlayWebContext implements WebContext {
 
     protected String responseContent = "";
 
+    protected String requestContent;
+
+    protected String responseContentType;
+
     public PlayWebContext(final Context context, final SessionStore<PlayWebContext> sessionStore) {
         this.context = context;
         this.request = context.request();
@@ -257,11 +261,23 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public void setResponseContentType(final String content) {
-        response.setHeader("Content-Type", content);
+    public void setResponseContentType(final String contentType) {
+        responseContentType = contentType;
+    }
+
+    public String getResponseContentType() {
+        return responseContentType;
     }
 
     public String getLocation() {
         return this.context.response().getHeaders().get(HttpConstants.LOCATION_HEADER);
+    }
+
+    @Override
+    public String getRequestContent() {
+        if (requestContent == null) {
+            requestContent = request.body().asText();
+        }
+        return requestContent;
     }
 }

@@ -6,6 +6,7 @@ import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.exception.http.WithContentAction;
 import org.pac4j.core.exception.http.WithLocationAction;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
+import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +28,20 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
 
     public static final PlayHttpActionAdapter INSTANCE = new PlayHttpActionAdapter();
 
+    protected Map<Integer, Result> results = new HashMap<>();
+
     @Override
     public Result adapt(final HttpAction action, final PlayWebContext context) {
         if (action != null) {
-            int code = action.getCode();
+            final int code = action.getCode();
             logger.debug("requires HTTP action: {}", code);
+
+            final Result predefinedResult = results.get(code);
+            if (predefinedResult != null) {
+                logger.debug("using pre-defined result: {}", predefinedResult);
+                return predefinedResult;
+            }
+
             Map<String, String> headers = new HashMap<>();
             HttpEntity httpEntity = HttpEntity.NO_ENTITY;
 
@@ -48,9 +58,24 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
                 }
             }
 
-            return new Result(code, headers, httpEntity);
+            final Result result = new Result(code, headers, httpEntity);
+            final String contentType = context.getResponseContentType();
+            if (contentType != null) {
+                return result.as(contentType);
+            } else {
+                return result;
+            }
         }
 
         throw new TechnicalException("No action provided");
+    }
+
+    public Map<Integer, Result> getResults() {
+        return results;
+    }
+
+    public void setResults(final Map<Integer, Result> results) {
+        CommonHelper.assertNotNull("results", results);
+        this.results = results;
     }
 }

@@ -26,7 +26,7 @@ import scala.util.Failure
   * consists of a list of filter rules, where the key is a regular expression that will be used to
   * match the path + query string.
   *
-  * For each regex key, there are two subkeys: `authorizers` and `clients`. Here you can define the
+  * For each regex key, there are three subkeys: `authorizers`, `clients` and `matchers`. Here you can define the
   * correct values, like you would supply to the `RequireAuthentication` method in controllers. There
   * are two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
   *
@@ -105,7 +105,7 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
         // - unauthorized
         // Or the future results in an exception
         Future {
-          log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers}. Authentication response code ${requiresAuthenticationResult.status}.")
+          log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${requiresAuthenticationResult.status}.")
           createResultSimple(javaContext, requiresAuthenticationResult)
         }
       }

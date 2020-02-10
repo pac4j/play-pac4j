@@ -63,7 +63,6 @@ public class SecureAction extends Action<Result> {
     @Inject
     public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
         this.config = config;
-        this.config.setSessionStore(playSessionStore);
         this.sessionStore = playSessionStore;
     }
 

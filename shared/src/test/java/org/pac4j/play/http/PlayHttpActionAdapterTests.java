@@ -49,13 +49,13 @@ public final class PlayHttpActionAdapterTests implements TestsConstants {
 
     @Test
     public void testUnauthorized() throws IOException {
-        final Result result = adapter.adapt(new StatusAction(HttpConstants.UNAUTHORIZED), null);
+        final Result result = adapter.adapt(new StatusAction(HttpConstants.UNAUTHORIZED), context);
         assertEquals(401, result.status());
     }
 
     @Test
     public void testForbidden() throws IOException {
-        final Result result = adapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), null);
+        final Result result = adapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), context);
         assertEquals(403, result.status());
     }
 
