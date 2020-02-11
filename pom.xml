@@ -41,17 +41,17 @@
         <repository>
             <id>typesafe</id>
             <name>typesafe-releases</name>
-            <url>http://repo.typesafe.com/typesafe/releases</url>
+            <url>https://repo.typesafe.com/typesafe/releases</url>
         </repository>
         <repository>
             <id>scala-tools.org</id>
             <name>Scala-tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
+            <url>https://scala-tools.org/repo-releases</url>
         </repository>
         <repository>
             <id>Akka Snapshot Repository</id>
             <name>Akka Snapshot Repository</name>
-            <url>http://repo.akka.io/snapshots/</url>
+            <url>https://repo.akka.io/snapshots/</url>
         </repository>
         <repository>
             <id>sonatype-nexus-snapshots</id>
@@ -70,7 +70,7 @@
         <pluginRepository>
             <id>scala-tools.org</id>
             <name>Scala-tools Maven2 Repository</name>
-            <url>http://scala-tools.org/repo-releases</url>
+            <url>https://scala-tools.org/repo-releases</url>
         </pluginRepository>
     </pluginRepositories>
 
