@@ -26,35 +26,29 @@ import scala.util.Failure
   * consists of a list of filter rules, where the key is a regular expression that will be used to
   * match the path + query string.
   *
-  * For each regex key, there are three subkeys: `authorizers`, `clients` and `matchers`. Here you can define the
-  * correct values, like you would supply to the `RequireAuthentication` method in controllers. There
-  * are two exceptions: `authorizers` can have two special values: `_authenticated_` and `_anonymous_`.
+  * For each regex key, there are three subkeys: `clients`, `authorizers` and `matchers`. Here you can define the
+  * correct values, like you would supply to the `SecureAction` method in controllers.
   *
-  * `_anonymous_` will disable authentication and authorization for paths matching the regex.
-  * `_authenticated_` will require authentication, but will set clients and authorizers both to `null`.
-  *
-  * Rules are traversed and applied from top to bottom. The first matching rule will define which clients and authorizers
+  * Rules are traversed and applied from top to bottom. The first matching rule will define which clients, authorizers and matchers
   * are used. When not provided, the value will be `null`.
   *
   * @example {{{
   * security.rules = [
-  *   # Admin pages need a special authorizer and do not support login via Twitter.
+  *   # Admin pages need a special authorizer and login is done via a form page.
   *   {"/admin/.*" = {
-  *     authorizers = "admin"
   *     clients = "FormClient"
+  *     authorizers = "admin"
   *   }}
   *   # Rules for the REST services. These don't specify a client and will return 401
   *   # when not authenticated.
   *   {"/restservices/.*" = {
-  *     authorizers = "_authenticated_"
   *   }}
   *   # The login page needs to be publicly accessible.
   *   {"/login.html" = {
-  *     authorizers = "_anonymous_"
+  *     clients = "AnonymousClient"
   *   }}
   *   # 'Catch all' rule to make sure the whole application stays secure.
   *   {".*" = {
-  *     authorizers = "_authenticated_"
   *     clients = "FormClient,TwitterClient"
   *   }}
   * ]
@@ -167,14 +161,9 @@ object SecurityFilter {
           c.getOptional[String]("matchers").orNull
         )
 
-        ruleData.authorizers match {
-          case "_anonymous_" => None
-          case "_authenticated_" => Some(ruleData.copy(authorizers = null))
-          case _ => Some(ruleData)
-        }
+        Some(ruleData)
       }
 
     Rule(path.replace("\"", ""), ruleData)
   }
 }
-

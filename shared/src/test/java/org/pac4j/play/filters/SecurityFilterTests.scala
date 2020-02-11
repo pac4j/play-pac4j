@@ -6,6 +6,7 @@ import com.typesafe.config.ConfigFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.BlockJUnit4ClassRunner
+import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.client.{Clients, MockDirectClient}
 import org.pac4j.core.config.Config
 import org.pac4j.core.engine.DefaultSecurityLogic
@@ -33,9 +34,8 @@ class SecurityFilterTests extends ScalaFutures with Results {
     val config: Configuration = new Configuration(ConfigFactory.load("config/security_filter.conf"))
 
     SecurityFilter.loadRules(config) shouldBe Seq(
-      Rule("/path_anonymous", None),
+      Rule("/path_anonymous", Some(RuleData("AnonymousClient", null, null))),
       Rule("/path_secure_1", Some(RuleData("client1,client2", null, null))),
-      Rule("/path_secure_2", Some(RuleData("client1,client2", null, null))),
       Rule("/path_secure_3", Some(RuleData(null, "authorizer1,authorizer2", null))),
       Rule("/path_secure_4", Some(RuleData("client1,client2", "authorizer1,authorizer2", "matcher1,matcher2")))
     )
@@ -52,20 +52,15 @@ class SecurityFilterTests extends ScalaFutures with Results {
         |pac4j.security.rules = [
         |  {
         |    "/path_anonymous" = {
-        |      authorizers = "_anonymous_"
-        |    }
-        |  }, {
-        |    "/path_anonymous_2/.*" = {
-        |      authorizers = "_anonymous_"
+        |      "clients" = "AnonymousClient"
+        |      "authorizers" = "none"
         |    }
         |  }, {
         |    "/path_secure" = {
-        |      authorizers = "_authenticated_"
         |      clients = "client1"
         |    }
         |  }, {
         |    "/path_secure_2/.*" = {
-        |      authorizers = "_authenticated_"
         |      clients = "client1"
         |    }
         |  }
@@ -83,23 +78,21 @@ class SecurityFilterTests extends ScalaFutures with Results {
     status(tryFilterApply("/path_secure_2/any_path_")) shouldBe 401
 
     status(tryFilterApply("/path_anonymous")) shouldBe 200
-    status(tryFilterApply("/path_anonymous_2/any_path")) shouldBe 200
     status(tryFilterApply("any/other/path")) shouldBe 200
   }
 
   private def prepareSecurityFilter(configString: String)
                                    (implicit ec: ExecutionContext, mat: Materializer): SecurityFilter = {
-    val pack4jConfig = new Config
-    pack4jConfig.setSecurityLogic(DefaultSecurityLogic.INSTANCE)
-    pack4jConfig.setHttpActionAdapter(PlayHttpActionAdapter.INSTANCE)
-    pack4jConfig.setClients(new Clients(Seq(
-      new MockDirectClient("client1")
+    val pac4jConfig = new Config
+    pac4jConfig.setSecurityLogic(DefaultSecurityLogic.INSTANCE)
+    pac4jConfig.setHttpActionAdapter(PlayHttpActionAdapter.INSTANCE)
+    pac4jConfig.setClients(new Clients(Seq(
+      new MockDirectClient("client1"), AnonymousClient.INSTANCE
     )))
 
     val playSessionStore = new PlayCacheSessionStore(new DefaultSyncCacheApi(new DefaultAsyncCacheApi(new MockInMemoryAsyncCacheApi())))
     val playConfig = new Configuration(ConfigFactory.parseString(configString))
 
-    new SecurityFilter(playConfig, playSessionStore, pack4jConfig)
+    new SecurityFilter(playConfig, playSessionStore, pac4jConfig)
   }
-
 }
