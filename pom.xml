@@ -44,11 +44,6 @@
             <url>https://repo.typesafe.com/typesafe/releases</url>
         </repository>
         <repository>
-            <id>scala-tools.org</id>
-            <name>Scala-tools Maven2 Repository</name>
-            <url>https://scala-tools.org/repo-releases</url>
-        </repository>
-        <repository>
             <id>Akka Snapshot Repository</id>
             <name>Akka Snapshot Repository</name>
             <url>https://repo.akka.io/snapshots/</url>
@@ -65,14 +60,6 @@
             </snapshots>
         </repository>
     </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>scala-tools.org</id>
-            <name>Scala-tools Maven2 Repository</name>
-            <url>https://scala-tools.org/repo-releases</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <properties>
         <pac4j.version>4.0.0-RC3-SNAPSHOT</pac4j.version>
