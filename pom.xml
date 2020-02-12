@@ -81,7 +81,7 @@
         <shiro.version>1.5.0</shiro.version>
         <scalatest.version>3.2.0-SNAP10</scalatest.version>
         <deadbolt.version>2.6.1</deadbolt.version>
-        <powermock.version>1.6.4</powermock.version>
+        <powermock.version>2.0.5</powermock.version>
     </properties>
 
     <modules>
@@ -147,7 +147,7 @@
         </dependency>
         <dependency>
             <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
+            <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
         </dependency>
