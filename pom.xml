@@ -79,6 +79,7 @@
         <play.version>2.7.2</play.version>
         <java.version>1.8</java.version>
         <shiro.version>1.5.0</shiro.version>
+        <scalatest.version>3.2.0-SNAP10</scalatest.version>
         <deadbolt.version>2.6.1</deadbolt.version>
         <powermock.version>1.6.4</powermock.version>
     </properties>
@@ -93,12 +94,6 @@
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
             <version>${pac4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.pac4j</groupId>
-            <artifactId>pac4j-cas</artifactId>
-            <version>${pac4j.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.inject</groupId>
@@ -160,12 +155,6 @@
             <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.12</artifactId>
-            <version>3.2.0-SNAP10</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
