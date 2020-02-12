@@ -3,7 +3,7 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.7 (and Scala 2.11 or Scala 2.12) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v3**. It's available under the Apache 2 license.
+It's based on Play 2.7 (Scala 2.11 or Scala 2.12) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v4**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
@@ -16,7 +16,8 @@ Several versions of the library are available for the different versions of the 
 | 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
 | 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
-| 2.7          | 3.7           | 8.0.x (Java & Scala)
+| 2.7          | 3.7           | [play-pac4j_2.11 and play-pac4j_2.12 8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
+| 2.7          | 4.x           | 9.0.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
