@@ -63,7 +63,7 @@
 
     <properties>
         <pac4j.version>4.0.0-RC3-SNAPSHOT</pac4j.version>
-        <play.version>2.7.4</play.version>
+        <play.version>2.8.1</play.version>
         <java.version>1.8</java.version>
         <shiro.version>1.5.0</shiro.version>
         <scalatest.version>3.2.0-SNAP10</scalatest.version>
