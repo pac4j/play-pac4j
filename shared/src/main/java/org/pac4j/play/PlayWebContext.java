@@ -73,7 +73,7 @@ public class PlayWebContext implements WebContext {
      * @param body the body (maybe)
      * @param sessionStore the session store
      */
-    public PlayWebContext(final RequestHeader requestHeader, final Object body, final SessionStore<org.pac4j.play.PlayWebContext> sessionStore) {
+    public PlayWebContext(final RequestHeader requestHeader, final Object body, final SessionStore<PlayWebContext> sessionStore) {
         this(JavaHelpers$.MODULE$.createJavaContext(requestHeader, JavaHelpers$.MODULE$.createContextComponents()), sessionStore);
         this.formParameters = new HashMap<>();
         if (body instanceof AnyContentAsFormUrlEncoded) {
