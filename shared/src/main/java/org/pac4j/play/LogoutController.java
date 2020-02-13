@@ -1,7 +1,6 @@
 package org.pac4j.play;
 
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultLogoutLogic;
 import org.pac4j.core.engine.LogoutLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
@@ -9,6 +8,7 @@ import org.pac4j.core.util.FindBest;
 import org.pac4j.play.http.PlayHttpActionAdapter;
 import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.libs.concurrent.HttpExecutionContext;
 
@@ -44,13 +44,12 @@ public class LogoutController extends Controller {
     @Inject
     protected HttpExecutionContext ec;
 
-    public CompletionStage<Result> logout() {
+    public CompletionStage<Result> logout(final Http.Request request) {
 
-        final SessionStore<PlayWebContext> bestSessionStore = FindBest.sessionStore(null, config, playSessionStore);
         final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
         final LogoutLogic<Result, PlayWebContext> bestLogic = FindBest.logoutLogic(logoutLogic, config, DefaultLogoutLogic.INSTANCE);
 
-        final PlayWebContext playWebContext = new PlayWebContext(ctx(), bestSessionStore);
+        final PlayWebContext playWebContext = new PlayWebContext(request, playSessionStore);
         return CompletableFuture.supplyAsync(() -> bestLogic.perform(playWebContext, config, bestAdapter, this.defaultUrl,
                 this.logoutUrlPattern, this.localLogout, this.destroySession, this.centralLogout), ec.current());
     }

@@ -2,7 +2,6 @@ package org.pac4j.play.java;
 
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.Pac4jConstants;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
@@ -14,7 +13,7 @@ import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Action;
-import play.mvc.Http.Context;
+import play.mvc.Http;
 import play.mvc.Result;
 
 import javax.inject.Inject;
@@ -25,7 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
- * <p>This filter protects an url.</p>
+ * <p>This filter protects an URL.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
@@ -58,7 +57,7 @@ public class SecureAction extends Action<Result> {
 
     final private Config config;
 
-    final private SessionStore sessionStore;
+    final private PlaySessionStore sessionStore;
 
     @Inject
     public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
@@ -67,34 +66,38 @@ public class SecureAction extends Action<Result> {
     }
 
     @Override
-    public CompletionStage<Result> call(final Context ctx) {
+    public CompletionStage<Result> call(final Http.Request req) {
         try {
           final InvocationHandler invocationHandler = Proxy.getInvocationHandler(configuration);
           final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
           final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
           final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
-  
-          return internalCall(ctx, clients, authorizers, matchers, multiProfile);
+
+          final PlayWebContext playWebContext = new PlayWebContext(req, sessionStore);
+          return internalCall(req, playWebContext, clients, authorizers, matchers, multiProfile);
         } catch(Throwable t) {
           throw new RuntimeException(t);
         }        
     }
 
-    public CompletionStage<Result> internalCall(final Context ctx, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+    public CompletionStage<Result> call(final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+        return internalCall(null, webContext, clients, authorizers, matchers, multiProfile);
+    }
 
-        final SessionStore<PlayWebContext> bestSessionStore = FindBest.sessionStore(null, config, sessionStore);
+    protected CompletionStage<Result> internalCall(final Http.Request req, final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+
         final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
         final SecurityLogic<CompletionStage<Result>, PlayWebContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final PlayWebContext playWebContext = new PlayWebContext(ctx, bestSessionStore);
+
         final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
-        return bestLogic.perform(playWebContext, config, (webCtx, profiles, parameters) -> {
+        return bestLogic.perform(webContext, config, (webCtx, profiles, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);
 	            } else {
-	                return delegate.call(ctx);
+	                return delegate.call(webCtx.supplementRequest(req));
 	            }
             }, actionAdapterWrapper, clients, authorizers, matchers, multiProfile);
     }

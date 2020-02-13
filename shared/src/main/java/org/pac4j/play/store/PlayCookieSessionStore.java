@@ -51,8 +51,8 @@ public class PlayCookieSessionStore implements PlaySessionStore {
 
     @Override
     public Optional<Object> get(final PlayWebContext context, final String key) {
-        final Http.Session session = context.getJavaSession();
-        String sessionValue = session.get(keyPrefix + key);
+        final Http.Session session = context.getSession();
+        final String sessionValue = session.getOptional(keyPrefix + key).orElse(null);
         if (sessionValue == null) {
             logger.trace("get, key = {} -> null", key);
             return Optional.empty();
@@ -72,8 +72,6 @@ public class PlayCookieSessionStore implements PlaySessionStore {
             clearedValue = clearUserProfiles(value);
         }
 
-        final Http.Session session = context.getJavaSession();
-
         byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
         String serialized = Base64.encodeBase64String(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
@@ -81,7 +79,7 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         } else {
             logger.trace("set, key = {} -> null serialized token", key);
         }
-        session.put(keyPrefix + key, serialized);
+        context.setSession(context.getSession().adding(keyPrefix + key, serialized));
     }
 
     @Override

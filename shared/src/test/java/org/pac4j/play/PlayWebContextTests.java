@@ -12,7 +12,6 @@ import org.pac4j.core.util.TestsConstants;
 import org.pac4j.play.store.PlaySessionStore;
 
 import play.mvc.Http.Request;
-import play.mvc.Http.Context;
 
 import java.io.IOException;
 
@@ -37,11 +36,7 @@ public final class PlayWebContextTests implements TestsConstants {
     public void setUp() {
         PlaySessionStore sessionStoreMock = mock(PlaySessionStore.class);
         requestMock = mock(Request.class);
-
-        Context contextMock = mock(Context.class);
-        PowerMockito.when(contextMock.request()).thenReturn(requestMock);
-
-        webContext = new PlayWebContext(contextMock, sessionStoreMock);
+        webContext = new PlayWebContext(requestMock, sessionStoreMock);
     }
     
     @After
