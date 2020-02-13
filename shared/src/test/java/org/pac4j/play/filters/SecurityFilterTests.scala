@@ -21,7 +21,6 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers.{POST, status, _}
 import play.cache.{DefaultAsyncCacheApi, DefaultSyncCacheApi}
 
-import scala.collection.JavaConversions._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 
@@ -86,9 +85,7 @@ class SecurityFilterTests extends ScalaFutures with Results {
     val pac4jConfig = new Config
     pac4jConfig.setSecurityLogic(DefaultSecurityLogic.INSTANCE)
     pac4jConfig.setHttpActionAdapter(PlayHttpActionAdapter.INSTANCE)
-    pac4jConfig.setClients(new Clients(Seq(
-      new MockDirectClient("client1"), AnonymousClient.INSTANCE
-    )))
+    pac4jConfig.setClients(new Clients(new MockDirectClient("client1"), AnonymousClient.INSTANCE))
 
     val playSessionStore = new PlayCacheSessionStore(new DefaultSyncCacheApi(new DefaultAsyncCacheApi(new MockInMemoryAsyncCacheApi())))
     val playConfig = new Configuration(ConfigFactory.parseString(configString))

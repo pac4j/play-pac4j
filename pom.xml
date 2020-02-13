@@ -74,6 +74,7 @@
     <modules>
         <module>play-pac4j_2.11</module>
         <module>play-pac4j_2.12</module>
+        <module>play-pac4j_2.13</module>
     </modules>
 
     <dependencies>

@@ -14,7 +14,6 @@ import play.api.mvc.RequestHeader;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
-import scala.collection.Seq;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -95,14 +94,7 @@ public class PlayWebContext implements WebContext {
         if (body instanceof Http.RequestBody) {
             p = ((Http.RequestBody) body).asFormUrlEncoded();
         } else if (body instanceof AnyContentAsFormUrlEncoded) {
-            p = new HashMap<>();
-            final scala.collection.immutable.Map<String, Seq<String>> scalaParameters = ((AnyContentAsFormUrlEncoded) body).asFormUrlEncoded().get();
-            for (final String key : ScalaCompatibility.scalaSetToJavaSet(scalaParameters.keySet())) {
-                final Seq<String> v = scalaParameters.get(key).get();
-                final String[] values = new String[v.size()];
-                v.copyToArray(values);
-                p.put(key, values);
-            }
+            p = ScalaCompatibility.parseBody((AnyContentAsFormUrlEncoded) body);
         }
         if (p != null) {
             parameters.putAll(p);

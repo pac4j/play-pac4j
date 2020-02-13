@@ -26,3 +26,4 @@ perfStats.log
 .fbExcludeFilterFile
 .pmd
 .pmdruleset.xml
+.DS_Store
