@@ -64,14 +64,19 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     }
 
     @Override
-    public CompletionStage<Optional<Result>> beforeAuthCheck(final Http.Context context) {
+    public long getId() {
+        return clients.hashCode();
+    }
+
+    @Override
+    public CompletionStage<Optional<Result>> beforeAuthCheck(final Http.RequestHeader requestHeader, final Optional<String> content) {
         return CompletableFuture.supplyAsync(() -> {
-            final Optional<CommonProfile> profile = getProfile(context);
+            final Optional<CommonProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
                 logger.debug("profile found -> returning empty");
                 return Optional.empty();
             } else {
-                final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
+                final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
                 final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
                 final List<Client> currentClients = getClientFinder().find(config.getClients(), playWebContext, clients);
                 logger.debug("currentClients: {}", currentClients);
@@ -85,7 +90,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                         if (credentials.isPresent()) {
                             CommonProfile userProfile = credentials.get().getUserProfile();
                             if (userProfile != null) {
-                                setProfile(context, userProfile);
+                                setProfile(requestHeader, userProfile);
                                 return Optional.empty();
                             }
                         }
@@ -108,9 +113,9 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     }
 
     @Override
-    public CompletionStage<Optional<? extends Subject>> getSubject(final Http.Context context) {
+    public CompletionStage<Optional<? extends Subject>> getSubject(final Http.RequestHeader requestHeader) {
         return CompletableFuture.supplyAsync(() -> {
-            final Optional<CommonProfile> profile = getProfile(context);
+            final Optional<CommonProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
                 logger.debug("profile found: {} -> building a subject", profile);
                 return Optional.of(new Pac4jSubject(profile.get()));
@@ -126,28 +131,28 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return rolePermissionsHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
     }
 
-    private Optional<CommonProfile> getProfile(final Http.Context context) {
-        final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
+    private Optional<CommonProfile> getProfile(final Http.RequestHeader requestHeader) {
+        final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
         final ProfileManager manager = new ProfileManager(playWebContext);
         return manager.get(true);
     }
 
-    private void setProfile(final Http.Context context, CommonProfile profile) {
-        final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
+    private void setProfile(final Http.RequestHeader requestHeader, CommonProfile profile) {
+        final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
         playWebContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profile);
     }
 
     @Override
-    public CompletionStage<Result> onAuthFailure(final Http.Context context, final Optional<String> content) {
+    public CompletionStage<Result> onAuthFailure(final Http.RequestHeader requestHeader, final Optional<String> content) {
         return CompletableFuture.supplyAsync(() -> {
-            final PlayWebContext playWebContext = new PlayWebContext(context, playSessionStore);
+            final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
             final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
             return httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext);
         }, httpExecutionContext.current());
     }
 
     @Override
-    public CompletionStage<Optional<DynamicResourceHandler>> getDynamicResourceHandler(final Http.Context context) {
+    public CompletionStage<Optional<DynamicResourceHandler>> getDynamicResourceHandler(final Http.RequestHeader requestHeader) {
         throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler");
     }
 

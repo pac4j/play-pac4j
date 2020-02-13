@@ -1,7 +1,6 @@
 package org.pac4j.play.scala
 
 import javax.inject.{Inject, Singleton}
-import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import play.api.mvc._
@@ -28,19 +27,6 @@ trait Security[P<:CommonProfile] extends BaseController {
   protected def config: Config = controllerComponents.config
 
   protected def playSessionStore: PlaySessionStore = controllerComponents.playSessionStore
-
-  /**
-    * Get or create a new sessionId.
-    *
-    * @param request
-    * @return the (updated) session
-    */
-  protected def getOrCreateSessionId(request: RequestHeader): Session = {
-    val webContext = new PlayWebContext(request, controllerComponents.playSessionStore)
-    webContext.getSessionStore.asInstanceOf[PlaySessionStore].getOrCreateSessionId(webContext)
-    val map = mapAsScalaMapConverter(webContext.getJavaSession).asScala.toMap
-    new Session(map)
-  }
 
   protected def profiles[A](implicit request: AuthenticatedRequest[A]): List[P] = request.profiles
 
@@ -83,30 +69,17 @@ case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedReques
     copy[P,A,R](parser = action.parser).async(action.parser)(r => action.apply(r))
 
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]) = {
-    val webContext = request.body match {
-      case content: AnyContentAsFormUrlEncoded =>
-        val javaBodyContent = content.asFormUrlEncoded
-          .getOrElse(Map.empty[String, Seq[String]])
-          .map(field => field._1 -> field._2.toArray) // Make field values Java-friendly
-          .asJava
-        val javaBody = new RequestBody(javaBodyContent)
-        val jRequest = Request(request, javaBody)
-        val jContext = JavaHelpers.createJavaContext(jRequest, JavaHelpers.createContextComponents())
-        new PlayWebContext(jContext, playSessionStore)
-      case _ =>
-        new PlayWebContext(request, playSessionStore)
-    }
     val secureAction = new org.pac4j.play.java.SecureAction(config, playSessionStore)
-    val javaContext = webContext.getJavaContext
-    secureAction.internalCall(javaContext, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
+    secureAction.internalCall(request.asJava, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
+        val webContext = new PlayWebContext(request, playSessionStore)
         val profileManager = new ProfileManager[P](webContext)
         val profiles = profileManager.getAll(true)
         logger.debug("profiles: {}", profiles)
         block(AuthenticatedRequest(asScalaBuffer(profiles).toList, request))
       } else {
         Future successful {
-          JavaHelpers.createResult(javaContext, r)
+          r.asScala
         }
       }
     )

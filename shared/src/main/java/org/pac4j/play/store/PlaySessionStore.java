@@ -10,5 +10,4 @@ import org.pac4j.play.PlayWebContext;
  * @since 2.5.0
  */
 public interface PlaySessionStore extends SessionStore<PlayWebContext> {
-
 }

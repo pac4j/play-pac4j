@@ -4,17 +4,13 @@ import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.apache.commons.lang3.StringUtils
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.Pac4jConstants
-import org.pac4j.play.PlayWebContext
 import SecurityFilter._
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc
-import play.mvc.Http
 
-import scala.collection.JavaConverters._
 import scala.compat.java8.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
@@ -77,21 +73,12 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
   }
 
   private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
-    val webContext = new PlayWebContext(request, playSessionStore)
     val securityAction = new SecureAction(config, playSessionStore)
-    val javaContext = webContext.getJavaContext
 
-    def calculateResult(requiresAuthenticationResult: mvc.Result): Future[Result] = {
-      val isAuthSucceeded = requiresAuthenticationResult == null
+    def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
+      val isAuthSucceeded = secureActionResult == null
       if (isAuthSucceeded) {
-        // we pass the current profiles from the context.args to the request attributes
-        // so that the next call to the PlayWebContext.getRequestAttribute works
-        val profilesOpt = javaContext.args.asScala.get(Pac4jConstants.USER_PROFILES)
-        val requestWithProfiles = profilesOpt match {
-          case Some(profiles) => request.addAttr[AnyRef](PlayWebContext.PAC4J_USER_PROFILES.underlying(), profiles)
-          case None => request
-        }
-        nextFilter(requestWithProfiles)
+        nextFilter(request)
       } else {
         // When the user is not authenticated, the result is one of the following:
         // - forbidden
@@ -99,15 +86,15 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
         // - unauthorized
         // Or the future results in an exception
         Future {
-          log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${requiresAuthenticationResult.status}.")
-          createResultSimple(javaContext, requiresAuthenticationResult)
+          log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${secureActionResult.status}.")
+          secureActionResult.asScala
         }
       }
     }
 
     val futureResult: Future[Result] =
       securityAction
-        .internalCall(javaContext, rule.clients, rule.authorizers, rule.matchers, false)
+        .internalCall(request.asJava, rule.clients, rule.authorizers, rule.matchers, false)
         .toScala
         .flatMap[Result](calculateResult)
 
@@ -130,14 +117,6 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
 
   private def removeMultipleSlashed(path: String): String =
     path.replaceAll("(/){2,}", "$1")
-
-  private def createResultSimple(javaContext: Http.Context, javaResult: play.mvc.Result): play.api.mvc.Result = {
-    import scala.collection.convert.decorateAsScala._
-    val scalaResult = javaResult.asScala
-    scalaResult
-      .withHeaders(javaContext.response.getHeaders.asScala.toSeq: _*)
-      .withSession(javaContext.session().asScala.data.toSeq: _*)
-  }
 }
 
 object SecurityFilter {

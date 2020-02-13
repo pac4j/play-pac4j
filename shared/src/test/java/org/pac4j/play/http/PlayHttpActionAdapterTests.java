@@ -13,10 +13,10 @@ import org.pac4j.core.util.TestsConstants;
 import org.pac4j.core.util.TestsHelper;
 import org.pac4j.play.PlayWebContext;
 
+import org.pac4j.play.store.PlaySessionStore;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.test.Helpers;
-
-import java.io.IOException;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -36,61 +36,58 @@ public final class PlayHttpActionAdapterTests implements TestsConstants {
     @Before
     public void setUp() {
         adapter = new PlayHttpActionAdapter();
-        context = mock(PlayWebContext.class);
+        context = new PlayWebContext(mock(Http.RequestHeader.class), mock(PlaySessionStore.class));
     }
     
     @After
     public void teardown() {
     }
 
-    protected String getBody(final Result result) throws IOException {
+    protected String getBody(final Result result) {
       return Helpers.contentAsString(result);
     }
 
     @Test
-    public void testUnauthorized() throws IOException {
+    public void testUnauthorized() {
         final Result result = adapter.adapt(new StatusAction(HttpConstants.UNAUTHORIZED), context);
         assertEquals(401, result.status());
     }
 
     @Test
-    public void testForbidden() throws IOException {
+    public void testForbidden() {
         final Result result = adapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), context);
         assertEquals(403, result.status());
     }
 
     @Test
-    public void testRedirectFound() throws IOException {
-        when(context.getLocation()).thenReturn(PAC4J_URL);
+    public void testRedirectFound() {
         final Result result = adapter.adapt(new FoundAction(PAC4J_URL), context);
         assertEquals(HttpConstants.FOUND, result.status());
         assertEquals(PAC4J_URL, result.redirectLocation().get());
     }
 
     @Test
-    public void testRedirectSeeOther() throws IOException {
-        when(context.getLocation()).thenReturn(PAC4J_URL);
+    public void testRedirectSeeOther() {
         final Result result = adapter.adapt(new SeeOtherAction(PAC4J_URL), context);
         assertEquals(HttpConstants.SEE_OTHER, result.status());
         assertEquals(PAC4J_URL, result.redirectLocation().get());
     }
 
     @Test
-    public void testBadRequest() throws IOException {
+    public void testBadRequest() {
         final Result result = adapter.adapt(new StatusAction(HttpConstants.BAD_REQUEST), context);
         assertEquals(400, result.status());
     }
 
     @Test
-    public void testOk() throws IOException {
-        when(context.getResponseContent()).thenReturn(VALUE);
+    public void testOk() {
         final Result result = adapter.adapt(new OkAction(VALUE), context);
         assertEquals(200, result.status());
         assertEquals(VALUE, getBody(result));
     }
 
     @Test
-    public void testNoActionProvided() throws IOException {
+    public void testNoActionProvided() {
         TestsHelper.expectException(() -> adapter.adapt(null, null), TechnicalException.class, "No action provided");
     }
 }

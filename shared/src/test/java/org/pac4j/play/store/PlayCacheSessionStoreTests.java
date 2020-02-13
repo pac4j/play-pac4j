@@ -3,6 +3,7 @@ package org.pac4j.play.store;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mockito;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.play.PlayWebContext;
 import org.powermock.api.mockito.PowerMockito;
@@ -37,9 +38,8 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
     public void setUp() {
         cacheApiMock = mock(SyncCacheApi.class);
         store = new PlayCacheSessionStore(cacheApiMock);
-        final Http.Session session = mock(Http.Session.class);
         context = mock(PlayWebContext.class);
-        when(context.getJavaSession()).thenReturn(session);
+        when(context.getSession()).thenReturn(Mockito.mock(Http.Session.class));
     }
 
     @Test
