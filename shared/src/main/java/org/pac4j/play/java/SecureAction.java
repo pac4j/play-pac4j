@@ -73,26 +73,31 @@ public class SecureAction extends Action<Result> {
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
           final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
           final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
-  
-          return internalCall(req, clients, authorizers, matchers, multiProfile);
+
+          final PlayWebContext playWebContext = new PlayWebContext(req, sessionStore);
+          return internalCall(req, playWebContext, clients, authorizers, matchers, multiProfile);
         } catch(Throwable t) {
           throw new RuntimeException(t);
         }        
     }
 
-    public CompletionStage<Result> internalCall(final Http.RequestHeader req, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+    public CompletionStage<Result> call(final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+        return internalCall(null, webContext, clients, authorizers, matchers, multiProfile);
+    }
+
+    protected CompletionStage<Result> internalCall(final Http.Request req, final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
 
         final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
         final SecurityLogic<CompletionStage<Result>, PlayWebContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
-        final PlayWebContext playWebContext = new PlayWebContext(req, sessionStore);
+
         final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
-        return bestLogic.perform(playWebContext, config, (webCtx, profiles, parameters) -> {
+        return bestLogic.perform(webContext, config, (webCtx, profiles, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);
 	            } else {
-	                return delegate.call((Http.Request) req);
+	                return delegate.call(webCtx.supplementRequest(req));
 	            }
             }, actionAdapterWrapper, clients, authorizers, matchers, multiProfile);
     }

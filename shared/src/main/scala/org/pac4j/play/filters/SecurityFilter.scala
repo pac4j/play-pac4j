@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import org.apache.commons.lang3.StringUtils
 import org.pac4j.core.config.Config
 import SecurityFilter._
+import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc._
@@ -73,12 +74,13 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
   }
 
   private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
+    val webContext = new PlayWebContext(request, playSessionStore)
     val securityAction = new SecureAction(config, playSessionStore)
 
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
       val isAuthSucceeded = secureActionResult == null
       if (isAuthSucceeded) {
-        nextFilter(request)
+        nextFilter(webContext.supplementRequest(request.asJava).asScala)
       } else {
         // When the user is not authenticated, the result is one of the following:
         // - forbidden
@@ -94,7 +96,7 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
 
     val futureResult: Future[Result] =
       securityAction
-        .internalCall(request.asJava, rule.clients, rule.authorizers, rule.matchers, false)
+        .call(webContext, rule.clients, rule.authorizers, rule.matchers, false)
         .toScala
         .flatMap[Result](calculateResult)
 

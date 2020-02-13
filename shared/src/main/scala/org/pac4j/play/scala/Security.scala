@@ -69,14 +69,14 @@ case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedReques
     copy[P,A,R](parser = action.parser).async(action.parser)(r => action.apply(r))
 
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]) = {
+    val webContext = new PlayWebContext(request, playSessionStore)
     val secureAction = new org.pac4j.play.java.SecureAction(config, playSessionStore)
-    secureAction.internalCall(request.asJava, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
+    secureAction.call(webContext, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
-        val webContext = new PlayWebContext(request, playSessionStore)
         val profileManager = new ProfileManager[P](webContext)
         val profiles = profileManager.getAll(true)
         logger.debug("profiles: {}", profiles)
-        block(AuthenticatedRequest(asScalaBuffer(profiles).toList, request))
+        block(AuthenticatedRequest(asScalaBuffer(profiles).toList, webContext.supplementRequest(request.asJava).asScala.asInstanceOf[Request[A]]))
       } else {
         Future successful {
           r.asScala

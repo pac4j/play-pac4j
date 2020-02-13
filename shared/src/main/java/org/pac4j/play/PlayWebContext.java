@@ -7,10 +7,14 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.store.PlaySessionStore;
+import play.api.mvc.AnyContentAsFormUrlEncoded;
+import play.api.mvc.AnyContentAsText;
+import play.api.mvc.Request;
 import play.api.mvc.RequestHeader;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
+import scala.collection.Seq;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -26,7 +30,9 @@ public class PlayWebContext implements WebContext {
 
     protected static final TypedKey<Map<String, Object>> PAC4J_ATTRIBUTES = TypedKey.create("pac4jAttributes");
 
-    protected Http.RequestHeader request;
+    protected Http.RequestHeader javaRequest;
+
+    protected RequestHeader scalaRequest;
 
     protected String requestContent;
 
@@ -42,17 +48,18 @@ public class PlayWebContext implements WebContext {
 
     protected Http.Session session;
 
-    public PlayWebContext(final Http.RequestHeader request, final PlaySessionStore sessionStore) {
-        CommonHelper.assertNotNull("request", request);
+    public PlayWebContext(final Http.RequestHeader javaRequest, final PlaySessionStore sessionStore) {
+        CommonHelper.assertNotNull("request", javaRequest);
         CommonHelper.assertNotNull("sessionStore", sessionStore);
-        this.request = request;
+        this.javaRequest = javaRequest;
         this.sessionStore = sessionStore;
-        this.session = request.session();
+        this.session = javaRequest.session();
         sessionHasChanged = false;
     }
 
-    public PlayWebContext(final RequestHeader requestHeader, final PlaySessionStore sessionStore) {
-        this(requestHeader.asJava(), sessionStore);
+    public PlayWebContext(final RequestHeader scalaRequest, final PlaySessionStore sessionStore) {
+        this(scalaRequest.asJava(), sessionStore);
+        this.scalaRequest = scalaRequest;
     }
 
     @Override
@@ -62,12 +69,12 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public Optional<String> getRequestHeader(final String name) {
-        return request.header(name);
+        return javaRequest.header(name);
     }
 
     @Override
     public String getRequestMethod() {
-        return request.method();
+        return javaRequest.method();
     }
 
     @Override
@@ -83,20 +90,37 @@ public class PlayWebContext implements WebContext {
     @Override
     public Map<String, String[]> getRequestParameters() {
         final Map<String, String[]> parameters = new HashMap<>();
-        if (request.hasBody()) {
-            final Http.RequestBody body = ((Http.Request) request).body();
-            if (body != null) {
-                final Map<String, String[]> p = body.asFormUrlEncoded();
-                if (p != null) {
-                    parameters.putAll(p);
-                }
+        final Object body = getBody();
+        Map<String, String[]> p = null;
+        if (body instanceof Http.RequestBody) {
+            p = ((Http.RequestBody) body).asFormUrlEncoded();
+        } else if (body instanceof AnyContentAsFormUrlEncoded) {
+            p = new HashMap<>();
+            final scala.collection.immutable.Map<String, Seq<String>> scalaParameters = ((AnyContentAsFormUrlEncoded) body).asFormUrlEncoded().get();
+            for (final String key : ScalaCompatibility.scalaSetToJavaSet(scalaParameters.keySet())) {
+                final Seq<String> v = scalaParameters.get(key).get();
+                final String[] values = new String[v.size()];
+                v.copyToArray(values);
+                p.put(key, values);
             }
         }
-        final Map<String, String[]> urlParameters = request.queryString();
+        if (p != null) {
+            parameters.putAll(p);
+        }
+        final Map<String, String[]> urlParameters = javaRequest.queryString();
         if (urlParameters != null) {
             parameters.putAll(urlParameters);
         }
         return parameters;
+    }
+
+    protected Object getBody() {
+        if (scalaRequest != null && scalaRequest.hasBody() && scalaRequest instanceof Request) {
+            return ((Request) scalaRequest).body();
+        } else if (javaRequest.hasBody() && javaRequest instanceof Http.Request) {
+            return ((Http.Request) javaRequest).body();
+        }
+        return null;
     }
 
     @Override
@@ -106,22 +130,22 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public String getServerName() {
-        String[] split = request.host().split(":");
+        String[] split = javaRequest.host().split(":");
         return split[0];
     }
 
     @Override
     public int getServerPort() {
-        String defaultPort = request.secure() ? "443" : "80";
+        String defaultPort = javaRequest.secure() ? "443" : "80";
 
-        String[] split = request.host().split(":");
+        String[] split = javaRequest.host().split(":");
         String portStr = split.length > 1 ? split[1] : defaultPort;
         return Integer.parseInt(portStr);
     }
 
     @Override
     public String getScheme() {
-        if (request.secure()) {
+        if (javaRequest.secure()) {
             return "https";
         } else {
             return "http";
@@ -129,35 +153,35 @@ public class PlayWebContext implements WebContext {
     }
 
     @Override
-    public boolean isSecure() { return request.secure(); }
+    public boolean isSecure() { return javaRequest.secure(); }
 
     @Override
     public String getFullRequestURL() {
-        return getScheme() + "://" + request.host() + request.uri();
+        return getScheme() + "://" + javaRequest.host() + javaRequest.uri();
     }
 
     @Override
     public String getRemoteAddr() {
-        return request.remoteAddress();
+        return javaRequest.remoteAddress();
     }
 
     @Override
     public Optional<Object> getRequestAttribute(final String name) {
-        Map<String, Object> attributes = request.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
+        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
         return Optional.ofNullable(attributes.get(name));
     }
 
     @Override
     public void setRequestAttribute(final String name, final Object value) {
-        Map<String, Object> attributes = request.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
+        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
         attributes.put(name, value);
-        request = request.addAttr(PAC4J_ATTRIBUTES, attributes);
+        javaRequest = javaRequest.addAttr(PAC4J_ATTRIBUTES, attributes);
     }
 
     @Override
     public Collection<Cookie> getRequestCookies() {
         final List<Cookie> cookies = new ArrayList<>();
-        final Http.Cookies httpCookies = request.cookies();
+        final Http.Cookies httpCookies = javaRequest.cookies();
         httpCookies.forEach(httpCookie -> {
             final Cookie cookie = new Cookie(httpCookie.name(), httpCookie.value());
             if(httpCookie.domain() != null) {
@@ -176,7 +200,7 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public String getPath() {
-        return request.path();
+        return javaRequest.path();
     }
 
     @Override
@@ -204,8 +228,13 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public String getRequestContent() {
-        if (requestContent == null && request.hasBody()) {
-            requestContent = ((Http.Request) request).body().asText();
+        if (requestContent == null) {
+            final Object body = getBody();
+            if (body instanceof Http.RequestBody) {
+                requestContent = ((Http.RequestBody) body).asText();
+            } else if (body instanceof AnyContentAsText) {
+                requestContent = ((AnyContentAsText) body).asText().getOrElse(null);
+            }
         }
         return requestContent;
     }
@@ -217,6 +246,14 @@ public class PlayWebContext implements WebContext {
     public void setSession(final Http.Session session) {
         this.session = session;
         sessionHasChanged = true;
+    }
+
+    public Http.Request supplementRequest(final Http.Request request) {
+        return request.withAttrs(this.javaRequest.attrs());
+    }
+
+    public Http.RequestHeader supplementRequest(final Http.RequestHeader request) {
+        return request.withAttrs(this.javaRequest.attrs());
     }
 
     public Result supplementResult(final Result result) {
@@ -237,7 +274,7 @@ public class PlayWebContext implements WebContext {
         }
         if (sessionHasChanged) {
             r = r.withSession(session);
-            session = request.session();
+            session = javaRequest.session();
             sessionHasChanged = false;
         }
         return r;

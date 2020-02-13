@@ -38,7 +38,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
 
             final Result predefinedResult = results.get(code);
             if (predefinedResult != null) {
-                logger.debug("using pre-defined result: {}", predefinedResult);
+                logger.debug("using pre-defined result for code: {}", code);
                 return context.supplementResult(predefinedResult);
             }
 
