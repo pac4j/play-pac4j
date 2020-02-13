@@ -74,11 +74,11 @@ class SecurityFilterTests extends ScalaFutures with Results {
       securityFilter.apply(nextFilter)(testRequest)
     }
 
-    //status(tryFilterApply("/path_secure")) shouldBe 401
-    //status(tryFilterApply("/path_secure_2/any_path_")) shouldBe 401
+    status(tryFilterApply("/path_secure")) shouldBe 401
+    status(tryFilterApply("/path_secure_2/any_path_")) shouldBe 401
 
     status(tryFilterApply("/path_anonymous")) shouldBe 200
-    //status(tryFilterApply("any/other/path")) shouldBe 200
+    status(tryFilterApply("any/other/path")) shouldBe 200
   }
 
   private def prepareSecurityFilter(configString: String)

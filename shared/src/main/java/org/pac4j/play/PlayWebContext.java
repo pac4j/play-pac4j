@@ -28,7 +28,7 @@ import java.time.temporal.ChronoUnit;
  */
 public class PlayWebContext implements WebContext {
 
-    protected static final TypedKey<Map<String, Object>> PAC4J_ATTRIBUTES = TypedKey.create("pac4jAttributes");
+    protected static final TypedKey<Map<String, Object>> PAC4J_REQUEST_ATTRIBUTES = TypedKey.create("pac4jRequestAttributes");
 
     protected Http.RequestHeader javaRequest;
 
@@ -167,15 +167,15 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public Optional<Object> getRequestAttribute(final String name) {
-        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
+        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_REQUEST_ATTRIBUTES).orElse(new HashMap<>());
         return Optional.ofNullable(attributes.get(name));
     }
 
     @Override
     public void setRequestAttribute(final String name, final Object value) {
-        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_ATTRIBUTES).orElse(new HashMap<>());
+        Map<String, Object> attributes = javaRequest.attrs().getOptional(PAC4J_REQUEST_ATTRIBUTES).orElse(new HashMap<>());
         attributes.put(name, value);
-        javaRequest = javaRequest.addAttr(PAC4J_ATTRIBUTES, attributes);
+        javaRequest = javaRequest.addAttr(PAC4J_REQUEST_ATTRIBUTES, attributes);
     }
 
     @Override
