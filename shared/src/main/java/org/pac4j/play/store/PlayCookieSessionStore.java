@@ -106,11 +106,11 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         if (value instanceof LinkedHashMap<?, ?>) {
             @SuppressWarnings("unchecked")
             LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) value;
-            profiles.forEach((name, profile) -> profile.clearSensitiveData());
+            profiles.forEach((name, profile) -> profile.removeLoginData());
             return profiles;
         } else {
             CommonProfile profile = (CommonProfile) value;
-            profile.clearSensitiveData();
+            profile.removeLoginData();
             return profile;
         }
     }
