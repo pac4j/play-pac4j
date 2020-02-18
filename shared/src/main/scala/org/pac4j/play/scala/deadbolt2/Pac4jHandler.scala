@@ -8,7 +8,8 @@ import be.objectify.deadbolt.scala.{AuthenticatedRequest, DeadboltHandler, Dynam
 import be.objectify.deadbolt.scala.models.Subject
 import org.pac4j.core.client.{Client, DirectClient}
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.{HttpConstants, Pac4jConstants}
+import org.pac4j.core.context.HttpConstants
+import org.pac4j.core.util.Pac4jConstants
 import org.pac4j.core.credentials.Credentials
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.core.exception.TechnicalException
