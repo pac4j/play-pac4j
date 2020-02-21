@@ -231,11 +231,11 @@ public class PlayWebContext implements WebContext {
         return requestContent;
     }
 
-    public Http.Session getSession() {
+    public Http.Session getNativeSession() {
         return session;
     }
 
-    public void setSession(final Http.Session session) {
+    public void setNativeSession(final Http.Session session) {
         this.session = session;
         sessionHasChanged = true;
     }
@@ -248,7 +248,7 @@ public class PlayWebContext implements WebContext {
         return request.withAttrs(this.javaRequest.attrs());
     }
 
-    public Result supplementResult(final Result result) {
+    public Result supplementResponse(final Result result) {
         Result r = result;
         if (responseCookies.size() > 0) {
             r = r.withCookies(responseCookies.toArray(new Http.Cookie[responseCookies.size()]));

@@ -39,7 +39,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
             final Result predefinedResult = results.get(code);
             if (predefinedResult != null) {
                 logger.debug("using pre-defined result for code: {}", code);
-                return context.supplementResult(predefinedResult);
+                return context.supplementResponse(predefinedResult);
             }
 
             Map<String, String> headers = new HashMap<>();
@@ -58,7 +58,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
                 }
             }
 
-            return context.supplementResult(new Result(code, headers, httpEntity));
+            return context.supplementResponse(new Result(code, headers, httpEntity));
         }
 
         throw new TechnicalException("No action provided");

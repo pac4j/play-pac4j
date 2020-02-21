@@ -65,7 +65,9 @@
         <pac4j.version>4.0.0-RC3</pac4j.version>
         <play.version>2.7.4</play.version>
         <java.version>1.8</java.version>
+        <guice.version>4.2.2</guice.version>
         <shiro.version>1.5.0</shiro.version>
+        <ehcache.version>2.10.6</ehcache.version>
         <scalatest.version>3.2.0-SNAP10</scalatest.version>
         <deadbolt.version>2.7.1</deadbolt.version>
         <powermock.version>2.0.5</powermock.version>
@@ -86,7 +88,7 @@
         <dependency>
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
-            <version>4.2.2</version>
+            <version>${guice.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.shiro</groupId>
@@ -94,23 +96,11 @@
             <version>${shiro.version}</version>
             <scope>provided</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
-        <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.14</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.9</version>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache</artifactId>
+            <version>${ehcache.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- tests -->

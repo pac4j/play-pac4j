@@ -2,9 +2,9 @@ package org.pac4j.play.filters
 
 import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
-import org.apache.commons.lang3.StringUtils
 import org.pac4j.core.config.Config
 import SecurityFilter._
+import org.pac4j.core.util.CommonHelper
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
 import org.pac4j.play.store.PlaySessionStore
@@ -111,7 +111,7 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
   private def getNormalizedPath(request: RequestHeader): String = {
     val pathPart = removeMultipleSlashed(request.path)
     val queryPart =
-      if (StringUtils.isBlank(request.rawQueryString)) ""
+      if (CommonHelper.isBlank(request.rawQueryString)) ""
       else s"?${request.rawQueryString}"
 
     pathPart + queryPart

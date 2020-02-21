@@ -1,7 +1,5 @@
 package org.pac4j.play.store;
 
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.JavaSerializationHelper;
@@ -16,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.zip.GZIPInputStream;
@@ -51,13 +50,13 @@ public class PlayCookieSessionStore implements PlaySessionStore {
 
     @Override
     public Optional<Object> get(final PlayWebContext context, final String key) {
-        final Http.Session session = context.getSession();
+        final Http.Session session = context.getNativeSession();
         final String sessionValue = session.getOptional(keyPrefix + key).orElse(null);
         if (sessionValue == null) {
             logger.trace("get, key = {} -> null", key);
             return Optional.empty();
         } else {
-            byte[] inputBytes = Base64.decodeBase64(sessionValue);
+            byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
             final Object value = JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
             logger.trace("get, key = {} -> value = {}", key, value);
             return Optional.of(value);
@@ -73,13 +72,13 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         }
 
         byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
-        String serialized = Base64.encodeBase64String(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
+        String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
             logger.trace("set, key = {} -> serialized token size = {}", key, serialized.length());
         } else {
             logger.trace("set, key = {} -> null serialized token", key);
         }
-        context.setSession(context.getSession().adding(keyPrefix + key, serialized));
+        context.setNativeSession(context.getNativeSession().adding(keyPrefix + key, serialized));
     }
 
     @Override
@@ -115,10 +114,15 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         }
     }
 
-    // based on http://lifelongprogrammer.blogspot.com/2013/11/java-use-zip-stream-and-base64-to-compress-big-string.html
     public static byte[] uncompressBytes(byte [] zippedBytes) {
+        final ByteArrayOutputStream resultBao = new ByteArrayOutputStream();
         try (GZIPInputStream zipInputStream = new GZIPInputStream(new ByteArrayInputStream(zippedBytes))) {
-            return IOUtils.toByteArray(zipInputStream);
+            byte[] buffer = new byte[8192];
+            int len;
+            while ((len = zipInputStream.read(buffer)) > 0) {
+                resultBao.write(buffer, 0, len);
+            }
+            return resultBao.toByteArray();
         } catch (IOException e) {
             logger.error("Unable to uncompress session cookie", e);
             return null;

@@ -39,7 +39,7 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
         cacheApiMock = mock(SyncCacheApi.class);
         store = new PlayCacheSessionStore(cacheApiMock);
         context = mock(PlayWebContext.class);
-        when(context.getSession()).thenReturn(Mockito.mock(Http.Session.class));
+        when(context.getNativeSession()).thenReturn(Mockito.mock(Http.Session.class));
     }
 
     @Test
