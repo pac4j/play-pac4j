@@ -1,5 +1,13 @@
 {
   "extends": [
     "config:base"
+  ],
+  "ignoreDeps": [
+    "be.objectify:deadbolt-java_2.11",
+    "be.objectify:deadbolt-scala_2.11",
+    "be.objectify:deadbolt-java_2.12",
+    "be.objectify:deadbolt-scala_2.12",
+    "be.objectify:deadbolt-java_2.13",
+    "be.objectify:deadbolt-scala_2.13",
   ]
 }
