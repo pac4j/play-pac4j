@@ -31,13 +31,15 @@ Several versions of the library are available for the different versions of the 
 
 &#9656; Roles / permissions - Anonymous / remember-me / (fully) authenticated - Profile type, attribute -  CORS - CSRF - Security headers - IP address, HTTP method
 
-3) The `Secure` annotation and the `Security` trait protect methods while the `SecurityFilter` protects URLs by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
+3) A [**matcher**](http://www.pac4j.org/docs/matchers.html) defines whether the security must be applied and can be used for additional web processing.
 
-4) The `CallbackController` finishes the login process for an indirect client
+4) The `Secure` annotation and the `Security` trait protect methods while the `SecurityFilter` protects URLs by checking that the user is authenticated and that the authorizations are valid, according to the clients and authorizers configuration. If the user is not authenticated, it performs authentication for direct clients or starts the login process for indirect clients
 
-5) The `LogoutController` logs out the user from the application and triggers the logout at the identity provider level
+5) The `CallbackController` finishes the login process for an indirect client
 
-6) The `Pac4jScalaTemplateHelper` can be used to get the user profile(s) from a Twirl template.
+6) The `LogoutController` logs out the user from the application and triggers the logout at the identity provider level
+
+7) The `Pac4jScalaTemplateHelper` can be used to get the user profile(s) from a Twirl template.
 
 
 ## Usage
