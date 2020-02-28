@@ -7,6 +7,8 @@ import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.play.store.PlaySessionStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.api.mvc.AnyContentAsFormUrlEncoded;
 import play.api.mvc.AnyContentAsText;
 import play.api.mvc.Request;
@@ -26,6 +28,8 @@ import java.time.temporal.ChronoUnit;
  * @since 1.1.0
  */
 public class PlayWebContext implements WebContext {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected static final TypedKey<Map<String, Object>> PAC4J_REQUEST_ATTRIBUTES = TypedKey.create("pac4jRequestAttributes");
 
@@ -241,30 +245,36 @@ public class PlayWebContext implements WebContext {
     }
 
     public Http.Request supplementRequest(final Http.Request request) {
+        logger.trace("supplement request with: {}", this.javaRequest.attrs());
         return request.withAttrs(this.javaRequest.attrs());
     }
 
     public Http.RequestHeader supplementRequest(final Http.RequestHeader request) {
+        logger.trace("supplement request with: {}", this.javaRequest.attrs());
         return request.withAttrs(this.javaRequest.attrs());
     }
 
     public Result supplementResponse(final Result result) {
         Result r = result;
         if (responseCookies.size() > 0) {
+            logger.trace("supplement response with cookies: {}", responseCookies);
             r = r.withCookies(responseCookies.toArray(new Http.Cookie[responseCookies.size()]));
             responseCookies.clear();
         }
         if (responseHeaders.size() > 0) {
             for (final Map.Entry<String, String> header : responseHeaders.entrySet()) {
+                logger.trace("supplement response with header: {}", header);
                 r = r.withHeader(header.getKey(), header.getValue());
             }
             responseHeaders.clear();
         }
         if (responseContentType != null) {
+            logger.trace("supplement response with type: {}", responseContentType);
             r = r.as(responseContentType);
             responseContentType = null;
         }
         if (sessionHasChanged) {
+            logger.trace("supplement response with session: {}", session);
             r = r.withSession(session);
             session = javaRequest.session();
             sessionHasChanged = false;

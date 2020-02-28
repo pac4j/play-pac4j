@@ -58,26 +58,35 @@ public class PlayCacheSessionStore implements PlaySessionStore {
     @Override
     public String getOrCreateSessionId(final PlayWebContext context) {
         // get current sessionId from session or from request
-        String sessionId = getSessionId(context);
+        String sessionId = getSessionIdFromSessionOrRequest(context);
         if (sessionId == null) {
             // generate id for session
             sessionId = java.util.UUID.randomUUID().toString();
             logger.debug("generated sessionId: {}", sessionId);
             // and save it to session/request
-            context.setNativeSession(context.getNativeSession().adding(Pac4jConstants.SESSION_ID, sessionId));
+            setSessionIdInSession(context, sessionId);
             context.setRequestAttribute(Pac4jConstants.SESSION_ID, sessionId);
         }
         return sessionId;
     }
 
-    private String getSessionId(final PlayWebContext context) {
+    protected String getSessionIdFromSessionOrRequest(final PlayWebContext context) {
         String sessionId = context.getNativeSession().getOptional(Pac4jConstants.SESSION_ID).orElse(null);
         logger.trace("retrieved sessionId from session: {}", sessionId);
         if (sessionId == null) {
             sessionId = (String) context.getRequestAttribute(Pac4jConstants.SESSION_ID).orElse(null);
             logger.trace("retrieved sessionId from request: {}", sessionId);
+            // re-save it in session if defined
+            if (sessionId != null) {
+                logger.trace("re-saving sessionId in session: {}", sessionId);
+                setSessionIdInSession(context, sessionId);
+            }
         }
         return sessionId;
+    }
+
+    protected void setSessionIdInSession(final PlayWebContext context, final String sessionId) {
+        context.setNativeSession(context.getNativeSession().adding(Pac4jConstants.SESSION_ID, sessionId));
     }
 
     @Override
@@ -108,7 +117,7 @@ public class PlayCacheSessionStore implements PlaySessionStore {
 
     @Override
     public boolean destroySession(final PlayWebContext context) {
-        final String sessionId = getSessionId(context);
+        final String sessionId = getSessionIdFromSessionOrRequest(context);
         if (sessionId != null) {
             context.setNativeSession(new Http.Session(new HashMap<>()));
             context.setRequestAttribute(Pac4jConstants.SESSION_ID, null);
@@ -119,12 +128,12 @@ public class PlayCacheSessionStore implements PlaySessionStore {
 
     @Override
     public Optional<Object> getTrackableSession(final PlayWebContext context) {
-        return Optional.ofNullable(getSessionId(context));
+        return Optional.ofNullable(getSessionIdFromSessionOrRequest(context));
     }
 
     @Override
     public Optional<SessionStore<PlayWebContext>> buildFromTrackableSession(final PlayWebContext context, final Object trackableSession) {
-        context.setNativeSession(context.getNativeSession().adding(Pac4jConstants.SESSION_ID, (String) trackableSession));
+        setSessionIdInSession(context, (String) trackableSession);
         context.setRequestAttribute(Pac4jConstants.SESSION_ID, trackableSession);
         return Optional.of(this);
     }
