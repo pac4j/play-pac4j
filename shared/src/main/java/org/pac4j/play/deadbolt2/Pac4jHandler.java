@@ -134,7 +134,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     private Optional<CommonProfile> getProfile(final Http.RequestHeader requestHeader) {
         final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
         final ProfileManager manager = new ProfileManager(playWebContext);
-        return manager.get(true);
+        return manager.getLikeDefaultSecurityLogic(true);
     }
 
     private void setProfile(final Http.RequestHeader requestHeader, CommonProfile profile) {

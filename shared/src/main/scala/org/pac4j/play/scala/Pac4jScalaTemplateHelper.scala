@@ -40,7 +40,7 @@ class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playSessionStore: Pla
     */
   def getCurrentProfiles(implicit request: RequestHeader): List[P] = {
     val profileManager = createProfileManager
-    profileManager.getAll(true).asScala.toList
+    profileManager.getAllLikeDefaultSecurityLogic(true).asScala.toList
   }
 
 
@@ -53,7 +53,7 @@ class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playSessionStore: Pla
 
     val profileManager = createProfileManager
 
-    val javaProfileOptional = profileManager.get(true)
+    val javaProfileOptional = profileManager.getLikeDefaultSecurityLogic(true)
 
     if(javaProfileOptional.isPresent) {
       Option.apply(javaProfileOptional.get())

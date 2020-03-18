@@ -81,7 +81,7 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
   private def getProfile(request: RequestHeader): Option[CommonProfile] = {
     val playWebContext = new PlayWebContext(request, playSessionStore)
     val profileManager = new ProfileManager[CommonProfile](playWebContext)
-    profileManager.get(true)
+    profileManager.getLikeDefaultSecurityLogic(true)
   }
 
   private def setProfile(request: RequestHeader, profile: CommonProfile): Unit = {

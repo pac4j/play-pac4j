@@ -72,7 +72,7 @@ case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedReques
     secureAction.call(webContext, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         val profileManager = new ProfileManager[P](webContext)
-        val profiles = profileManager.getAll(true)
+        val profiles = profileManager.getAllLikeDefaultSecurityLogic(true)
         logger.debug("profiles: {}", profiles)
         block(AuthenticatedRequest(profiles.asScala.toList, webContext.supplementRequest(request.asJava).asScala.asInstanceOf[Request[A]]))
       } else {
