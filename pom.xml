@@ -70,7 +70,7 @@
         <ehcache.version>2.10.6</ehcache.version>
         <scalatest.version>3.2.0-SNAP10</scalatest.version>
         <deadbolt.version>2.7.1</deadbolt.version>
-        <powermock.version>2.0.5</powermock.version>
+        <powermock.version>2.0.6</powermock.version>
     </properties>
 
     <modules>
