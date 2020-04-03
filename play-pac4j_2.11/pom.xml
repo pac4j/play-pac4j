@@ -15,6 +15,7 @@
 
     <properties>
         <scala.version>2.11</scala.version>
+        <scala.maven.version>2.11.12</scala.maven.version>
     </properties>
 
     <dependencies>

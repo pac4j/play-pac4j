@@ -13,7 +13,7 @@ import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.play.filters.SecurityFilter.{Rule, RuleData}
 import org.pac4j.play.http.PlayHttpActionAdapter
 import org.pac4j.play.store.PlayCacheSessionStore
-import org.scalatest.Matchers._
+import org.scalatest.matchers.should.Matchers._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.Configuration
 import play.api.mvc.{RequestHeader, Result, Results}

@@ -13,10 +13,6 @@
     <name>pac4j implementation for Play framework (Scala 2.13)</name>
     <description>Security library for Play framework based on pac4j using Scala 2.13</description>
 
-    <properties>
-        <scala.version>2.13</scala.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.typesafe.play</groupId>
@@ -53,7 +49,7 @@
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.version}</artifactId>
-            <version>3.0.8</version>
+            <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

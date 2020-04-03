@@ -68,9 +68,12 @@
         <guice.version>4.2.3</guice.version>
         <shiro.version>1.5.2</shiro.version>
         <ehcache.version>2.10.6</ehcache.version>
-        <scalatest.version>3.2.0-SNAP10</scalatest.version>
+        <scalatest.version>3.3.0-SNAP2</scalatest.version>
         <deadbolt.version>2.7.1</deadbolt.version>
-        <powermock.version>2.0.7</powermock.version>
+        <scala.version>2.13</scala.version>
+        <scala.maven.version>2.13.0</scala.maven.version>
+        <junit.version>4.13</junit.version>
+        <mockito.version>3.3.3</mockito.version>
     </properties>
 
     <modules>
@@ -114,27 +117,16 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.13</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-core</artifactId>
-            <version>${powermock.version}</version>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito2</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>${powermock.version}</version>
-            <scope>test</scope>
-        </dependency>
+
     </dependencies>
 
     <build>
@@ -190,13 +182,20 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.scala-tools</groupId>
-                <artifactId>maven-scala-plugin</artifactId>
-                <version>2.15.2</version>
+                <groupId>net.alchim31.maven</groupId>
+                <artifactId>scala-maven-plugin</artifactId>
+                <version>4.3.1</version>
                 <configuration>
-                    <includes>
-                        <include>**/*.scala</include>
-                    </includes>
+                    <scalaCompatVersion>${scala.version}</scalaCompatVersion>
+                    <scalaVersion>${scala.maven.version}</scalaVersion>
+                    <recompileMode>incremental</recompileMode>
+                    <args>
+                        <arg>-target:jvm-${java.version}</arg>
+                    </args>
+                    <javacArgs>
+                        <javacArg>-source</javacArg><javacArg>${java.version}</javacArg>
+                        <javacArg>-target</javacArg><javacArg>${java.version}</javacArg>
+                    </javacArgs>
                 </configuration>
                 <executions>
                     <execution>
