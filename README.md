@@ -3,21 +3,22 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.7 (Scala v2.11, v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v4**. It's available under the Apache 2 license.
+It's based on Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v4**. It's available under the Apache 2 license.
 
 Several versions of the library are available for the different versions of the Play framework:
 
 | Play version | pac4j version | play-pac4j version
 |--------------|---------------|-------------------
-| 2.0          | 1.7           | [play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.9 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
-| 2.1          | 1.7           | [play-pac4j_java 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.10 1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
-| 2.2          | 1.7           | [play-pac4j_java 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala 1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
-| 2.3          | 1.7           | [play-pac4j_java 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
-| 2.4          | 1.9           | [play-pac4j 2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
-| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
-| 2.7          | 3.7           | [play-pac4j_2.11 and play-pac4j_2.12 8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
-| 2.7          | 4.x           | 9.0.x (Java & Scala)
+| 2.0          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.9 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
+| 2.1          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.10 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
+| 2.2          | 1.7           | [play-pac4j_java v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
+| 2.3          | 1.7           | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
+| 2.4          | 1.9           | [play-pac4j v2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
+| 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 v3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
+| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
+| 2.7          | 3.7           | [play-pac4j_2.11 and play-pac4j_2.12 v8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
+| 2.7          | 4.x           | [play-pac4j_2.11 and play-pac4j_2.12 and play-pac4j_2.13 v9.0.x](https://github.com/pac4j/play-pac4j/tree/9.0.x) (Java & Scala)
+| 2.8          | 4.x           | 10.0.x (Java & Scala)
 
 **Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
@@ -69,7 +70,7 @@ Test them online: [http://play-pac4j-java-demo.herokuapp.com](http://play-pac4j-
 The latest released version is the [![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent/badge.svg?style=flat)](https://maven-badges.herokuapp.com/maven-central/org.pac4j/play-pac4j-parent), available in the [Maven central repository](https://repo.maven.apache.org/maven2).
 The [next version](https://github.com/pac4j/play-pac4j/wiki/Next-version) is under development.
 
-See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/4.0.0/index.html) and the [play-pac4j_2.11 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.11/9.0.0) / [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/9.0.0) / [play-pac4j_2.13 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.13/9.0.0).
+See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes). Learn more by browsing the [pac4j documentation](https://www.javadoc.io/doc/org.pac4j/pac4j-core/4.0.0/index.html) and the [play-pac4j_2.12 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.12/10.0.0) / [play-pac4j_2.13 Javadoc](http://www.javadoc.io/doc/org.pac4j/play-pac4j_2.13/10.0.0).
 
 See the [migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-guide) as well.
 
