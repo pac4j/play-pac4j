@@ -44,6 +44,9 @@ import scala.util.Failure
   *   {"/login.html" = {
   *     clients = "AnonymousClient"
   *   }}
+  *   # No security must be applied on the callback endpoint.
+  *   {"/callback.*" = {
+  *   }}
   *   # 'Catch all' rule to make sure the whole application stays secure.
   *   {".*" = {
   *     clients = "FormClient,TwitterClient"
@@ -136,13 +139,15 @@ object SecurityFilter {
 
     val ruleData: Option[RuleData] =
       conf.getOptional[Configuration](s""""$path"""").flatMap { c =>
-        val ruleData = RuleData(
-          c.getOptional[String]("clients").orNull,
-          c.getOptional[String]("authorizers").orNull,
-          c.getOptional[String]("matchers").orNull
-        )
+        val clients = c.getOptional[String]("clients").orNull
+        val authorizers = c.getOptional[String]("authorizers").orNull
+        val matchers = c.getOptional[String]("matchers").orNull
 
-        Some(ruleData)
+        if (clients != null || authorizers != null || matchers != null) {
+          Some(RuleData(clients, authorizers, matchers))
+        } else {
+          None
+        }
       }
 
     Rule(path.replace("\"", ""), ruleData)
