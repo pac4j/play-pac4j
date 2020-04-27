@@ -59,7 +59,7 @@ public class PlayCookieSessionStore implements PlaySessionStore {
             byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
             final Object value = JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
             logger.trace("get, key = {} -> value = {}", key, value);
-            return Optional.of(value);
+            return Optional.ofNullable(value);
         }
     }
 
