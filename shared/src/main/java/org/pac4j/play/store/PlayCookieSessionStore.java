@@ -102,16 +102,9 @@ public class PlayCookieSessionStore implements PlaySessionStore {
     }
 
     protected Object clearUserProfiles(Object value) {
-        if (value instanceof LinkedHashMap<?, ?>) {
-            @SuppressWarnings("unchecked")
-            LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) value;
-            profiles.forEach((name, profile) -> profile.removeLoginData());
-            return profiles;
-        } else {
-            CommonProfile profile = (CommonProfile) value;
-            profile.removeLoginData();
-            return profile;
-        }
+        final LinkedHashMap<String, CommonProfile> profiles = (LinkedHashMap<String, CommonProfile>) value;
+        profiles.forEach((name, profile) -> profile.removeLoginData());
+        return profiles;
     }
 
     public static byte[] uncompressBytes(byte [] zippedBytes) {
