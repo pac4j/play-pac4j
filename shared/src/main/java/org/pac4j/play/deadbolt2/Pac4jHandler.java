@@ -20,6 +20,8 @@ import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.store.PlaySessionStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -40,6 +42,8 @@ import static org.pac4j.core.util.CommonHelper.isNotEmpty;
  * @since 2.6.0
  */
 public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> implements DeadboltHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Pac4jHandler.class);
 
     private final Config config;
 
@@ -73,18 +77,18 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return CompletableFuture.supplyAsync(() -> {
             final Optional<CommonProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
-                logger.debug("profile found -> returning empty");
+                LOGGER.debug("profile found -> returning empty");
                 return Optional.empty();
             } else {
                 final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
                 final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
-                final List<Client> currentClients = getClientFinder().find(config.getClients(), playWebContext, clients);
-                logger.debug("currentClients: {}", currentClients);
+                final List<Client<? extends Credentials>> currentClients = getClientFinder().find(config.getClients(), playWebContext, clients);
+                LOGGER.debug("currentClients: {}", currentClients);
 
                 HttpAction action;
                 try {
                     if (startDirectAuthentication(currentClients)) {
-                        logger.debug("Starting direct authentication");
+                        LOGGER.debug("Starting direct authentication");
                         DirectClient client = (DirectClient) currentClients.get(0);
                         Optional<Credentials> credentials = client.getCredentials(playWebContext);
                         if (credentials.isPresent()) {
@@ -94,14 +98,14 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                                 return Optional.empty();
                             }
                         }
-                        logger.debug("unauthorized");
+                        LOGGER.debug("unauthorized");
                         action = unauthorized(playWebContext, currentClients);
                     } else if (startAuthentication(playWebContext, currentClients)) {
-                        logger.debug("Starting authentication");
+                        LOGGER.debug("Starting authentication");
                         saveRequestedUrl(playWebContext, currentClients, null);
                         action = redirectToIdentityProvider(playWebContext, currentClients);
                     } else {
-                        logger.debug("unauthorized");
+                        LOGGER.debug("unauthorized");
                         action = unauthorized(playWebContext, currentClients);
                     }
                 } catch (final HttpAction e) {
@@ -117,10 +121,10 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return CompletableFuture.supplyAsync(() -> {
             final Optional<CommonProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
-                logger.debug("profile found: {} -> building a subject", profile);
+                LOGGER.debug("profile found: {} -> building a subject", profile);
                 return Optional.of(new Pac4jSubject(profile.get()));
             } else {
-                logger.debug("no profile found -> returning empty");
+                LOGGER.debug("no profile found -> returning empty");
                 return Optional.empty();
             }
         }, httpExecutionContext.current());
@@ -156,7 +160,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler");
     }
 
-    private boolean startDirectAuthentication(final List<Client> currentClients) {
+    private boolean startDirectAuthentication(final List<Client<? extends Credentials>> currentClients) {
         return isNotEmpty(currentClients) && currentClients.get(0) instanceof DirectClient;
     }
 }
