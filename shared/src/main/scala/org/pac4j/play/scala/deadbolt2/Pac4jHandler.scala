@@ -19,6 +19,7 @@ import org.pac4j.core.profile.{CommonProfile, ProfileManager}
 import org.pac4j.core.util.CommonHelper.isNotEmpty
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.store.PlaySessionStore
+import play.api.Logger
 import play.api.mvc.{Request, RequestHeader, Result}
 
 /**
@@ -27,6 +28,8 @@ import play.api.mvc.{Request, RequestHeader, Result}
   */
 class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessionStore, rolePermissionsHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext)
     extends DefaultSecurityLogic[Result, PlayWebContext] with DeadboltHandler {
+
+  private val logger = Logger(this.getClass)
 
   implicit def asScalaOption[B](o: Optional[B]) = if (o.isPresent) Some(o.get) else None
 
@@ -39,7 +42,7 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
       val playWebContext = new PlayWebContext(request, playSessionStore)
       val currentClients = getClientFinder().find(config.getClients(), playWebContext, clients)
 
-      logger.debug("currentClients: {}", currentClients)
+      logger.debug("currentClients: " + currentClients)
 
       val action = try {
         if (startDirectAuthentication(currentClients)) {
