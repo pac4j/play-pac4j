@@ -75,6 +75,6 @@ class Pac4jScalaTemplateHelper[P<:CommonProfile] @Inject()(playSessionStore: Pla
   def isAuthorized(authorizers: String)(implicit request: RequestHeader): Boolean = {
     val context = new PlayWebContext(request, playSessionStore)
     val profiles = getCurrentProfiles.asInstanceOf[List[UserProfile]].asJava
-    authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers)
+    authorizationChecker.isAuthorized(context, profiles, authorizers, config.getAuthorizers, config.getClients.getClients)
   }
 }
