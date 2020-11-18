@@ -65,6 +65,14 @@ public class PlayWebContext implements WebContext {
         this.scalaRequest = scalaRequest;
     }
 
+    public Http.RequestHeader getNativeJavaRequest() {
+        return javaRequest;
+    }
+
+    public RequestHeader getNativeScalaRequest() {
+        return scalaRequest;
+    }
+
     @Override
     public SessionStore getSessionStore() {
         return this.sessionStore;
