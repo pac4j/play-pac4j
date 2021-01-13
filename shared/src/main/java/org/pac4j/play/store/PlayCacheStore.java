@@ -5,10 +5,9 @@ import com.google.inject.Provider;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.store.AbstractStore;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.core.util.JavaSerializationHelper;
+import org.pac4j.core.util.serializer.JavaSerializer;
 import play.cache.SyncCacheApi;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Optional;
  */
 public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
-    public static final JavaSerializationHelper JAVA_SERIALIZATION_HELPER = new JavaSerializationHelper();
+    public static final JavaSerializer JAVA_SERIALIZER = new JavaSerializer();
 
     private final SyncCacheApi cache;
     private final Provider<SyncCacheApi> cacheProvider;
@@ -46,7 +45,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
     @Override
     protected Optional<O> internalGet(final K key) {
-        return getCache().getOptional(computeKey(key));
+        return getCache().get(computeKey(key));
     }
 
     @Override
@@ -63,7 +62,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
         if (objKey instanceof String) {
             return (String) objKey;
         } else {
-            return JAVA_SERIALIZATION_HELPER.serializeToBase64((Serializable) objKey);
+            return JAVA_SERIALIZER.encode(objKey);
         }
     }
 

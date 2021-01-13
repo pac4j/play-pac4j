@@ -3,9 +3,9 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v4**. It's available under the Apache 2 license.
+It's based on Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
 
-Several versions of the library are available for the different versions of the Play framework:
+Several versions of the library are available depending on the version of the Play framework:
 
 | Play version | pac4j version | play-pac4j version
 |--------------|---------------|-------------------
@@ -15,18 +15,18 @@ Several versions of the library are available for the different versions of the 
 | 2.3          | 1.7           | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
 | 2.4          | 1.9           | [play-pac4j v2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
 | 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 v3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
-| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala)
-| 2.7          | 3.7           | [play-pac4j_2.11 and play-pac4j_2.12 v8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
+| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala) **Do NOT use Play v2.6.3 and v2.6.5 which have issues in their Cache implementations!**
+| 2.7          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
 | 2.7          | 4.x           | [play-pac4j_2.11 and play-pac4j_2.12 and play-pac4j_2.13 v9.0.x](https://github.com/pac4j/play-pac4j/tree/9.0.x) (Java & Scala)
-| 2.8          | 4.x           | 10.0.x (Java & Scala)
+| 2.8          | 4.x           | [play-pac4j_2.12 and play-pac4j_2.13 v9.0.x](https://github.com/pac4j/play-pac4j/tree/10.0.x) (Java & Scala)
+| 2.8          | 5.x           | play-pac4j_2.12 and play-pac4j_2.13 v11.0.x-PLAY2.8 (Java & Scala)
 
-**Do NOT use Play 2.6.3 and 2.6.5 versions which have issues in their Cache implementations!**
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
 1) A [**client**](http://www.pac4j.org/docs/clients.html) represents an authentication mechanism. It performs the login process and returns a user profile. An indirect client is for UI authentication while a direct client is for web services authentication:
 
-&#9656; OAuth - SAML - CAS - OpenID Connect - HTTP - OpenID - Google App Engine - Kerberos - LDAP - SQL - JWT - MongoDB - CouchDB - IP address - REST API
+&#9656; OAuth - SAML - CAS - OpenID Connect - HTTP - Google App Engine - Kerberos - LDAP - SQL - JWT - MongoDB - CouchDB - IP address - REST API
 
 2) An [**authorizer**](http://www.pac4j.org/docs/authorizers.html) is meant to check authorizations on the authenticated user profile(s) or on the current web context:
 
@@ -77,11 +77,4 @@ See the [migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-gui
 
 ## Need help?
 
-If you need commercial support (premium support or new/specific features), contact us at [info@pac4j.org](mailto:info@pac4j.org).
-
-If you have any questions, want to contribute or be notified about the new releases and security fixes, please subscribe to the following [mailing lists](http://www.pac4j.org/mailing-lists.html):
-
-- [pac4j-users](https://groups.google.com/forum/?hl=en#!forum/pac4j-users)
-- [pac4j-developers](https://groups.google.com/forum/?hl=en#!forum/pac4j-dev)
-- [pac4j-announce](https://groups.google.com/forum/?hl=en#!forum/pac4j-announce)
-- [pac4j-security](https://groups.google.com/forum/#!forum/pac4j-security)
+You can use the [mailing lists](http://www.pac4j.org/mailing-lists.html) or the [commercial support](http://www.pac4j.org/commercial-support.html).

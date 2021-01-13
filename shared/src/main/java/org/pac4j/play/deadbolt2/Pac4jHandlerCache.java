@@ -3,8 +3,8 @@ package org.pac4j.play.deadbolt2;
 import be.objectify.deadbolt.java.DeadboltHandler;
 import be.objectify.deadbolt.java.cache.HandlerCache;
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.store.PlaySessionStore;
 import play.libs.concurrent.HttpExecutionContext;
 
 import javax.inject.Inject;
@@ -28,19 +28,19 @@ public class Pac4jHandlerCache implements HandlerCache {
 
     private HttpExecutionContext httpExecutionContext;
 
-    private PlaySessionStore playSessionStore;
+    private SessionStore sessionStore;
 
     private DeadboltHandler defaultHandler;
 
     private final Pac4jRoleHandler roleHandler;
 
     @Inject
-    public Pac4jHandlerCache(final Config config, final HttpExecutionContext httpExecutionContext, final PlaySessionStore playSessionStore, final Pac4jRoleHandler roleHandler) {
+    public Pac4jHandlerCache(final Config config, final HttpExecutionContext httpExecutionContext, final SessionStore sessionStore, final Pac4jRoleHandler roleHandler) {
         this.config = config;
         this.httpExecutionContext = httpExecutionContext;
-        this.playSessionStore = playSessionStore;
+        this.sessionStore = sessionStore;
         this.roleHandler = roleHandler;
-        defaultHandler = new Pac4jHandler(config, httpExecutionContext, null, playSessionStore, roleHandler);
+        defaultHandler = new Pac4jHandler(config, httpExecutionContext, null, sessionStore, roleHandler);
         handlers.put("defaultHandler", defaultHandler);
     }
 
@@ -56,7 +56,7 @@ public class Pac4jHandlerCache implements HandlerCache {
     protected synchronized DeadboltHandler getAndBuildHandler(final String clients) {
         DeadboltHandler handler = handlers.get(clients);
         if (handler == null) {
-            handler = new Pac4jHandler(config, httpExecutionContext, clients, playSessionStore, roleHandler);
+            handler = new Pac4jHandler(config, httpExecutionContext, clients, sessionStore, roleHandler);
         }
         return handler;
     }
@@ -69,6 +69,6 @@ public class Pac4jHandlerCache implements HandlerCache {
     @Override
     public String toString() {
         return CommonHelper.toNiceString(this.getClass(), "handlers", handlers, "config", config,
-                "httpExecutionContext", httpExecutionContext, "playSessionStore", playSessionStore);
+                "httpExecutionContext", httpExecutionContext, "playSessionStore", sessionStore);
     }
 }

@@ -5,7 +5,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.pac4j.core.util.TestsConstants;
-import org.pac4j.play.store.PlaySessionStore;
 
 import play.mvc.Http.Request;
 
@@ -27,9 +26,8 @@ public final class PlayWebContextTests implements TestsConstants {
     
     @Before
     public void setUp() {
-        PlaySessionStore sessionStoreMock = mock(PlaySessionStore.class);
         requestMock = mock(Request.class);
-        webContext = new PlayWebContext(requestMock, sessionStoreMock);
+        webContext = new PlayWebContext(requestMock);
     }
     
     @After

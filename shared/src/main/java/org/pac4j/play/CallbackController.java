@@ -1,12 +1,14 @@
 package org.pac4j.play;
 
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.CallbackLogic;
 import org.pac4j.core.engine.DefaultCallbackLogic;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
+import org.pac4j.play.context.PlayContextFactory;
 import org.pac4j.play.http.PlayHttpActionAdapter;
-import org.pac4j.play.store.PlaySessionStore;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -26,13 +28,9 @@ import javax.inject.Inject;
  */
 public class CallbackController extends Controller {
 
-    private CallbackLogic<Result, PlayWebContext> callbackLogic;
+    private CallbackLogic callbackLogic;
 
     private String defaultUrl;
-
-    private Boolean saveInSession;
-
-    private Boolean multiProfile;
 
     private Boolean renewSession;
 
@@ -41,18 +39,19 @@ public class CallbackController extends Controller {
     @Inject
     protected Config config;
     @Inject
-    protected PlaySessionStore playSessionStore;
+    protected SessionStore sessionStore;
     @Inject
     protected HttpExecutionContext ec;
 
     public CompletionStage<Result> callback(final Http.Request request) {
 
-        final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
-        final CallbackLogic<Result, PlayWebContext> bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
+        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
+        final CallbackLogic bestLogic = FindBest.callbackLogic(callbackLogic, config, DefaultCallbackLogic.INSTANCE);
 
-        final PlayWebContext playWebContext = new PlayWebContext(request, playSessionStore);
-        return CompletableFuture.supplyAsync(() -> bestLogic.perform(playWebContext, config, bestAdapter,
-                this.defaultUrl, this.saveInSession, this.multiProfile, this.renewSession, this.defaultClient), ec.current());
+        final WebContext context = FindBest.webContextFactory(null, config, PlayContextFactory.INSTANCE).newContext(request);
+
+        return CompletableFuture.supplyAsync(() -> (Result) bestLogic.perform(context, sessionStore, config, bestAdapter,
+                this.defaultUrl, this.renewSession, this.defaultClient), ec.current());
     }
 
     public String getDefaultUrl() {
@@ -61,22 +60,6 @@ public class CallbackController extends Controller {
 
     public void setDefaultUrl(final String defaultUrl) {
         this.defaultUrl = defaultUrl;
-    }
-
-    public Boolean getSaveInSession() {
-        return saveInSession;
-    }
-
-    public void setSaveInSession(final Boolean saveInSession) {
-        this.saveInSession = saveInSession;
-    }
-
-    public boolean isMultiProfile() {
-        return multiProfile;
-    }
-
-    public void setMultiProfile(final boolean multiProfile) {
-        this.multiProfile = multiProfile;
     }
 
     public Boolean getRenewSession() {
@@ -103,19 +86,15 @@ public class CallbackController extends Controller {
         this.config = config;
     }
 
-    public CallbackLogic<Result, PlayWebContext> getCallbackLogic() {
+    public CallbackLogic getCallbackLogic() {
         return callbackLogic;
     }
 
-    public Boolean getMultiProfile() {
-        return multiProfile;
+    public SessionStore getSessionStore() {
+        return sessionStore;
     }
 
-    public PlaySessionStore getPlaySessionStore() {
-        return playSessionStore;
-    }
-
-    public void setCallbackLogic(final CallbackLogic<Result, PlayWebContext> callbackLogic) {
+    public void setCallbackLogic(final CallbackLogic callbackLogic) {
         this.callbackLogic = callbackLogic;
     }
 }

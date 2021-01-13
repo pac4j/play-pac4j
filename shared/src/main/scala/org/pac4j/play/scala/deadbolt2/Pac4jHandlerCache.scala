@@ -2,14 +2,12 @@ package org.pac4j.play.scala.deadbolt2
 
 import scala.collection.mutable.Map
 import scala.concurrent.ExecutionContext
-
 import be.objectify.deadbolt.scala.{DeadboltHandler, HandlerKey}
 import be.objectify.deadbolt.scala.cache.HandlerCache
 import javax.inject.{Inject, Singleton}
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.util.CommonHelper
-import org.pac4j.play.store.PlaySessionStore
-
 
 case class ClientsHandlerKey(clients: String) extends HandlerKey
 
@@ -18,13 +16,13 @@ case class ClientsHandlerKey(clients: String) extends HandlerKey
   * @since 4.1.0
   */
 @Singleton
-class Pac4jHandlerCache @Inject() (config: Config, playSessionStore: PlaySessionStore, roleHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext) extends HandlerCache {
+class Pac4jHandlerCache @Inject()(config: Config, sessionStore: SessionStore, roleHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext) extends HandlerCache {
 
   private val handlers: Map[HandlerKey, DeadboltHandler] = Map()
 
   private val defaultHandlerKey = ClientsHandlerKey("defaultHandler")
 
-  private val defaultHandler = new Pac4jHandler(config, null, playSessionStore, roleHandler);
+  private val defaultHandler = new Pac4jHandler(config, null, sessionStore, roleHandler);
 
   handlers += (defaultHandlerKey -> defaultHandler)
 
@@ -41,7 +39,7 @@ class Pac4jHandlerCache @Inject() (config: Config, playSessionStore: PlaySession
         filter(_.isInstanceOf[ClientsHandlerKey]).
         map(_.asInstanceOf[ClientsHandlerKey]).
         map(_.clients).
-        map(new Pac4jHandler(config, _, playSessionStore, roleHandler)).
+        map(new Pac4jHandler(config, _, sessionStore, roleHandler)).
         orElse(buildCustomHandler(handlerKey)).
         map { handler =>
           handlers += (handlerKey -> handler)
@@ -53,5 +51,5 @@ class Pac4jHandlerCache @Inject() (config: Config, playSessionStore: PlaySession
   protected def buildCustomHandler(handlerKey: HandlerKey): Option[DeadboltHandler] = None
 
   override def toString() = CommonHelper.toNiceString(this.getClass(), "handlers", handlers, "config", config,
-    "executionContext", ec, "playSessionStore", playSessionStore)
+    "executionContext", ec, "playSessionStore", sessionStore)
 }

@@ -4,10 +4,10 @@ import akka.stream.Materializer
 import javax.inject.{Inject, Singleton}
 import org.pac4j.core.config.Config
 import SecurityFilter._
+import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.util.CommonHelper
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.java.SecureAction
-import org.pac4j.play.store.PlaySessionStore
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc
@@ -57,7 +57,7 @@ import scala.util.Failure
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: PlaySessionStore, config: Config)
+class SecurityFilter @Inject()(configuration: Configuration, sessionStore: SessionStore, config: Config)
                               (implicit val ec: ExecutionContext, val mat: Materializer) extends Filter {
   private val log = Logger(this.getClass)
 
@@ -77,8 +77,8 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
   }
 
   private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
-    val webContext = new PlayWebContext(request, playSessionStore)
-    val securityAction = new SecureAction(config, playSessionStore)
+    val webContext = new PlayWebContext(request)
+    val securityAction = new SecureAction(config, sessionStore)
 
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
       val isAuthSucceeded = secureActionResult == null
@@ -99,7 +99,7 @@ class SecurityFilter @Inject()(configuration: Configuration, playSessionStore: P
 
     val futureResult: Future[Result] =
       securityAction
-        .call(webContext, rule.clients, rule.authorizers, rule.matchers, false)
+        .call(webContext, sessionStore, rule.clients, rule.authorizers, rule.matchers)
         .toScala
         .flatMap[Result](calculateResult)
 

@@ -8,18 +8,18 @@ import org.pac4j.core.client.Client;
 import org.pac4j.core.client.DirectClient;
 import org.pac4j.core.config.Config;
 import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.credentials.Credentials;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.exception.http.StatusAction;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.profile.ProfileManager;
+import org.pac4j.core.profile.UserProfile;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.libs.concurrent.HttpExecutionContext;
@@ -41,7 +41,7 @@ import static org.pac4j.core.util.CommonHelper.isNotEmpty;
  * @author Jerome Leleu
  * @since 2.6.0
  */
-public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> implements DeadboltHandler {
+public class Pac4jHandler extends DefaultSecurityLogic implements DeadboltHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Pac4jHandler.class);
 
@@ -51,19 +51,19 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
 
     private final String clients;
 
-    private final PlaySessionStore playSessionStore;
+    private final SessionStore sessionStore;
 
     private final Pac4jRoleHandler rolePermissionsHandler;
 
-    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final PlaySessionStore playSessionStore, final Pac4jRoleHandler rolePermissionsHandler) {
+    public Pac4jHandler(final Config config, final HttpExecutionContext httpExecutionContext, final String clients, final SessionStore sessionStore, final Pac4jRoleHandler rolePermissionsHandler) {
         CommonHelper.assertNotNull("config", config);
         CommonHelper.assertNotNull("httpExecutionContext", httpExecutionContext);
-        CommonHelper.assertNotNull("playSessionStore", playSessionStore);
+        CommonHelper.assertNotNull("playSessionStore", sessionStore);
 
         this.config = config;
         this.httpExecutionContext = httpExecutionContext;
         this.clients = clients;
-        this.playSessionStore = playSessionStore;
+        this.sessionStore = sessionStore;
         this.rolePermissionsHandler = rolePermissionsHandler;
     }
 
@@ -75,14 +75,14 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     @Override
     public CompletionStage<Optional<Result>> beforeAuthCheck(final Http.RequestHeader requestHeader, final Optional<String> content) {
         return CompletableFuture.supplyAsync(() -> {
-            final Optional<CommonProfile> profile = getProfile(requestHeader);
+            final Optional<UserProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
                 LOGGER.debug("profile found -> returning empty");
                 return Optional.empty();
             } else {
-                final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
-                final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
-                final List<Client<? extends Credentials>> currentClients = getClientFinder().find(config.getClients(), playWebContext, clients);
+                final PlayWebContext playWebContext = new PlayWebContext(requestHeader);
+                final HttpActionAdapter httpActionAdapter = config.getHttpActionAdapter();
+                final List<Client> currentClients = getClientFinder().find(config.getClients(), playWebContext, clients);
                 LOGGER.debug("currentClients: {}", currentClients);
 
                 HttpAction action;
@@ -90,28 +90,28 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
                     if (startDirectAuthentication(currentClients)) {
                         LOGGER.debug("Starting direct authentication");
                         DirectClient client = (DirectClient) currentClients.get(0);
-                        Optional<Credentials> credentials = client.getCredentials(playWebContext);
+                        Optional<Credentials> credentials = client.getCredentials(playWebContext, sessionStore);
                         if (credentials.isPresent()) {
-                            CommonProfile userProfile = credentials.get().getUserProfile();
+                            UserProfile userProfile = credentials.get().getUserProfile();
                             if (userProfile != null) {
                                 setProfile(requestHeader, userProfile);
                                 return Optional.empty();
                             }
                         }
                         LOGGER.debug("unauthorized");
-                        action = unauthorized(playWebContext, currentClients);
-                    } else if (startAuthentication(playWebContext, currentClients)) {
+                        action = unauthorized(playWebContext, sessionStore, currentClients);
+                    } else if (startAuthentication(playWebContext, sessionStore, currentClients)) {
                         LOGGER.debug("Starting authentication");
-                        saveRequestedUrl(playWebContext, currentClients, null);
-                        action = redirectToIdentityProvider(playWebContext, currentClients);
+                        saveRequestedUrl(playWebContext, sessionStore, currentClients, null);
+                        action = redirectToIdentityProvider(playWebContext, sessionStore, currentClients);
                     } else {
                         LOGGER.debug("unauthorized");
-                        action = unauthorized(playWebContext, currentClients);
+                        action = unauthorized(playWebContext, sessionStore, currentClients);
                     }
                 } catch (final HttpAction e) {
                     action = e;
                 }
-                return Optional.of(httpActionAdapter.adapt(action, playWebContext));
+                return Optional.of((Result) httpActionAdapter.adapt(action, playWebContext));
             }
         }, httpExecutionContext.current());
     }
@@ -119,7 +119,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
     @Override
     public CompletionStage<Optional<? extends Subject>> getSubject(final Http.RequestHeader requestHeader) {
         return CompletableFuture.supplyAsync(() -> {
-            final Optional<CommonProfile> profile = getProfile(requestHeader);
+            final Optional<UserProfile> profile = getProfile(requestHeader);
             if (profile.isPresent()) {
                 LOGGER.debug("profile found: {} -> building a subject", profile);
                 return Optional.of(new Pac4jSubject(profile.get()));
@@ -135,23 +135,23 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         return rolePermissionsHandler.getPermissionsForRole(clients, roleName, httpExecutionContext);
     }
 
-    private Optional<CommonProfile> getProfile(final Http.RequestHeader requestHeader) {
-        final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
-        final ProfileManager manager = new ProfileManager(playWebContext);
-        return manager.getLikeDefaultSecurityLogic(true);
+    private Optional<UserProfile> getProfile(final Http.RequestHeader requestHeader) {
+        final PlayWebContext playWebContext = new PlayWebContext(requestHeader);
+        final ProfileManager manager = new ProfileManager(playWebContext, sessionStore);
+        return manager.getProfile();
     }
 
-    private void setProfile(final Http.RequestHeader requestHeader, CommonProfile profile) {
-        final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
+    private void setProfile(final Http.RequestHeader requestHeader, UserProfile profile) {
+        final PlayWebContext playWebContext = new PlayWebContext(requestHeader);
         playWebContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profile);
     }
 
     @Override
     public CompletionStage<Result> onAuthFailure(final Http.RequestHeader requestHeader, final Optional<String> content) {
         return CompletableFuture.supplyAsync(() -> {
-            final PlayWebContext playWebContext = new PlayWebContext(requestHeader, playSessionStore);
-            final HttpActionAdapter<Result, PlayWebContext> httpActionAdapter = config.getHttpActionAdapter();
-            return httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext);
+            final PlayWebContext playWebContext = new PlayWebContext(requestHeader);
+            final HttpActionAdapter httpActionAdapter = config.getHttpActionAdapter();
+            return (Result) httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext);
         }, httpExecutionContext.current());
     }
 
@@ -160,7 +160,7 @@ public class Pac4jHandler extends DefaultSecurityLogic<Result, PlayWebContext> i
         throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler");
     }
 
-    private boolean startDirectAuthentication(final List<Client<? extends Credentials>> currentClients) {
+    private boolean startDirectAuthentication(final List<Client> currentClients) {
         return isNotEmpty(currentClients) && currentClients.get(0) instanceof DirectClient;
     }
 }

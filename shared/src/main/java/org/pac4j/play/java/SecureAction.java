@@ -1,6 +1,8 @@
 package org.pac4j.play.java;
 
 import org.pac4j.core.config.Config;
+import org.pac4j.core.context.WebContext;
+import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.engine.DefaultSecurityLogic;
 import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
@@ -8,8 +10,8 @@ import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
+import org.pac4j.play.context.PlayContextFactory;
 import org.pac4j.play.http.PlayHttpActionAdapter;
-import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Action;
@@ -34,7 +36,7 @@ public class SecureAction extends Action<Result> {
 
     protected Logger logger = LoggerFactory.getLogger(getClass());
 
-    private SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic;
+    private SecurityLogic securityLogic;
     
     protected final static Method CLIENTS_METHOD;
 
@@ -42,14 +44,11 @@ public class SecureAction extends Action<Result> {
 
     protected final static Method MATCHERS_METHOD;
 
-    protected final static Method MULTI_PROFILE_METHOD;
-
     static {
         try {
             CLIENTS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.CLIENTS);
             AUTHORIZERS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.AUTHORIZERS);
             MATCHERS_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.MATCHERS);
-            MULTI_PROFILE_METHOD = Secure.class.getDeclaredMethod(Pac4jConstants.MULTI_PROFILE);
         } catch (final SecurityException | NoSuchMethodException e) {
             throw new TechnicalException(e);
         }
@@ -57,12 +56,12 @@ public class SecureAction extends Action<Result> {
 
     final private Config config;
 
-    final private PlaySessionStore sessionStore;
+    final private SessionStore sessionStore;
 
     @Inject
-    public SecureAction(final Config config, final PlaySessionStore playSessionStore) {
+    public SecureAction(final Config config, final SessionStore sessionStore) {
         this.config = config;
-        this.sessionStore = playSessionStore;
+        this.sessionStore = sessionStore;
     }
 
     @Override
@@ -72,34 +71,35 @@ public class SecureAction extends Action<Result> {
           final String clients = getStringParam(invocationHandler, CLIENTS_METHOD, null);
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
           final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
-          final boolean multiProfile = getBooleanParam(invocationHandler, MULTI_PROFILE_METHOD, false);
 
-          final PlayWebContext playWebContext = new PlayWebContext(req, sessionStore);
-          return internalCall(req, playWebContext, clients, authorizers, matchers, multiProfile);
+          final WebContext context = FindBest.webContextFactory(null, config, PlayContextFactory.INSTANCE).newContext(req);
+
+          return internalCall(req, context, sessionStore, clients, authorizers, matchers);
         } catch(Throwable t) {
           throw new RuntimeException(t);
         }        
     }
 
-    public CompletionStage<Result> call(final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
-        return internalCall(null, webContext, clients, authorizers, matchers, multiProfile);
+    public CompletionStage<Result> call(final WebContext webContext, final SessionStore sessionStore, final String clients, final String authorizers, final String matchers) throws Throwable {
+        return internalCall(null, webContext, sessionStore, clients, authorizers, matchers);
     }
 
-    protected CompletionStage<Result> internalCall(final Http.Request req, final PlayWebContext webContext, final String clients, final String authorizers, final String matchers, final boolean multiProfile) throws Throwable {
+    protected CompletionStage<Result> internalCall(final Http.Request req, final WebContext webContext, final SessionStore sessionStore, final String clients, final String authorizers, final String matchers) throws Throwable {
 
-        final HttpActionAdapter<Result, PlayWebContext> bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
-        final SecurityLogic<CompletionStage<Result>, PlayWebContext> bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
+        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
+        final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
 
+        final HttpActionAdapter actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
 
-        final HttpActionAdapter<CompletionStage<Result>, PlayWebContext> actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
-        return bestLogic.perform(webContext, config, (webCtx, profiles, parameters) -> {
+        return (CompletionStage<Result>) bestLogic.perform(webContext, sessionStore, config, (webCtx, session, profiles, parameters) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);
 	            } else {
-	                return delegate.call(webCtx.supplementRequest(req));
+	                final PlayWebContext playWebContext = (PlayWebContext) webCtx;
+	                return delegate.call(playWebContext.supplementRequest(req));
 	            }
-            }, actionAdapterWrapper, clients, authorizers, matchers, multiProfile);
+            }, actionAdapterWrapper, clients, authorizers, matchers);
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
@@ -120,11 +120,11 @@ public class SecureAction extends Action<Result> {
         return value;
     }
 
-    public SecurityLogic<CompletionStage<Result>, PlayWebContext> getSecurityLogic() {
+    public SecurityLogic getSecurityLogic() {
         return securityLogic;
     }
 
-    public void setSecurityLogic(final SecurityLogic<CompletionStage<Result>, PlayWebContext> securityLogic) {
+    public void setSecurityLogic(final SecurityLogic securityLogic) {
         this.securityLogic = securityLogic;
     }
 }

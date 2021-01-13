@@ -1,9 +1,10 @@
 package org.pac4j.play.store;
 
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
-import org.pac4j.core.util.JavaSerializationHelper;
 import org.pac4j.core.util.Pac4jConstants;
+import org.pac4j.core.util.serializer.JavaSerializer;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,21 +22,21 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 /**
- * A PlaySesssionStore which only uses the Play Session cookie for storage, allowing for a stateless backend.
+ * A session store which only uses the Play Session cookie for storage, allowing for a stateless backend.
  *
  * @author Vidmantas Zemleris
  * @since 6.1.0
  */
 @Singleton
-public class PlayCookieSessionStore implements PlaySessionStore {
+public class PlayCookieSessionStore implements SessionStore {
 
-    private static final Logger logger = LoggerFactory.getLogger(PlayCookieSessionStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlayCookieSessionStore.class);
 
     private final String tokenName = "pac4j";
     private final String keyPrefix = "pac4j_";
     private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
 
-    public static final JavaSerializationHelper JAVA_SER_HELPER = new JavaSerializationHelper();
+    public static final JavaSerializer JAVA_SER_HELPER = new JavaSerializer();
 
     public PlayCookieSessionStore() {}
 
@@ -44,60 +45,61 @@ public class PlayCookieSessionStore implements PlaySessionStore {
     }
 
     @Override
-    public String getOrCreateSessionId(final PlayWebContext context) {
-        return tokenName;
+    public Optional<String> getSessionId(final WebContext context, final boolean createSession) {
+        return Optional.of(tokenName);
     }
 
     @Override
-    public Optional<Object> get(final PlayWebContext context, final String key) {
-        final Http.Session session = context.getNativeSession();
-        final String sessionValue = session.getOptional(keyPrefix + key).orElse(null);
+    public Optional<Object> get(final WebContext context, final String key) {
+        final Http.Session session = ((PlayWebContext) context).getNativeSession();
+        final String sessionValue = session.get(keyPrefix + key).orElse(null);
         if (sessionValue == null) {
-            logger.trace("get, key = {} -> null", key);
+            LOGGER.debug("get, key = {} -> null", key);
             return Optional.empty();
         } else {
             byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            final Object value = JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
-            logger.trace("get, key = {} -> value = {}", key, value);
+            final Object value = JAVA_SER_HELPER.decodeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            LOGGER.debug("get, key = {} -> value = {}", key, value);
             return Optional.ofNullable(value);
         }
     }
 
     @Override
-    public void set(final PlayWebContext context, final String key, final Object value) {
-        logger.trace("set, key = {}, value = {}", key, value);
+    public void set(final WebContext context, final String key, final Object value) {
+        LOGGER.debug("set, key = {}, value = {}", key, value);
         Object clearedValue = value;
         if (key.contentEquals(Pac4jConstants.USER_PROFILES)) {
             clearedValue = clearUserProfiles(value);
         }
 
-        byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes((Serializable) clearedValue);
+        byte[] javaSerBytes = JAVA_SER_HELPER.encodeToBytes((Serializable) clearedValue);
         String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
-            logger.trace("set, key = {} -> serialized token size = {}", key, serialized.length());
+            LOGGER.debug("set, key = {} -> serialized token size = {}", key, serialized.length());
         } else {
-            logger.trace("set, key = {} -> null serialized token", key);
+            LOGGER.debug("set, key = {} -> null serialized token", key);
         }
-        context.setNativeSession(context.getNativeSession().adding(keyPrefix + key, serialized));
+        final PlayWebContext playWebContext = (PlayWebContext) context;
+        playWebContext.setNativeSession(playWebContext.getNativeSession().adding(keyPrefix + key, serialized));
     }
 
     @Override
-    public boolean destroySession(PlayWebContext playWebContext) {
+    public boolean destroySession(final WebContext context) {
         return false;
     }
 
     @Override
-    public Optional<Object> getTrackableSession(PlayWebContext playWebContext) {
+    public Optional<Object> getTrackableSession(final WebContext context) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<SessionStore<PlayWebContext>> buildFromTrackableSession(PlayWebContext playWebContext, Object o) {
+    public Optional<SessionStore> buildFromTrackableSession(final WebContext context, final Object trackableSession) {
         return Optional.empty();
     }
 
     @Override
-    public boolean renewSession(PlayWebContext playWebContext) {
+    public boolean renewSession(final WebContext context) {
         return false;
     }
 
@@ -117,7 +119,7 @@ public class PlayCookieSessionStore implements PlaySessionStore {
             }
             return resultBao.toByteArray();
         } catch (IOException e) {
-            logger.error("Unable to uncompress session cookie", e);
+            LOGGER.error("Unable to uncompress session cookie", e);
             return null;
         }
     }
@@ -127,7 +129,7 @@ public class PlayCookieSessionStore implements PlaySessionStore {
         try (GZIPOutputStream zipOutputStream = new GZIPOutputStream(resultBao)) {
             zipOutputStream.write(srcBytes);
         } catch (IOException e) {
-            logger.error("Unable to compress session cookie", e);
+            LOGGER.error("Unable to compress session cookie", e);
             return null;
         }
 

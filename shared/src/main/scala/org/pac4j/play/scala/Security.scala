@@ -1,24 +1,26 @@
 package org.pac4j.play.scala
 
 import javax.inject.{Inject, Singleton}
+
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import play.api.mvc._
 import org.pac4j.core.config.Config
-import org.pac4j.core.profile.CommonProfile
+import org.pac4j.core.context.session.SessionStore
+import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.store.PlaySessionStore
 
 /**
  * <p>To protect a resource, the {@link #Secure} methods must be used.</p>
- * <p>For manual computation of login urls (redirections to identity providers), the session must be first initialized using the {@link #getOrCreateSessionId} method.</p>
+ * <p>For manual computation of login urls (redirections to identity providers), the session must be first initialized
+ * using the {@link #getSessionId} method with <code>createSession</code> set to <code>true</code>.</p>
  *
  * @author Jerome Leleu
  * @author Michael Remond
  * @author Hugo Valk
  * @since 1.5.0
  */
-trait Security[P<:CommonProfile] extends BaseController {
+trait Security[P<:UserProfile] extends BaseController {
 
   protected type AuthenticatedRequest[A] = org.pac4j.play.scala.AuthenticatedRequest[P, A]
 
@@ -26,16 +28,16 @@ trait Security[P<:CommonProfile] extends BaseController {
 
   protected def config: Config = controllerComponents.config
 
-  protected def playSessionStore: PlaySessionStore = controllerComponents.playSessionStore
+  protected def sessionStore: SessionStore = controllerComponents.sessionStore
 
   protected def profiles[A](implicit request: AuthenticatedRequest[A]): List[P] = request.profiles
 
   protected def Secure: SecureAction[P,AnyContent,AuthenticatedRequest] =
-    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, multiProfile = false, controllerComponents.parser, playSessionStore, config)(controllerComponents.executionContext)
+    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, controllerComponents.parser, sessionStore, config)(controllerComponents.executionContext)
 }
 
 
-case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](clients: String, authorizers: String, matchers: String, multiProfile: Boolean, parser: BodyParser[ContentType], playSessionStore: PlaySessionStore, config: Config)(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
+case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](clients: String, authorizers: String, matchers: String, parser: BodyParser[ContentType], sessionStore: SessionStore, config: Config)(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
   import scala.collection.JavaConverters._
   import scala.compat.java8.FutureConverters._
   import scala.concurrent.Future
@@ -50,11 +52,11 @@ case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedReques
     *
     * @param clients the list of clients (separated by commas) to use for authentication
     * @param authorizers the list of authorizers (separated by commas) to use to check authorizations
-    * @param multiProfile whether multiple authentications (and thus multiple profiles) must be kept at the same time
+    * @param matchers the list of matchers (separated by commas)
     * @return
     */
-  def apply(clients: String = clients, authorizers: String = authorizers, matchers: String = matchers, multiProfile: Boolean = multiProfile): SecureAction[P,ContentType,R] =
-    copy[P,ContentType,R](clients, authorizers, matchers, multiProfile)
+  def apply(clients: String = clients, authorizers: String = authorizers, matchers: String = matchers): SecureAction[P,ContentType,R] =
+    copy[P,ContentType,R](clients, authorizers, matchers)
 
   /**
     * This function is used to protect an action.
@@ -67,14 +69,16 @@ case class SecureAction[P<:CommonProfile, ContentType, R[X]>:AuthenticatedReques
     copy[P,A,R](parser = action.parser).async(action.parser)(r => action.apply(r))
 
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]) = {
-    val webContext = new PlayWebContext(request, playSessionStore)
-    val secureAction = new org.pac4j.play.java.SecureAction(config, playSessionStore)
-    secureAction.call(webContext, clients, authorizers, matchers, multiProfile).toScala.flatMap[play.api.mvc.Result](r =>
+    val webContext = new PlayWebContext(request)
+    val secureAction = new org.pac4j.play.java.SecureAction(config, sessionStore)
+    secureAction.call(webContext, sessionStore, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
-        val profileManager = new ProfileManager[P](webContext)
-        val profiles = profileManager.getAllLikeDefaultSecurityLogic(true)
+        val profileManager = new ProfileManager(webContext, sessionStore)
+        val profiles = profileManager.getProfiles()
         logger.debug("profiles: {}", profiles)
-        block(AuthenticatedRequest(profiles.asScala.toList, webContext.supplementRequest(request.asJava).asScala.asInstanceOf[Request[A]]))
+        val sProfiles = profiles.asScala.toList.asInstanceOf[List[P]]
+        val sRequest = webContext.supplementRequest(request.asJava).asScala.asInstanceOf[Request[A]]
+        block(AuthenticatedRequest(sProfiles, sRequest))
       } else {
         Future successful {
           r.asScala
@@ -88,13 +92,13 @@ object SecureAction {
   private val logger = org.slf4j.LoggerFactory.getLogger(getClass)
 }
 
-case class AuthenticatedRequest[P<:CommonProfile, +A](profiles: List[P], request: Request[A]) extends WrappedRequest[A](request)
+case class AuthenticatedRequest[P<:UserProfile, +A](profiles: List[P], request: Request[A]) extends WrappedRequest[A](request)
 
 trait SecurityComponents extends ControllerComponents {
 
   def components: ControllerComponents
   def config: Config
-  def playSessionStore: PlaySessionStore
+  def sessionStore: SessionStore
   def parser: BodyParsers.Default
 
   @inline def actionBuilder = components.actionBuilder
@@ -108,7 +112,7 @@ trait SecurityComponents extends ControllerComponents {
 @Singleton
 case class DefaultSecurityComponents @Inject()
 (
-  playSessionStore: PlaySessionStore,
+  sessionStore: SessionStore,
   config: Config,
   parser: BodyParsers.Default,
   components: ControllerComponents

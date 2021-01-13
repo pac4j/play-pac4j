@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.pac4j</groupId>
         <artifactId>play-pac4j-parent</artifactId>
-        <version>10.0.3-SNAPSHOT</version>
+        <version>11.0.0-PLAY2.8-SNAPSHOT</version>
     </parent>
 
     <artifactId>play-pac4j_2.12</artifactId>
@@ -15,7 +15,7 @@
 
     <properties>
         <scala.version>2.12</scala.version>
-        <scala.maven.version>2.12.10</scala.maven.version>
+        <scala.maven.version>2.12.11</scala.maven.version>
     </properties>
 
     <dependencies>

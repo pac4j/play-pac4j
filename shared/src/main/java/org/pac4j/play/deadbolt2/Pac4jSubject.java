@@ -3,7 +3,7 @@ package org.pac4j.play.deadbolt2;
 import be.objectify.deadbolt.java.models.Permission;
 import be.objectify.deadbolt.java.models.Role;
 import be.objectify.deadbolt.java.models.Subject;
-import org.pac4j.core.profile.CommonProfile;
+import org.pac4j.core.profile.UserProfile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class Pac4jSubject implements Subject {
 
     private List<Pac4jPermission> permissions = new ArrayList<>();
 
-    public Pac4jSubject(final CommonProfile profile) {
+    public Pac4jSubject(final UserProfile profile) {
         id = profile.getId();
         for (final String role : profile.getRoles()) {
             roles.add(new Pac4jRole(role));

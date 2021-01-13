@@ -2,6 +2,7 @@ package org.pac4j.play.store;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.play.PlayWebContext;
 import play.cache.SyncCacheApi;
@@ -22,16 +23,20 @@ import static org.mockito.Mockito.*;
  */
 public final class PlayCacheSessionStoreTests implements TestsConstants {
 
+    private static final String SESSION_ID = "mysessionid";
+
     private PlayCacheSessionStore store;
     private PlayWebContext context;
     private SyncCacheApi cacheApiMock;
+    private Http.Session session;
 
     @Before
     public void setUp() {
         cacheApiMock = mock(SyncCacheApi.class);
         store = new PlayCacheSessionStore(cacheApiMock);
         context = mock(PlayWebContext.class);
-        when(context.getNativeSession()).thenReturn(mock(Http.Session.class));
+        session = mock(Http.Session.class);
+        when(context.getNativeSession()).thenReturn(session);
     }
 
     @Test
@@ -46,18 +51,24 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
     }
 
     @Test
-    public void testGetOrCreateSessionId() {
-        assertNotNull(store.getOrCreateSessionId(context));
+    public void testGetSessionIdNoCreation() {
+        assertFalse(store.getSessionId(context, false).isPresent());
+    }
+
+    @Test
+    public void testGetSessionIdCreation() {
+        assertTrue(store.getSessionId(context, true).isPresent());
     }
 
     @Test
     public void testGetSet() {
         final Map<String, Object> data = new HashMap<>();
         data.put(KEY, VALUE);
-        when(cacheApiMock.getOptional(any(String.class))).thenReturn(Optional.of(data));
+        when(session.get(Pac4jConstants.SESSION_ID)).thenReturn(Optional.of(SESSION_ID));
         store.setPrefix(KEY);
         store.set(context, KEY, VALUE);
-        Optional<Object> value = store.get(context, KEY);
+        when(cacheApiMock.get(KEY + SESSION_ID)).thenReturn(Optional.of(data));
+        final Optional<Object> value = store.get(context, KEY);
         assertEquals(Optional.of(VALUE), value);
     }
 }

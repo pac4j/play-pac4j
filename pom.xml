@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>10.0.3-SNAPSHOT</version>
+    <version>11.0.0-PLAY2.8-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -62,13 +62,13 @@
     </repositories>
 
     <properties>
-        <pac4j.version>4.3.0</pac4j.version>
+        <pac4j.version>5.0.0-SNAPSHOT</pac4j.version>
         <play.version>2.8.7</play.version>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <guice.version>4.2.3</guice.version>
         <shiro.version>1.7.0</shiro.version>
         <ehcache.version>2.10.6</ehcache.version>
-        <scalatest.version>3.3.0-SNAP3</scalatest.version>
+        <scalatest.version>3.3.0-SNAP2</scalatest.version>
         <deadboltscala.version>2.8.2</deadboltscala.version>
         <deadboltjava.version>2.8.1</deadboltjava.version>
         <scala.version>2.13</scala.version>
@@ -145,8 +145,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <release>${java.version}</release>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
@@ -185,18 +184,6 @@
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
                 <version>4.4.0</version>
-                <configuration>
-                    <scalaCompatVersion>${scala.version}</scalaCompatVersion>
-                    <scalaVersion>${scala.maven.version}</scalaVersion>
-                    <recompileMode>incremental</recompileMode>
-                    <args>
-                        <arg>-target:jvm-${java.version}</arg>
-                    </args>
-                    <javacArgs>
-                        <javacArg>-source</javacArg><javacArg>${java.version}</javacArg>
-                        <javacArg>-target</javacArg><javacArg>${java.version}</javacArg>
-                    </javacArgs>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -205,21 +192,24 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <scalaVersion>${scala.maven.version}</scalaVersion>
+                </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>findbugs-maven-plugin</artifactId>
-                <version>3.0.5</version>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.0.4</version>
                 <configuration>
                     <effort>Low</effort>
                     <threshold>Max</threshold>
                     <failOnError>true</failOnError>
-                    <excludeFilterFile>findbugs-exclude.xml</excludeFilterFile>
+                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
                     <includeTests>true</includeTests>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>run-findbugs</id>
+                        <id>run-spotbugs</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>check</goal>

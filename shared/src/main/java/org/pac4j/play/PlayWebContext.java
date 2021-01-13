@@ -6,7 +6,6 @@ import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.play.store.PlaySessionStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.api.mvc.AnyContentAsFormUrlEncoded;
@@ -39,8 +38,6 @@ public class PlayWebContext implements WebContext {
 
     protected String requestContent;
 
-    protected PlaySessionStore sessionStore;
-
     protected Map<String, String> responseHeaders = new HashMap<>();
 
     protected List<Http.Cookie> responseCookies = new ArrayList<>();
@@ -51,17 +48,15 @@ public class PlayWebContext implements WebContext {
 
     protected Http.Session session;
 
-    public PlayWebContext(final Http.RequestHeader javaRequest, final PlaySessionStore sessionStore) {
+    public PlayWebContext(final Http.RequestHeader javaRequest) {
         CommonHelper.assertNotNull("request", javaRequest);
-        CommonHelper.assertNotNull("sessionStore", sessionStore);
         this.javaRequest = javaRequest;
-        this.sessionStore = sessionStore;
         this.session = javaRequest.session();
         sessionHasChanged = false;
     }
 
-    public PlayWebContext(final RequestHeader scalaRequest, final PlaySessionStore sessionStore) {
-        this(scalaRequest.asJava(), sessionStore);
+    public PlayWebContext(final RequestHeader scalaRequest) {
+        this(scalaRequest.asJava());
         this.scalaRequest = scalaRequest;
     }
 
@@ -71,11 +66,6 @@ public class PlayWebContext implements WebContext {
 
     public RequestHeader getNativeScalaRequest() {
         return scalaRequest;
-    }
-
-    @Override
-    public SessionStore getSessionStore() {
-        return this.sessionStore;
     }
 
     @Override
@@ -130,6 +120,11 @@ public class PlayWebContext implements WebContext {
     @Override
     public void setResponseHeader(final String name, final String value) {
         responseHeaders.put(name, value);
+    }
+
+    @Override
+    public Optional<String> getResponseHeader(final String name) {
+        return Optional.ofNullable(responseHeaders.get(name));
     }
 
     @Override
@@ -288,5 +283,9 @@ public class PlayWebContext implements WebContext {
             sessionHasChanged = false;
         }
         return r;
+    }
+
+    public play.api.mvc.Result supplementResponse(final play.api.mvc.Result result) {
+        return supplementResponse(result.asJava()).asScala();
     }
 }

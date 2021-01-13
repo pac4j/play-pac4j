@@ -1,6 +1,7 @@
 package org.pac4j.play.http;
 
 import org.pac4j.core.context.HttpConstants;
+import org.pac4j.core.context.WebContext;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.exception.http.HttpAction;
 import org.pac4j.core.exception.http.WithContentAction;
@@ -22,7 +23,7 @@ import java.util.Map;
  * @author Jerome Leleu
  * @since 7.0.0
  */
-public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebContext> {
+public class PlayHttpActionAdapter implements HttpActionAdapter {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -31,7 +32,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
     protected Map<Integer, Result> results = new HashMap<>();
 
     @Override
-    public Result adapt(final HttpAction action, final PlayWebContext context) {
+    public Result adapt(final HttpAction action, final WebContext context) {
         if (action != null) {
             final int code = action.getCode();
             logger.debug("requires HTTP action: {}", code);
@@ -39,7 +40,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
             final Result predefinedResult = results.get(code);
             if (predefinedResult != null) {
                 logger.debug("using pre-defined result for code: {}", code);
-                return context.supplementResponse(predefinedResult);
+                return ((PlayWebContext) context).supplementResponse(predefinedResult);
             }
 
             Map<String, String> headers = new HashMap<>();
@@ -58,7 +59,7 @@ public class PlayHttpActionAdapter implements HttpActionAdapter<Result, PlayWebC
                 }
             }
 
-            return context.supplementResponse(new Result(code, headers, httpEntity));
+            return ((PlayWebContext) context).supplementResponse(new Result(code, headers, httpEntity));
         }
 
         throw new TechnicalException("No action provided");

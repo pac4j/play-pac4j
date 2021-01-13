@@ -9,16 +9,14 @@ import be.objectify.deadbolt.scala.models.Subject
 import org.pac4j.core.client.{Client, DirectClient}
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.HttpConstants
+import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.util.Pac4jConstants
-import org.pac4j.core.credentials.Credentials
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.core.exception.TechnicalException
 import org.pac4j.core.exception.http.{HttpAction, StatusAction}
-import org.pac4j.core.http.adapter.HttpActionAdapter
-import org.pac4j.core.profile.{CommonProfile, ProfileManager}
+import org.pac4j.core.profile.{ProfileManager, UserProfile}
 import org.pac4j.core.util.CommonHelper.isNotEmpty
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.store.PlaySessionStore
 import play.api.Logger
 import play.api.mvc.{Request, RequestHeader, Result}
 
@@ -26,8 +24,8 @@ import play.api.mvc.{Request, RequestHeader, Result}
   * @author Zenkie Zhu
   * @since 4.1.0
   */
-class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessionStore, rolePermissionsHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext)
-    extends DefaultSecurityLogic[Result, PlayWebContext] with DeadboltHandler {
+class Pac4jHandler(config: Config, clients: String, sessionStore: SessionStore, rolePermissionsHandler: Pac4jRoleHandler)(implicit ec: ExecutionContext)
+    extends DefaultSecurityLogic with DeadboltHandler {
 
   private val logger = Logger(this.getClass)
 
@@ -39,7 +37,7 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
       logger.debug("profile found -> returning None")
       None
     } else {
-      val playWebContext = new PlayWebContext(request, playSessionStore)
+      val playWebContext = new PlayWebContext(request)
       val currentClients = getClientFinder().find(config.getClients(), playWebContext, clients)
 
       logger.debug("currentClients: " + currentClients)
@@ -47,8 +45,8 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
       val action = try {
         if (startDirectAuthentication(currentClients)) {
           logger.debug("Starting direct authentication")
-          val client = currentClients.get(0).asInstanceOf[DirectClient[_ <: Credentials]]
-          val credentials = client.getCredentials(playWebContext)
+          val client = currentClients.get(0).asInstanceOf[DirectClient]
+          val credentials = client.getCredentials(playWebContext, sessionStore)
           if (credentials.isPresent()) {
             val userProfile = credentials.get().getUserProfile
             if (userProfile != null) {
@@ -57,20 +55,20 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
             }
           }
           logger.debug("unauthorized")
-          unauthorized(playWebContext, currentClients)
-        } else if (startAuthentication(playWebContext, currentClients)) {
+          unauthorized(playWebContext, sessionStore, currentClients)
+        } else if (startAuthentication(playWebContext, sessionStore, currentClients)) {
           logger.debug("Starting authentication")
-          saveRequestedUrl(playWebContext, currentClients, null)
-          redirectToIdentityProvider(playWebContext, currentClients)
+          saveRequestedUrl(playWebContext, sessionStore, currentClients, null)
+          redirectToIdentityProvider(playWebContext, sessionStore, currentClients)
         } else {
           logger.debug("unauthorized")
-          unauthorized(playWebContext, currentClients)
+          unauthorized(playWebContext, sessionStore, currentClients)
         }
       } catch {
         case e: HttpAction => e
       }
 
-      Some(httpActionAdapter.adapt(action, playWebContext).asScala())
+      Some(httpActionAdapter.adapt(action, playWebContext).asInstanceOf[play.mvc.Result].asScala())
     }
   }
 
@@ -81,28 +79,27 @@ class Pac4jHandler(config: Config, clients: String, playSessionStore: PlaySessio
   override def getPermissionsForRole(roleName: String): Future[List[String]] =
     rolePermissionsHandler.getPermissionsForRole(clients, roleName)
 
-  private def getProfile(request: RequestHeader): Option[CommonProfile] = {
-    val playWebContext = new PlayWebContext(request, playSessionStore)
-    val profileManager = new ProfileManager[CommonProfile](playWebContext)
-    profileManager.getLikeDefaultSecurityLogic(true)
+  private def getProfile(request: RequestHeader): Option[UserProfile] = {
+    val playWebContext = new PlayWebContext(request)
+    val profileManager = new ProfileManager(playWebContext, sessionStore)
+    profileManager.getProfile()
   }
 
-  private def setProfile(request: RequestHeader, profile: CommonProfile): Unit = {
-    val playWebContext = new PlayWebContext(request, playSessionStore)
+  private def setProfile(request: RequestHeader, profile: UserProfile): Unit = {
+    val playWebContext = new PlayWebContext(request)
     playWebContext.setRequestAttribute(Pac4jConstants.USER_PROFILES, profile)
   }
 
   override def onAuthFailure[A](request: AuthenticatedRequest[A]): Future[Result] = Future {
-    val playWebContext = new PlayWebContext(request, playSessionStore)
-    httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext).asScala()
+    val playWebContext = new PlayWebContext(request)
+    httpActionAdapter.adapt(new StatusAction(HttpConstants.FORBIDDEN), playWebContext).asInstanceOf[play.mvc.Result].asScala()
   }
 
-  private def httpActionAdapter = config.getHttpActionAdapter().
-    asInstanceOf[HttpActionAdapter[play.mvc.Result, PlayWebContext]]
+  private def httpActionAdapter = config.getHttpActionAdapter()
 
   override def getDynamicResourceHandler[A](request: Request[A]): Future[Option[DynamicResourceHandler]] =
     throw new TechnicalException("getDynamicResourceHandler() not supported in Pac4jHandler")
 
-  private def startDirectAuthentication(currentClients: java.util.List[Client[_ <: Credentials]]): Boolean =
-    isNotEmpty(currentClients) && currentClients.get(0).isInstanceOf[DirectClient[_ <: Credentials]]
+  private def startDirectAuthentication(currentClients: java.util.List[Client]): Boolean =
+    isNotEmpty(currentClients) && currentClients.get(0).isInstanceOf[DirectClient]
 }

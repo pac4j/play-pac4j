@@ -27,6 +27,4 @@ public @interface Secure {
     String authorizers() default "";
 
     String matchers() default "";
-
-    boolean multiProfile() default false;
 }
