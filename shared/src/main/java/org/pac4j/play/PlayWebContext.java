@@ -12,6 +12,8 @@ import play.api.mvc.AnyContentAsFormUrlEncoded;
 import play.api.mvc.AnyContentAsText;
 import play.api.mvc.Request;
 import play.api.mvc.RequestHeader;
+import play.api.mvc.request.AssignedCell;
+import play.api.mvc.request.RequestAttrKey;
 import play.libs.typedmap.TypedKey;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -44,15 +46,12 @@ public class PlayWebContext implements WebContext {
 
     protected String responseContentType;
 
-    protected boolean sessionHasChanged;
-
     protected Http.Session session;
 
     public PlayWebContext(final Http.RequestHeader javaRequest) {
         CommonHelper.assertNotNull("request", javaRequest);
         this.javaRequest = javaRequest;
         this.session = javaRequest.session();
-        sessionHasChanged = false;
     }
 
     public PlayWebContext(final RequestHeader scalaRequest) {
@@ -244,17 +243,16 @@ public class PlayWebContext implements WebContext {
 
     public void setNativeSession(final Http.Session session) {
         this.session = session;
-        sessionHasChanged = true;
     }
 
     public Http.Request supplementRequest(final Http.Request request) {
-        logger.trace("supplement request with: {}", this.javaRequest.attrs());
-        return request.withAttrs(this.javaRequest.attrs());
+        logger.trace("supplement request with: {} and session: {}", this.javaRequest.attrs(), session);
+        return request.withAttrs(this.javaRequest.attrs()).addAttr(RequestAttrKey.Session().asJava(), new AssignedCell<>(session.asScala()));
     }
 
     public Http.RequestHeader supplementRequest(final Http.RequestHeader request) {
-        logger.trace("supplement request with: {}", this.javaRequest.attrs());
-        return request.withAttrs(this.javaRequest.attrs());
+        logger.trace("supplement request with: {} and session: {}", this.javaRequest.attrs(), session);
+        return request.withAttrs(this.javaRequest.attrs()).addAttr(RequestAttrKey.Session().asJava(), new AssignedCell<>(session.asScala()));
     }
 
     public Result supplementResponse(final Result result) {
@@ -276,12 +274,8 @@ public class PlayWebContext implements WebContext {
             r = r.as(responseContentType);
             responseContentType = null;
         }
-        if (sessionHasChanged) {
-            logger.trace("supplement response with session: {}", session);
-            r = r.withSession(session);
-            session = javaRequest.session();
-            sessionHasChanged = false;
-        }
+        logger.trace("supplement response with session: {}", session);
+        r = r.withSession(session);
         return r;
     }
 

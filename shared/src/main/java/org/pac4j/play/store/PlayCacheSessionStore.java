@@ -100,7 +100,11 @@ public class PlayCacheSessionStore implements SessionStore {
             if (values != null && values.isPresent()) {
                 value = values.get().get(key);
             }
-            LOGGER.debug("Get value: {} for key: {}", value, key);
+            if (value instanceof Exception) {
+                LOGGER.debug("Get value: {} for key: {}", value.toString(), key);
+            } else {
+                LOGGER.debug("Get value: {} for key: {}", value, key);
+            }
             return Optional.ofNullable(value);
         } else {
             LOGGER.debug("Can't get value for key: {}, no session available", key);
@@ -118,9 +122,9 @@ public class PlayCacheSessionStore implements SessionStore {
             values = oldValues.get();
         }
         if (value instanceof Exception) {
-            LOGGER.debug("Set key: {} for value: {}", key, value.toString());
+            LOGGER.debug("Set key: {} with value: {}", key, value.toString());
         } else {
-            LOGGER.debug("Set key: {} for value: {}", key, value);
+            LOGGER.debug("Set key: {} with value: {}", key, value);
         }
         values.put(key, value);
         store.set(prefixedSessionKey, values);

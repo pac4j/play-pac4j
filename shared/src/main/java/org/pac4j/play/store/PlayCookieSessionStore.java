@@ -15,9 +15,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.Base64;
-import java.util.LinkedHashMap;
-import java.util.Optional;
+import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -32,8 +30,7 @@ public class PlayCookieSessionStore implements SessionStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayCookieSessionStore.class);
 
-    private final String tokenName = "pac4j";
-    private final String keyPrefix = "pac4j_";
+    private String sessionName = "pac4j";
     private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
 
     public static final JavaSerializer JAVA_SER_HELPER = new JavaSerializer();
@@ -46,41 +43,65 @@ public class PlayCookieSessionStore implements SessionStore {
 
     @Override
     public Optional<String> getSessionId(final WebContext context, final boolean createSession) {
-        return Optional.of(tokenName);
+        return Optional.of(sessionName);
     }
 
     @Override
     public Optional<Object> get(final WebContext context, final String key) {
-        final Http.Session session = ((PlayWebContext) context).getNativeSession();
-        final String sessionValue = session.get(keyPrefix + key).orElse(null);
-        if (sessionValue == null) {
-            LOGGER.debug("get, key = {} -> null", key);
-            return Optional.empty();
+        final Map<String, Object> values = getSessionValues(context);
+        final Object value = values.get(key);
+        if (value instanceof Exception) {
+            LOGGER.debug("Get value: {} for key: {}", value.toString(), key);
         } else {
-            byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            final Object value = JAVA_SER_HELPER.decodeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
-            LOGGER.debug("get, key = {} -> value = {}", key, value);
-            return Optional.ofNullable(value);
+            LOGGER.debug("Get value: {} for key: {}", value, key);
+        }
+        return Optional.ofNullable(value);
+    }
+
+    protected Map<String, Object> getSessionValues(final WebContext context) {
+        final Http.Session session = ((PlayWebContext) context).getNativeSession();
+        final String sessionValue = session.get(sessionName).orElse(null);
+        Map<String, Object> values = null;
+        if (sessionValue != null) {
+            final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
+            values = (Map<String, Object>) JAVA_SER_HELPER.decodeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+        }
+        if (values != null) {
+            return values;
+        } else {
+            return new HashMap<>();
         }
     }
 
     @Override
     public void set(final WebContext context, final String key, final Object value) {
-        LOGGER.debug("set, key = {}, value = {}", key, value);
-        Object clearedValue = value;
-        if (key.contentEquals(Pac4jConstants.USER_PROFILES)) {
-            clearedValue = clearUserProfiles(value);
+        if (value instanceof Exception) {
+            LOGGER.debug("set key: {} with value: {}", key, value.toString());
+        } else {
+            LOGGER.debug("set key: {}, with value: {}", key, value);
         }
 
-        byte[] javaSerBytes = JAVA_SER_HELPER.encodeToBytes((Serializable) clearedValue);
-        String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
-        if (serialized != null) {
-            LOGGER.debug("set, key = {} -> serialized token size = {}", key, serialized.length());
+        final Map<String, Object> values = getSessionValues(context);
+        if (value == null) {
+            // let's try to save some space by removing the key for a null value
+            values.remove(key);
         } else {
-            LOGGER.debug("set, key = {} -> null serialized token", key);
+            Object clearedValue = value;
+            if (Pac4jConstants.USER_PROFILES.equals(key)) {
+                clearedValue = clearUserProfiles(value);
+            }
+            values.put(key, clearedValue);
         }
-        final PlayWebContext playWebContext = (PlayWebContext) context;
-        playWebContext.setNativeSession(playWebContext.getNativeSession().adding(keyPrefix + key, serialized));
+
+        final byte[] javaSerBytes = JAVA_SER_HELPER.encodeToBytes((Serializable) values);
+        final String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
+        if (serialized != null) {
+            LOGGER.trace("set, key = {} -> serialized token size = {}", key, serialized.length());
+        } else {
+            LOGGER.trace("set, key = {} -> null serialized token", key);
+        }
+        final PlayWebContext playWebContext = (PlayWebContext) context ;
+        playWebContext.setNativeSession(playWebContext.getNativeSession().adding(sessionName, serialized));
     }
 
     @Override
@@ -134,5 +155,13 @@ public class PlayCookieSessionStore implements SessionStore {
         }
 
         return resultBao.toByteArray();
+    }
+
+    public String getSessionName() {
+        return sessionName;
+    }
+
+    public void setSessionName(final String sessionName) {
+        this.sessionName = sessionName;
     }
 }
