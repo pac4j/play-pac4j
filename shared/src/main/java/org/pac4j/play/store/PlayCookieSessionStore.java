@@ -104,20 +104,28 @@ public class PlayCookieSessionStore implements SessionStore {
     }
 
     protected void putSessionValues(final WebContext context, final Map<String, Object> values) {
-        final byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes(values);
-        final String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
+        String serialized = null;
+        if (values != null) {
+            final byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes(values);
+            serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
+        }
         if (serialized != null) {
             LOGGER.trace("serialized token size = {}", serialized.length());
         } else {
             LOGGER.trace("-> null serialized token");
         }
         final PlayWebContext playWebContext = (PlayWebContext) context ;
-        playWebContext.setNativeSession(playWebContext.getNativeSession().adding(sessionName, serialized));
+        if (serialized == null) {
+            playWebContext.setNativeSession(playWebContext.getNativeSession().removing(sessionName));
+        } else {
+            playWebContext.setNativeSession(playWebContext.getNativeSession().adding(sessionName, serialized));
+        }
     }
 
     @Override
     public boolean destroySession(final WebContext context) {
-        return false;
+        putSessionValues(context, null);
+        return true;
     }
 
     @Override
