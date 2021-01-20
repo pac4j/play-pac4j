@@ -14,7 +14,6 @@ import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -43,7 +42,15 @@ public class PlayCookieSessionStore implements SessionStore {
 
     @Override
     public Optional<String> getSessionId(final WebContext context, final boolean createSession) {
-        return Optional.of(sessionName);
+        final Http.Session session = ((PlayWebContext) context).getNativeSession();
+        if (session.get(sessionName).isPresent()) {
+            return Optional.of(sessionName);
+        } else if (createSession) {
+            putSessionValues(context, null);
+            return Optional.of(sessionName);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -64,7 +71,7 @@ public class PlayCookieSessionStore implements SessionStore {
         Map<String, Object> values = null;
         if (sessionValue != null) {
             final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            values = (Map<String, Object>) JAVA_SER_HELPER.decodeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            values = (Map<String, Object>) JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
         }
         if (values != null) {
             return values;
@@ -93,12 +100,16 @@ public class PlayCookieSessionStore implements SessionStore {
             values.put(key, clearedValue);
         }
 
-        final byte[] javaSerBytes = JAVA_SER_HELPER.encodeToBytes((Serializable) values);
+        putSessionValues(context, values);
+    }
+
+    protected void putSessionValues(final WebContext context, final Map<String, Object> values) {
+        final byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes(values);
         final String serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         if (serialized != null) {
-            LOGGER.trace("set, key = {} -> serialized token size = {}", key, serialized.length());
+            LOGGER.trace("serialized token size = {}", serialized.length());
         } else {
-            LOGGER.trace("set, key = {} -> null serialized token", key);
+            LOGGER.trace("-> null serialized token");
         }
         final PlayWebContext playWebContext = (PlayWebContext) context ;
         playWebContext.setNativeSession(playWebContext.getNativeSession().adding(sessionName, serialized));

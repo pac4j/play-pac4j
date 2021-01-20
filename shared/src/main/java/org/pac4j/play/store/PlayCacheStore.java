@@ -62,7 +62,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
         if (objKey instanceof String) {
             return (String) objKey;
         } else {
-            return JAVA_SERIALIZER.encode(objKey);
+            return JAVA_SERIALIZER.serializeToString(objKey);
         }
     }
 
