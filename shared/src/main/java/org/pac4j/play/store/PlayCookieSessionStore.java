@@ -32,7 +32,7 @@ public class PlayCookieSessionStore implements SessionStore {
     private String sessionName = "pac4j";
     private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
 
-    public static final JavaSerializer JAVA_SER_HELPER = new JavaSerializer();
+    public static final JavaSerializer JAVA_SERIALIZER = new JavaSerializer();
 
     public PlayCookieSessionStore() {}
 
@@ -46,7 +46,7 @@ public class PlayCookieSessionStore implements SessionStore {
         if (session.get(sessionName).isPresent()) {
             return Optional.of(sessionName);
         } else if (createSession) {
-            putSessionValues(context, null);
+            putSessionValues(context, new HashMap<>());
             return Optional.of(sessionName);
         } else {
             return Optional.empty();
@@ -71,7 +71,7 @@ public class PlayCookieSessionStore implements SessionStore {
         Map<String, Object> values = null;
         if (sessionValue != null) {
             final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            values = (Map<String, Object>) JAVA_SER_HELPER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            values = (Map<String, Object>) JAVA_SERIALIZER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
         }
         if (values != null) {
             return values;
@@ -106,7 +106,7 @@ public class PlayCookieSessionStore implements SessionStore {
     protected void putSessionValues(final WebContext context, final Map<String, Object> values) {
         String serialized = null;
         if (values != null) {
-            final byte[] javaSerBytes = JAVA_SER_HELPER.serializeToBytes(values);
+            final byte[] javaSerBytes = JAVA_SERIALIZER.serializeToBytes(values);
             serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         }
         if (serialized != null) {
