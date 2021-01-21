@@ -126,7 +126,11 @@ public class PlayCacheSessionStore implements SessionStore {
         } else {
             LOGGER.debug("Set key: {} with value: {}", key, value);
         }
-        values.put(key, value);
+        if (value == null) {
+            values.remove(key);
+        } else {
+            values.put(key, value);
+        }
         store.set(prefixedSessionKey, values);
     }
 
