@@ -2,6 +2,7 @@ package org.pac4j.play.store;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.play.PlayWebContext;
 import play.cache.SyncCacheApi;
