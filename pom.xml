@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>11.0.0-PLAY2.8-RC1</version>
+    <version>11.0.0-PLAY2.8-RC2-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
