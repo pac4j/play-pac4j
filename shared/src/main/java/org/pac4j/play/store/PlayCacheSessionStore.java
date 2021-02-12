@@ -121,6 +121,8 @@ public class PlayCacheSessionStore implements PlaySessionStore {
         if (sessionId != null) {
             context.setNativeSession(new Http.Session(new HashMap<>()));
             context.setRequestAttribute(Pac4jConstants.SESSION_ID, null);
+            final String prefixedSessionKey = getPrefixedSessionKey(sessionId);
+            store.remove(prefixedSessionKey);
             return true;
         }
         return false;

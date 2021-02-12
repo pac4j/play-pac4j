@@ -2,6 +2,7 @@ package org.pac4j.play.store;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.core.util.TestsConstants;
 import org.pac4j.play.PlayWebContext;
 import play.cache.SyncCacheApi;
@@ -59,5 +60,14 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
         store.set(context, KEY, VALUE);
         Optional<Object> value = store.get(context, KEY);
         assertEquals(Optional.of(VALUE), value);
+    }
+
+    @Test
+    public void testDestroySession() {
+        when(context.getRequestAttribute(Pac4jConstants.SESSION_ID)).thenReturn(Optional.of(KEY));
+
+        store.destroySession(context);
+
+        verify(cacheApiMock, times(1)).remove(KEY);
     }
 }
