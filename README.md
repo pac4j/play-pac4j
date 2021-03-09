@@ -3,7 +3,7 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
+It's based on JDK 11 and Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
 
 Several versions of the library are available depending on the version of the Play framework:
 
