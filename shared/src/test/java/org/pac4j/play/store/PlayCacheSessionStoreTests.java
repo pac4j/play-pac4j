@@ -74,10 +74,10 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
 
     @Test
     public void testDestroySession() {
-        when(context.getRequestAttribute(Pac4jConstants.SESSION_ID)).thenReturn(Optional.of(KEY));
+        when(context.getRequestAttribute(Pac4jConstants.SESSION_ID)).thenReturn(Optional.of(SESSION_ID));
 
         store.destroySession(context);
 
-        verify(cacheApiMock, times(1)).remove(KEY);
+        verify(cacheApiMock, times(1)).remove(SESSION_ID);
     }
 }
