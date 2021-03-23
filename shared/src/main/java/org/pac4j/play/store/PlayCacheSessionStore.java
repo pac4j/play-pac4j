@@ -143,9 +143,8 @@ public class PlayCacheSessionStore implements SessionStore {
             context.setRequestAttribute(Pac4jConstants.SESSION_ID, null);
             final String prefixedSessionKey = getPrefixedSessionKey(sessionId);
             store.remove(prefixedSessionKey);
-            return true;
         }
-        return false;
+        return true;
     }
 
     @Override
