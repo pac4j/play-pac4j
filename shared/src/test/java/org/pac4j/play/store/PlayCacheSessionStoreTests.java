@@ -80,4 +80,16 @@ public final class PlayCacheSessionStoreTests implements TestsConstants {
 
         verify(cacheApiMock, times(1)).remove(KEY);
     }
+
+    @Test
+    public void testRenewSession() {
+        final Map<String, Object> data = new HashMap<>();
+        data.put(KEY, VALUE);
+        when(context.getRequestAttribute(Pac4jConstants.SESSION_ID)).thenReturn(Optional.of(SESSION_ID));
+        when(cacheApiMock.get(SESSION_ID)).thenReturn(Optional.of(data));
+
+        store.renewSession(context);
+
+        verify(cacheApiMock, times(1)).remove(SESSION_ID);
+    }
 }

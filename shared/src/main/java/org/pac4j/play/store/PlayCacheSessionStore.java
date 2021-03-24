@@ -172,12 +172,14 @@ public class PlayCacheSessionStore implements SessionStore {
     public boolean renewSession(final WebContext context) {
         final Optional<String> oldSessionId = getSessionId(context, false);
         final Map<String, Object> oldData = new HashMap<>();
-        if (oldSessionId.isPresent()) {
-            final Optional<Map<String, Object>> optOldData = store.get(getPrefixedSessionKey(oldSessionId.get()));
-            if (optOldData.isPresent()) {
+        oldSessionId.ifPresent(sessionId -> {
+            final String prefixedSessionId = getPrefixedSessionKey(sessionId);
+            final Optional<Map<String, Object>> optOldData = store.get(prefixedSessionId);
+            optOldData.ifPresent(oldDataMap -> {
                 oldData.putAll(optOldData.get());
-            }
-        }
+                store.remove(prefixedSessionId);
+            });
+        });
 
         final PlayWebContext playWebContext = (PlayWebContext) context;
         playWebContext.setNativeSession(playWebContext.getNativeSession().removing(Pac4jConstants.SESSION_ID));
