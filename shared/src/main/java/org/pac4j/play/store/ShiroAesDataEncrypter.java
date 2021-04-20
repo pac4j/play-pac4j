@@ -2,8 +2,6 @@ package org.pac4j.play.store;
 
 import org.apache.shiro.crypto.AesCipherService;
 import org.pac4j.core.util.CommonHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.security.SecureRandom;
 
@@ -15,7 +13,7 @@ import java.security.SecureRandom;
  */
 public class ShiroAesDataEncrypter implements DataEncrypter {
 
-    protected final Logger logger = LoggerFactory.getLogger(getClass());
+    private static final SecureRandom random = new SecureRandom();
 
     private AesCipherService aesCipherService = new AesCipherService();
 
@@ -27,7 +25,6 @@ public class ShiroAesDataEncrypter implements DataEncrypter {
     }
 
     public ShiroAesDataEncrypter() {
-        SecureRandom random = new SecureRandom();
         byte bytes[] = new byte[16];
         random.nextBytes(bytes);
         this.key = bytes;
