@@ -36,7 +36,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
     }
 
     @Override
-    protected void internalInit() {
+    protected void internalInit(final boolean forceReinit) {
         CommonHelper.assertTrue(this.timeout >= 0, "timeout must be greater than zero");
         if (this.cache == null && this.cacheProvider == null) {
             throw new TechnicalException("The cache and the cacheProvider must not both be null");

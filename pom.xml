@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>11.0.1-PLAY2.8-SNAPSHOT</version>
+    <version>11.1.0-PLAY2.8-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -62,7 +62,7 @@
     </repositories>
 
     <properties>
-        <pac4j.version>5.2.1</pac4j.version>
+        <pac4j.version>5.3.0</pac4j.version>
         <play.version>2.8.13</play.version>
         <java.version>11</java.version>
         <guice.version>5.0.1</guice.version>
@@ -75,6 +75,7 @@
         <scala.maven.version>2.13.0</scala.maven.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>4.2.0</mockito.version>
+        <pmdVersion>6.41.0</pmdVersion>
     </properties>
 
     <modules>
@@ -234,6 +235,28 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-core</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-java</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-javascript</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>net.sourceforge.pmd</groupId>
+                        <artifactId>pmd-jsp</artifactId>
+                        <version>${pmdVersion}</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
