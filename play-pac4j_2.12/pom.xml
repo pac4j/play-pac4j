@@ -31,18 +31,6 @@
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>be.objectify</groupId>
-            <artifactId>deadbolt-java_${scala.version}</artifactId>
-            <version>${deadboltjava.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>be.objectify</groupId>
-            <artifactId>deadbolt-scala_${scala.version}</artifactId>
-            <version>${deadboltscala.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
         <!-- tests -->
         <dependency>

@@ -69,8 +69,6 @@
         <shiro.version>1.10.1</shiro.version>
         <ehcache.version>2.10.9.2</ehcache.version>
         <scalatest.version>3.3.0-SNAP3</scalatest.version>
-        <deadboltscala.version>2.8.2</deadboltscala.version>
-        <deadboltjava.version>2.8.1</deadboltjava.version>
         <scala.version>2.13</scala.version>
         <scala.maven.version>2.13.10</scala.maven.version>
         <junit.version>4.13.2</junit.version>
