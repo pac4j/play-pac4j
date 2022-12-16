@@ -3,24 +3,14 @@
 </p>
 
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
-It's based on JDK 11 and Play 2.8 (Scala v2.12 or v2.13) and on the **[pac4j security engine](https://github.com/pac4j/pac4j) v5**. It's available under the Apache 2 license.
+It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
-Several versions of the library are available depending on the version of the Play framework:
-
-| Play version | pac4j version | play-pac4j version
-|--------------|---------------|-------------------
-| 2.0          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.9 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
-| 2.1          | 1.7           | [play-pac4j_java v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Java) / [play-pac4j_scala2.10 v1.1.x](https://github.com/pac4j/play-pac4j/tree/1.1.x) (Scala)
-| 2.2          | 1.7           | [play-pac4j_java v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Java) / [play-pac4j_scala v1.2.x](https://github.com/pac4j/play-pac4j/tree/1.2.x) (Scala)
-| 2.3          | 1.7           | [play-pac4j_java v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Java) / [play-pac4j_scala2.10 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) and [play-pac4j_scala2.11 v1.4.x](https://github.com/pac4j/play-pac4j/tree/1.4.x) (Scala)
-| 2.4          | 1.9           | [play-pac4j v2.3.x](https://github.com/pac4j/play-pac4j/tree/2.3.x) (Java & Scala)
-| 2.5          | 2.x           | [play-pac4j_2.11 and play-pac4j_2.12 v3.1.x](https://github.com/pac4j/play-pac4j/tree/3.1.x) (Java & Scala)
-| 2.6          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v7.0.x](https://github.com/pac4j/play-pac4j/tree/7.0.x) (Java & Scala) **Do NOT use Play v2.6.3 and v2.6.5 which have issues in their Cache implementations!**
-| 2.7          | 3.x           | [play-pac4j_2.11 and play-pac4j_2.12 v8.0.x](https://github.com/pac4j/play-pac4j/tree/8.0.x) (Java & Scala)
-| 2.7          | 4.x           | [play-pac4j_2.11 and play-pac4j_2.12 and play-pac4j_2.13 v9.0.x](https://github.com/pac4j/play-pac4j/tree/9.0.x) (Java & Scala)
-| 2.8          | 4.x           | [play-pac4j_2.12 and play-pac4j_2.13 v9.0.x](https://github.com/pac4j/play-pac4j/tree/10.0.x) (Java & Scala)
-| 2.8          | 5.x           | play-pac4j_2.12 and play-pac4j_2.13 v11.0.x-PLAY2.8 (Java & Scala)
-
+| JDK  | Play version | pac4j version | play-pac4j version | Modules (Java & Scala)                          |
+|------|--------------|---------------|--------------------|-------------------------------------------------|
+| 17   | 2.8          | 6.x           | 12.x               | play-pac4j_2.12 play-pac4j_2.13                 |
+| 11   | 2.8          | 5.x           | 11.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 |
+| 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 |
+| 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | 
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
