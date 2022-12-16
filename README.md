@@ -5,12 +5,12 @@
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
 It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
-| JDK  | Play version | pac4j version | play-pac4j version | Modules (Java & Scala)                          |
-|------|--------------|---------------|--------------------|-------------------------------------------------|
-| 17   | 2.8          | 6.x           | 12.x               | play-pac4j_2.12 play-pac4j_2.13                 |
-| 11   | 2.8          | 5.x           | 11.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 |
-| 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 |
-| 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | 
+| JDK  | Play version | pac4j version | play-pac4j version | Modules (Java & Scala)                          | Usage of Lombok |
+|------|--------------|---------------|--------------------|-------------------------------------------------|-----------------|
+| 17   | 2.8          | 6.x           | 12.x               | play-pac4j_2.12 play-pac4j_2.13                 | Yes             |
+| 11   | 2.8          | 5.x           | 11.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | No              |
+| 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 | No              |
+| 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | No              |
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
