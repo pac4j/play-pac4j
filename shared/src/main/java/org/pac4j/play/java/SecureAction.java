@@ -1,19 +1,15 @@
 package org.pac4j.play.java;
 
+import lombok.extern.slf4j.Slf4j;
+import lombok.val;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.engine.DefaultSecurityLogic;
-import org.pac4j.core.engine.SecurityLogic;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
-import org.pac4j.core.util.FindBest;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.context.PlayContextFactory;
-import org.pac4j.play.http.PlayHttpActionAdapter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.pac4j.play.config.Pac4jPlayConfig;
+import org.pac4j.play.context.PlayFrameworkParameters;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -32,12 +28,9 @@ import java.util.concurrent.CompletionStage;
  * @author Michael Remond
  * @since 1.0.0
  */
+@Slf4j
 public class SecureAction extends Action<Result> {
 
-    protected Logger logger = LoggerFactory.getLogger(getClass());
-
-    private SecurityLogic securityLogic;
-    
     protected final static Method CLIENTS_METHOD;
 
     protected final static Method AUTHORIZERS_METHOD;
@@ -72,34 +65,43 @@ public class SecureAction extends Action<Result> {
           final String authorizers = getStringParam(invocationHandler, AUTHORIZERS_METHOD, null);
           final String matchers = getStringParam(invocationHandler, MATCHERS_METHOD, null);
 
-          final WebContext context = FindBest.webContextFactory(null, config, PlayContextFactory.INSTANCE).newContext(req);
-
-          return internalCall(req, context, sessionStore, clients, authorizers, matchers);
+          return internalCall(new PlayFrameworkParameters(req), clients, authorizers, matchers);
         } catch(Throwable t) {
           throw new RuntimeException(t);
         }        
     }
 
-    public CompletionStage<Result> call(final WebContext webContext, final SessionStore sessionStore, final String clients, final String authorizers, final String matchers) throws Throwable {
-        return internalCall(null, webContext, sessionStore, clients, authorizers, matchers);
+    public CompletionStage<Result> call(final PlayFrameworkParameters parameters, final String clients, final String authorizers, final String matchers) throws Throwable {
+        return internalCall(parameters, clients, authorizers, matchers);
     }
 
-    protected CompletionStage<Result> internalCall(final Http.Request req, final WebContext webContext, final SessionStore sessionStore, final String clients, final String authorizers, final String matchers) throws Throwable {
+    protected CompletionStage<Result> internalCall(final PlayFrameworkParameters parameters, final String clients, final String authorizers, final String matchers) throws Throwable {
 
-        final HttpActionAdapter bestAdapter = FindBest.httpActionAdapter(null, config, PlayHttpActionAdapter.INSTANCE);
-        final SecurityLogic bestLogic = FindBest.securityLogic(securityLogic, config, DefaultSecurityLogic.INSTANCE);
+        Pac4jPlayConfig.applyPlaySettingsIfUndefined(config, sessionStore);
 
-        final HttpActionAdapter actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(bestAdapter.adapt(action, webCtx));
+        final HttpActionAdapter actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(config.getHttpActionAdapter().adapt(action, webCtx));
 
-        return (CompletionStage<Result>) bestLogic.perform(webContext, sessionStore, config, (webCtx, session, profiles, parameters) -> {
+        val configSecurity = new Config()
+                .withClients(config.getClients())
+                .withAuthorizers(config.getAuthorizers())
+                .withMatchers(config.getMatchers())
+                .withSecurityLogic(config.getSecurityLogic())
+                .withCallbackLogic(config.getCallbackLogic())
+                .withLogoutLogic(config.getLogoutLogic())
+                .withWebContextFactory(config.getWebContextFactory())
+                .withSessionStoreFactory(config.getSessionStoreFactory())
+                .withProfileManagerFactory(config.getProfileManagerFactory())
+                .withHttpActionAdapter(actionAdapterWrapper);
+
+        return (CompletionStage<Result>) configSecurity.getSecurityLogic().perform(configSecurity, (webCtx, session, profiles, p) -> {
 	            // when called from Scala
 	            if (delegate == null) {
 	                return CompletableFuture.completedFuture(null);
 	            } else {
 	                final PlayWebContext playWebContext = (PlayWebContext) webCtx;
-	                return delegate.call(playWebContext.supplementRequest(req));
+	                return delegate.call((Http.Request) playWebContext.supplementRequest(parameters.getJavaRequest()));
 	            }
-            }, actionAdapterWrapper, clients, authorizers, matchers);
+            }, clients, authorizers, matchers, parameters);
     }
 
     protected String getStringParam(final InvocationHandler invocationHandler, final Method method, final String defaultValue) throws Throwable {
@@ -107,7 +109,7 @@ public class SecureAction extends Action<Result> {
         if (value == null) {
             value = defaultValue;
         }
-        logger.debug("String param: {}: {}", method.getName(), value);
+        LOGGER.debug("String param: {}: {}", method.getName(), value);
         return value;
     }
 
@@ -116,15 +118,7 @@ public class SecureAction extends Action<Result> {
         if (value == null) {
             value = defaultValue;
         }
-        logger.debug("Boolean param: {}: {}", method.getName(), value);
+        LOGGER.debug("Boolean param: {}: {}", method.getName(), value);
         return value;
-    }
-
-    public SecurityLogic getSecurityLogic() {
-        return securityLogic;
-    }
-
-    public void setSecurityLogic(final SecurityLogic securityLogic) {
-        this.securityLogic = securityLogic;
     }
 }

@@ -1,13 +1,16 @@
 package org.pac4j.play.store;
 
-import javax.inject.Inject;
 import com.google.inject.Provider;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.store.AbstractStore;
 import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.serializer.JavaSerializer;
 import play.cache.SyncCacheApi;
 
+import javax.inject.Inject;
 import java.util.Optional;
 
 /**
@@ -16,12 +19,15 @@ import java.util.Optional;
  * @author Jerome Leleu
  * @since 3.0.0
  */
+@ToString
 public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
     public static final JavaSerializer JAVA_SERIALIZER = new JavaSerializer();
 
     private final SyncCacheApi cache;
     private final Provider<SyncCacheApi> cacheProvider;
+    @Getter
+    @Setter
     private int timeout;
 
     @Inject
@@ -68,18 +74,5 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
     public SyncCacheApi getCache() {
         return cache != null ? cache : cacheProvider.get();
-    }
-
-    public int getTimeout() {
-        return timeout;
-    }
-
-    public void setTimeout(final int timeout) {
-        this.timeout = timeout;
-    }
-
-    @Override
-    public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "cache", getCache(), "timeout", timeout);
     }
 }

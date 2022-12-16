@@ -1,7 +1,6 @@
 package org.pac4j.play.scala
 
 import javax.inject.{Inject, Singleton}
-
 import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import play.api.mvc._
@@ -9,6 +8,7 @@ import org.pac4j.core.config.Config
 import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.PlayWebContext
+import org.pac4j.play.context.PlayFrameworkParameters
 
 /**
  * <p>To protect a resource, the {@link #Secure} methods must be used.</p>
@@ -69,10 +69,11 @@ case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[
     copy[P,A,R](parser = action.parser).async(action.parser)(r => action.apply(r))
 
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]) = {
-    val webContext = new PlayWebContext(request)
     val secureAction = new org.pac4j.play.java.SecureAction(config, sessionStore)
-    secureAction.call(webContext, sessionStore, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result](r =>
+    val parameters = new PlayFrameworkParameters(request)
+    secureAction.call(parameters, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
+        val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
         val profileManager = new ProfileManager(webContext, sessionStore)
         val profiles = profileManager.getProfiles()
         logger.debug("profiles: {}", profiles)

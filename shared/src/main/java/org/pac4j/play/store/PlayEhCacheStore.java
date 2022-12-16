@@ -1,10 +1,10 @@
 package org.pac4j.play.store;
 
 import com.google.inject.Provider;
+import lombok.ToString;
 import net.sf.ehcache.CacheManager;
 import net.sf.ehcache.Ehcache;
 import net.sf.ehcache.Element;
-import org.pac4j.core.util.CommonHelper;
 import play.cache.SyncCacheApi;
 
 import javax.inject.Inject;
@@ -15,6 +15,7 @@ import javax.inject.Inject;
  * @author Jerome Leleu
  * @since 9.0.0
  */
+@ToString
 public class PlayEhCacheStore<K, O> extends PlayCacheStore<K, O> {
 
     @Inject
@@ -36,11 +37,5 @@ public class PlayEhCacheStore<K, O> extends PlayCacheStore<K, O> {
         // FIX: by default, the Play framework will use the setTimeToLive
         e.setTimeToIdle(getTimeout());
         getEhcache().put(e);
-    }
-
-    @Override
-    public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "cache", getCache(), "timeout", getTimeout(),
-                "ehcache", getEhcache());
     }
 }

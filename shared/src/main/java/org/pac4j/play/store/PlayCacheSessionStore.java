@@ -1,12 +1,9 @@
 package org.pac4j.play.store;
 
-import javax.inject.Inject;
-import javax.inject.Singleton;
-
 import com.google.inject.Provider;
+import lombok.ToString;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
@@ -14,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import play.cache.SyncCacheApi;
 import play.mvc.Http;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +24,7 @@ import java.util.Optional;
  * @since 2.0.0
  */
 @Singleton
+@ToString
 public class PlayCacheSessionStore implements SessionStore {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(PlayCacheSessionStore.class);
@@ -216,10 +216,5 @@ public class PlayCacheSessionStore implements SessionStore {
     protected void setDefaultTimeout() {
         // 1 hour = 3600 seconds
         this.store.setTimeout(3600);
-    }
-
-    @Override
-    public String toString() {
-        return CommonHelper.toNiceString(this.getClass(), "store", store, "prefix", prefix, "timeout", getTimeout());
     }
 }

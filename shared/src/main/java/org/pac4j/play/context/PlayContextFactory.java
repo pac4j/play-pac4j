@@ -1,8 +1,9 @@
 package org.pac4j.play.context;
 
+import org.pac4j.core.context.FrameworkParameters;
 import org.pac4j.core.context.WebContextFactory;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.play.PlayWebContext;
-import play.mvc.Http;
 
 /**
  * Build a Play context from parameters.
@@ -17,7 +18,14 @@ public class PlayContextFactory implements WebContextFactory {
     protected PlayContextFactory() {}
 
     @Override
-    public PlayWebContext newContext(final Object... parameters) {
-        return new PlayWebContext((Http.Request) parameters[0]);
+    public PlayWebContext newContext(final FrameworkParameters parameters) {
+        if (parameters instanceof PlayFrameworkParameters playFrameworkParameters) {
+            if (playFrameworkParameters.getJavaRequest() != null) {
+                return new PlayWebContext(playFrameworkParameters.getJavaRequest());
+            } else {
+                return new PlayWebContext(playFrameworkParameters.getScalaRequest());
+            }
+        }
+        throw new TechnicalException("Bad parameter type");
     }
 }

@@ -1,18 +1,20 @@
 package org.pac4j.play.filters
 
 import akka.stream.Materializer
-import javax.inject.{Inject, Singleton}
 import org.pac4j.core.config.Config
-import SecurityFilter._
 import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.util.CommonHelper
 import org.pac4j.play.PlayWebContext
+import org.pac4j.play.config.Pac4jPlayConfig
+import org.pac4j.play.context.PlayFrameworkParameters
+import org.pac4j.play.filters.SecurityFilter._
 import org.pac4j.play.java.SecureAction
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc
 
-import scala.compat.java8.FutureConverters._
+import javax.inject.{Inject, Singleton}
+import scala.compat.java8.FutureConverters.CompletionStageOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
@@ -77,7 +79,11 @@ class SecurityFilter @Inject()(configuration: Configuration, sessionStore: Sessi
   }
 
   private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
-    val webContext = new PlayWebContext(request)
+
+    Pac4jPlayConfig.applyPlaySettingsIfUndefined(config, sessionStore)
+
+    val parameters = new PlayFrameworkParameters(request)
+    val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
     val securityAction = new SecureAction(config, sessionStore)
 
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
@@ -99,7 +105,7 @@ class SecurityFilter @Inject()(configuration: Configuration, sessionStore: Sessi
 
     val futureResult: Future[Result] =
       securityAction
-        .call(webContext, sessionStore, rule.clients, rule.authorizers, rule.matchers)
+        .call(parameters, rule.clients, rule.authorizers, rule.matchers)
         .toScala
         .flatMap[Result](calculateResult)
 
