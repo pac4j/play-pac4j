@@ -22,12 +22,10 @@ public class FrameworkAdapterImpl extends DefaultFrameworkAdapter {
 
         config.setWebContextFactoryIfUndefined(PlayContextFactory.INSTANCE);
         if (config.getSessionStoreFactory() == null) {
-            val message = """
-Please create a SessionStore and define it in the config: 
-'config.setSessionStoreFactory(p -> mySessionStore);' in Java or
-'config.setSessionStoreFactory(new SessionStoreFactory { override def newSessionStore(parameters: FrameworkParameters): 
-SessionStore = mySessionStore });' in Scala!
-""";
+            val message = "Please create a SessionStore and define it in the config: " +
+                          "'config.setSessionStoreFactory(p -> mySessionStore);' in Java or " +
+                          "'config.setSessionStoreFactory(new SessionStoreFactory { override def " +
+                          " newSessionStore(parameters: FrameworkParameters): SessionStore = mySessionStore });' in Scala!";
             throw new TechnicalException(message);
         }
         config.setHttpActionAdapterIfUndefined(PlayHttpActionAdapter.INSTANCE);
