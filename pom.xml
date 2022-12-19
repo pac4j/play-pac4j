@@ -198,8 +198,12 @@
                     </execution>
                 </executions>
                 <configuration>
+                    <javacArgs>
+                        <javacArg>-release</javacArg>
+                        <javacArg>${java.version}</javacArg>
+                    </javacArgs>
                     <includes>
-                        <include>*.scala</include>
+                        <include>**/*.scala</include>
                     </includes>
                     <scalaVersion>${scala.maven.version}</scalaVersion>
                 </configuration>
