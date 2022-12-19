@@ -95,7 +95,7 @@ public class SecureAction extends Action<Result> {
 	                return CompletableFuture.completedFuture(null);
 	            } else {
 	                final PlayWebContext playWebContext = (PlayWebContext) webCtx;
-	                return delegate.call((Http.Request) playWebContext.supplementRequest(parameters.getJavaRequest()));
+	                return delegate.call(playWebContext.supplementRequest((Http.Request) parameters.getJavaRequest()));
 	            }
             }, clients, authorizers, matchers, parameters);
     }
