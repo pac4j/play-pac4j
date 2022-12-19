@@ -2,13 +2,12 @@ package org.pac4j.play.java;
 
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
-import org.pac4j.play.config.Pac4jPlayConfig;
 import org.pac4j.play.context.PlayFrameworkParameters;
 import play.mvc.Action;
 import play.mvc.Http;
@@ -49,12 +48,9 @@ public class SecureAction extends Action<Result> {
 
     final private Config config;
 
-    final private SessionStore sessionStore;
-
     @Inject
-    public SecureAction(final Config config, final SessionStore sessionStore) {
+    public SecureAction(final Config config) {
         this.config = config;
-        this.sessionStore = sessionStore;
     }
 
     @Override
@@ -77,7 +73,7 @@ public class SecureAction extends Action<Result> {
 
     protected CompletionStage<Result> internalCall(final PlayFrameworkParameters parameters, final String clients, final String authorizers, final String matchers) throws Throwable {
 
-        Pac4jPlayConfig.applyPlaySettingsIfUndefined(config, sessionStore);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         final HttpActionAdapter actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(config.getHttpActionAdapter().adapt(action, webCtx));
 

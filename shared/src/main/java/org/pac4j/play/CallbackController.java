@@ -2,9 +2,8 @@ package org.pac4j.play;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.pac4j.core.adapter.FrameworkAdapter;
 import org.pac4j.core.config.Config;
-import org.pac4j.core.context.session.SessionStore;
-import org.pac4j.play.config.Pac4jPlayConfig;
 import org.pac4j.play.context.PlayFrameworkParameters;
 import play.libs.concurrent.HttpExecutionContext;
 import play.mvc.Controller;
@@ -35,13 +34,11 @@ public class CallbackController extends Controller {
     @Inject
     protected Config config;
     @Inject
-    protected SessionStore sessionStore;
-    @Inject
     protected HttpExecutionContext ec;
 
     public CompletionStage<Result> callback(final Http.Request request) {
 
-        Pac4jPlayConfig.applyPlaySettingsIfUndefined(config, sessionStore);
+        FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
         return CompletableFuture.supplyAsync(() ->
                     (Result) config.getCallbackLogic().perform(config, defaultUrl, renewSession, defaultClient, new PlayFrameworkParameters(request))

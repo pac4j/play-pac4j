@@ -9,12 +9,14 @@ import org.junit.runners.BlockJUnit4ClassRunner
 import org.pac4j.core.client.direct.AnonymousClient
 import org.pac4j.core.client.{Clients, MockDirectClient}
 import org.pac4j.core.config.Config
+import org.pac4j.core.context.FrameworkParameters
+import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.play.filters.SecurityFilter.{Rule, RuleData}
 import org.pac4j.play.http.PlayHttpActionAdapter
 import org.pac4j.play.store.PlayCacheSessionStore
-import org.scalatest.matchers.should.Matchers._
 import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.matchers.should.Matchers._
 import play.api.Configuration
 import play.api.mvc.{RequestHeader, Result, Results}
 import play.api.test.FakeRequest
@@ -88,8 +90,11 @@ class SecurityFilterTests extends ScalaFutures with Results {
     pac4jConfig.setClients(new Clients(new MockDirectClient("client1"), AnonymousClient.INSTANCE))
 
     val playSessionStore = new PlayCacheSessionStore(new DefaultSyncCacheApi(new DefaultAsyncCacheApi(new MockInMemoryAsyncCacheApi())))
+    pac4jConfig.setSessionStoreFactory(new SessionStoreFactory {
+      override def newSessionStore(parameters: FrameworkParameters): SessionStore = playSessionStore
+    });
     val playConfig = new Configuration(ConfigFactory.parseString(configString))
 
-    new SecurityFilter(playConfig, playSessionStore, pac4jConfig)
+    new SecurityFilter(playConfig, pac4jConfig)
   }
 }

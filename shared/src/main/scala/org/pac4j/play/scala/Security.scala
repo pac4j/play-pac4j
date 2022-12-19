@@ -5,7 +5,6 @@ import scala.concurrent.ExecutionContext
 import scala.language.higherKinds
 import play.api.mvc._
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.context.PlayFrameworkParameters
@@ -28,16 +27,14 @@ trait Security[P<:UserProfile] extends BaseController {
 
   protected def config: Config = controllerComponents.config
 
-  protected def sessionStore: SessionStore = controllerComponents.sessionStore
-
   protected def profiles[A](implicit request: AuthenticatedRequest[A]): List[P] = request.profiles
 
   protected def Secure: SecureAction[P,AnyContent,AuthenticatedRequest] =
-    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, controllerComponents.parser, sessionStore, config)(controllerComponents.executionContext)
+    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, controllerComponents.parser, config)(controllerComponents.executionContext)
 }
 
 
-case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](clients: String, authorizers: String, matchers: String, parser: BodyParser[ContentType], sessionStore: SessionStore, config: Config)(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
+case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](clients: String, authorizers: String, matchers: String, parser: BodyParser[ContentType], config: Config)(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
   import scala.collection.JavaConverters._
   import scala.compat.java8.FutureConverters._
   import scala.concurrent.Future
@@ -69,12 +66,13 @@ case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[
     copy[P,A,R](parser = action.parser).async(action.parser)(r => action.apply(r))
 
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]) = {
-    val secureAction = new org.pac4j.play.java.SecureAction(config, sessionStore)
+    val secureAction = new org.pac4j.play.java.SecureAction(config)
     val parameters = new PlayFrameworkParameters(request)
     secureAction.call(parameters, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result](r =>
       if (r == null) {
         val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
-        val profileManager = new ProfileManager(webContext, sessionStore)
+        val sessionStore = config.getSessionStoreFactory.newSessionStore(parameters)
+        val profileManager = config.getProfileManagerFactory.apply(webContext, sessionStore)
         val profiles = profileManager.getProfiles()
         logger.debug("profiles: {}", profiles)
         val sProfiles = profiles.asScala.toList.asInstanceOf[List[P]]
@@ -99,7 +97,6 @@ trait SecurityComponents extends ControllerComponents {
 
   def components: ControllerComponents
   def config: Config
-  def sessionStore: SessionStore
   def parser: BodyParsers.Default
 
   @inline def actionBuilder = components.actionBuilder
@@ -113,7 +110,6 @@ trait SecurityComponents extends ControllerComponents {
 @Singleton
 case class DefaultSecurityComponents @Inject()
 (
-  sessionStore: SessionStore,
   config: Config,
   parser: BodyParsers.Default,
   components: ControllerComponents

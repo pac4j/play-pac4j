@@ -1,11 +1,10 @@
 package org.pac4j.play.filters
 
 import akka.stream.Materializer
+import org.pac4j.core.adapter.FrameworkAdapter
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.util.CommonHelper
 import org.pac4j.play.PlayWebContext
-import org.pac4j.play.config.Pac4jPlayConfig
 import org.pac4j.play.context.PlayFrameworkParameters
 import org.pac4j.play.filters.SecurityFilter._
 import org.pac4j.play.java.SecureAction
@@ -59,7 +58,7 @@ import scala.util.Failure
   * @since 2.1.0
   */
 @Singleton
-class SecurityFilter @Inject()(configuration: Configuration, sessionStore: SessionStore, config: Config)
+class SecurityFilter @Inject()(configuration: Configuration, config: Config)
                               (implicit val ec: ExecutionContext, val mat: Materializer) extends Filter {
   private val log = Logger(this.getClass)
 
@@ -80,11 +79,11 @@ class SecurityFilter @Inject()(configuration: Configuration, sessionStore: Sessi
 
   private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
 
-    Pac4jPlayConfig.applyPlaySettingsIfUndefined(config, sessionStore)
+    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config)
 
     val parameters = new PlayFrameworkParameters(request)
     val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
-    val securityAction = new SecureAction(config, sessionStore)
+    val securityAction = new SecureAction(config)
 
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
       val isAuthSucceeded = secureActionResult == null

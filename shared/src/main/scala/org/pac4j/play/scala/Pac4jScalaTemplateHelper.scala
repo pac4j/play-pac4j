@@ -1,11 +1,12 @@
 package org.pac4j.play.scala
 
+import org.pac4j.core.adapter.FrameworkAdapter
+
 import javax.inject.Inject
 import org.pac4j.core.authorization.checker.DefaultAuthorizationChecker
 import org.pac4j.core.config.Config
-import org.pac4j.core.context.session.SessionStore
 import org.pac4j.core.profile.{ProfileManager, UserProfile}
-import org.pac4j.play.PlayWebContext
+import org.pac4j.play.context.PlayFrameworkParameters
 import play.api.mvc.RequestHeader
 
 import scala.collection.JavaConverters._
@@ -29,7 +30,7 @@ import scala.collection.JavaConverters._
   *
   * @since 6.0.0
   */
-class Pac4jScalaTemplateHelper[P<:UserProfile] @Inject()(sessionStore: SessionStore, config: Config)  {
+class Pac4jScalaTemplateHelper[P<:UserProfile] @Inject()(config: Config)  {
 
   private val authorizationChecker = new DefaultAuthorizationChecker()
 
@@ -67,13 +68,23 @@ class Pac4jScalaTemplateHelper[P<:UserProfile] @Inject()(sessionStore: SessionSt
     * @return the newly creates [[ProfileManager]]
     */
   def createProfileManager(implicit request: RequestHeader) : ProfileManager = {
-    val webContext = new PlayWebContext(request)
+
+    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config)
+
+    val parameters = new PlayFrameworkParameters(request)
+    val webContext = config.getWebContextFactory.newContext(parameters)
+    val sessionStore = config.getSessionStoreFactory.newSessionStore(parameters)
     new ProfileManager(webContext, sessionStore)
   }
 
   def isAuthorized(authorizers: String)(implicit request: RequestHeader): Boolean = {
-    val context = new PlayWebContext(request)
+
+    FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config)
+
+    val parameters = new PlayFrameworkParameters(request)
+    val webContext = config.getWebContextFactory.newContext(parameters)
+    val sessionStore = config.getSessionStoreFactory.newSessionStore(parameters)
     val profiles = getCurrentProfiles.asInstanceOf[List[UserProfile]].asJava
-    authorizationChecker.isAuthorized(context, sessionStore, profiles, authorizers, config.getAuthorizers, config.getClients.getClients)
+    authorizationChecker.isAuthorized(webContext, sessionStore, profiles, authorizers, config.getAuthorizers, config.getClients.getClients)
   }
 }
