@@ -88,7 +88,8 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
       val isAuthSucceeded = secureActionResult == null
       if (isAuthSucceeded) {
-        nextFilter(webContext.supplementRequest(request.asJava).asScala)
+        val newRequest = webContext.supplementRequest(request.asJava).asScala
+        nextFilter(newRequest)
       } else {
         // When the user is not authenticated, the result is one of the following:
         // - forbidden
