@@ -9,6 +9,7 @@ import org.pac4j.core.http.adapter.HttpActionAdapter;
 import org.pac4j.core.util.Pac4jConstants;
 import org.pac4j.play.PlayWebContext;
 import org.pac4j.play.context.PlayFrameworkParameters;
+import org.pac4j.play.result.PlayWebContextResultHolder;
 import play.mvc.Action;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -90,11 +91,11 @@ public class SecureAction extends Action<Result> {
                 .withHttpActionAdapter(actionAdapterWrapper);
 
         return (CompletionStage<Result>) configSecurity.getSecurityLogic().perform(configSecurity, (webCtx, session, profiles, p) -> {
+                val playWebContext = (PlayWebContext) webCtx;
 	            // when called from Scala
 	            if (delegate == null) {
-	                return CompletableFuture.completedFuture(null);
+	                return CompletableFuture.completedFuture(new PlayWebContextResultHolder(playWebContext));
 	            } else {
-	                final PlayWebContext playWebContext = (PlayWebContext) webCtx;
 	                return delegate.call(playWebContext.supplementRequest((Http.Request) playWebContext.getNativeJavaRequest()));
 	            }
             }, clients, authorizers, matchers, parameters);

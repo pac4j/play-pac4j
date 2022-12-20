@@ -8,6 +8,7 @@ import org.pac4j.play.PlayWebContext
 import org.pac4j.play.context.PlayFrameworkParameters
 import org.pac4j.play.filters.SecurityFilter._
 import org.pac4j.play.java.SecureAction
+import org.pac4j.play.result.PlayWebContextResultHolder
 import play.api.mvc._
 import play.api.{Configuration, Logger}
 import play.mvc
@@ -86,9 +87,9 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
     val securityAction = new SecureAction(config)
 
     def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
-      val isAuthSucceeded = secureActionResult == null
-      if (isAuthSucceeded) {
-        val newRequest = webContext.supplementRequest(request.asJava).asScala
+      if (secureActionResult.isInstanceOf[PlayWebContextResultHolder]) {
+        val newCtx = secureActionResult.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
+        val newRequest = newCtx.supplementRequest(request.asJava).asScala
         nextFilter(newRequest)
       } else {
         // When the user is not authenticated, the result is one of the following:

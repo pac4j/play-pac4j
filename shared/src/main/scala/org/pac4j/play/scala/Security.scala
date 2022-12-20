@@ -8,6 +8,7 @@ import org.pac4j.core.config.Config
 import org.pac4j.core.profile.UserProfile
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.context.PlayFrameworkParameters
+import org.pac4j.play.result.PlayWebContextResultHolder
 
 /**
  * <p>To protect a resource, the {@link #Secure} methods must be used.</p>
@@ -69,8 +70,8 @@ case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[
     val secureAction = new org.pac4j.play.java.SecureAction(config)
     val parameters = new PlayFrameworkParameters(request)
     secureAction.call(parameters, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result](r =>
-      if (r == null) {
-        val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
+      if (r.isInstanceOf[PlayWebContextResultHolder]) {
+        val webContext = r.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
         val sessionStore = config.getSessionStoreFactory.newSessionStore(parameters)
         val profileManager = config.getProfileManagerFactory.apply(webContext, sessionStore)
         val profiles = profileManager.getProfiles()
