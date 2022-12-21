@@ -90,7 +90,7 @@ public class SecureAction extends Action<Result> {
                 .withProfileManagerFactory(config.getProfileManagerFactory())
                 .withHttpActionAdapter(actionAdapterWrapper);
 
-        return (CompletionStage<Result>) configSecurity.getSecurityLogic().perform(configSecurity, (webCtx, session, profiles, p) -> {
+        return (CompletionStage<Result>) configSecurity.getSecurityLogic().perform(configSecurity, (webCtx, session, profiles) -> {
                 val playWebContext = (PlayWebContext) webCtx;
 	            // when called from Scala
 	            if (delegate == null) {
