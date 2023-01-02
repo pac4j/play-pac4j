@@ -73,7 +73,7 @@
         <scala.maven.version>2.13.10</scala.maven.version>
         <junit.version>4.13.2</junit.version>
         <mockito.version>4.11.0</mockito.version>
-        <pmdVersion>6.52.0</pmdVersion>
+        <pmdVersion>6.53.0</pmdVersion>
     </properties>
 
     <modules>
