@@ -21,14 +21,18 @@ import java.util.concurrent.CompletionStage;
  * @author Michael Remond
  * @since 1.5.0
  */
-@Getter
-@Setter
 public class CallbackController extends Controller {
 
+    @Getter
+    @Setter
     private String defaultUrl;
 
+    @Getter
+    @Setter
     private Boolean renewSession;
 
+    @Getter
+    @Setter
     private String defaultClient;
 
     @Inject

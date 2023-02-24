@@ -1,0 +1,40 @@
+<FindBugsFilter>
+    <Match>
+        <Class name="~.*PlayHttpActionAdapter"/>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayHttpActionAdapter"/>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayWebContextResultHolder"/>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayWebContextResultHolder"/>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Class name="~.*SecureAction"/>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayCacheSessionStore"/>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayCacheSessionStore"/>
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>
+    <Match>
+        <Class name="~.*PlayCacheStore"/>
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~.*SecurityFilter.*"/>
+    </Match>
+    <Match>
+        <Class name="~.*scala.*"/>
+    </Match>
+</FindBugsFilter>

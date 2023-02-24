@@ -1,6 +1,8 @@
 package org.pac4j.play.store;
 
 import com.google.inject.Provider;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -29,6 +31,8 @@ public class PlayCacheSessionStore implements SessionStore {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(PlayCacheSessionStore.class);
 
+    @Getter
+    @Setter
     // prefix for the cache
     private String prefix = null;
 
@@ -193,24 +197,12 @@ public class PlayCacheSessionStore implements SessionStore {
         return true;
     }
 
-    public String getPrefix() {
-        return prefix;
-    }
-
-    public void setPrefix(final String prefix) {
-        this.prefix = prefix;
-    }
-
     public int getTimeout() {
         return this.store.getTimeout();
     }
 
     public void setTimeout(final int timeout) {
         this.store.setTimeout(timeout);
-    }
-
-    public PlayCacheStore<String, Map<String, Object>> getStore() {
-        return store;
     }
 
     protected void setDefaultTimeout() {

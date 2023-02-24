@@ -20,18 +20,26 @@ import java.util.concurrent.CompletionStage;
  * @author Jerome Leleu
  * @since 2.0.0
  */
-@Getter
-@Setter
 public class LogoutController extends Controller {
 
+    @Getter
+    @Setter
     private String defaultUrl;
 
+    @Getter
+    @Setter
     private String logoutUrlPattern;
 
+    @Getter
+    @Setter
     private Boolean localLogout;
 
+    @Getter
+    @Setter
     private Boolean destroySession;
 
+    @Getter
+    @Setter
     private Boolean centralLogout;
 
     @Inject
