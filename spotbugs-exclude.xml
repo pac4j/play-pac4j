@@ -28,6 +28,10 @@
         <Bug pattern="EI_EXPOSE_REP" />
     </Match>
     <Match>
+        <Class name="~.*MockInMemoryAsyncCacheApi.*" />
+        <Bug pattern="EI_EXPOSE_REP" />
+    </Match>    
+    <Match>
         <Class name="~.*PlayCacheStore"/>
         <Bug pattern="EI_EXPOSE_REP2" />
     </Match>

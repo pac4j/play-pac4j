@@ -8,17 +8,10 @@
         <version>12.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>play-pac4j_2.12</artifactId>
+    <artifactId>play-pac4j_3</artifactId>
     <packaging>jar</packaging>
-    <name>pac4j implementation for Play framework (Scala 2.12)</name>
-    <description>Security library for Play framework based on pac4j using Scala 2.12</description>
-
-    <properties>
-        <scala.version>2.12</scala.version>
-        <scala.maven.version>2.12.16</scala.maven.version>
-        <play.version>2.8.19</play.version>
-         <selenium.version>3.141.59</selenium.version>
-    </properties>
+    <name>pac4j implementation for Play framework (Scala 3)</name>
+    <description>Security library for Play framework based on pac4j using Scala 3</description>
 
     <dependencies>
         <dependency>
@@ -32,6 +25,11 @@
             <artifactId>play-cache_${scala.version}</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <version>2.13.10</version>
         </dependency>
 
         <!-- tests -->

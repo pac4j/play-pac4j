@@ -36,7 +36,7 @@ trait Security[P<:UserProfile] extends BaseController {
 
 
 case class SecureAction[P<:UserProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](clients: String, authorizers: String, matchers: String, parser: BodyParser[ContentType], config: Config)(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
-  import scala.collection.JavaConverters._
+  import ScalaCompat.Converters._
   import scala.compat.java8.FutureConverters._
   import scala.concurrent.Future
   import org.pac4j.core.profile.ProfileManager

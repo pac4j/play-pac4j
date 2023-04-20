@@ -27,3 +27,6 @@ perfStats.log
 .pmd
 .pmdruleset.xml
 .DS_Store
+.bloop
+.vscode
+.metals
