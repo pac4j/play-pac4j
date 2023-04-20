@@ -109,7 +109,7 @@ public class PlayWebContext implements WebContext {
 
     protected Object getBody() {
         if (scalaRequest != null && scalaRequest.hasBody() && scalaRequest instanceof Request) {
-            return ((Request) scalaRequest).body();
+            return ((Request<?>) scalaRequest).body();
         } else if (javaRequest.hasBody() && javaRequest instanceof Http.Request) {
             return ((Http.Request) javaRequest).body();
         }
@@ -253,6 +253,11 @@ public class PlayWebContext implements WebContext {
     public Http.RequestHeader supplementRequest(final Http.RequestHeader request) {
         logger.trace("supplement request with: {} and session: {}", this.javaRequest.attrs(), session);
         return request.withAttrs(this.javaRequest.attrs()).addAttr(RequestAttrKey.Session().asJava(), new AssignedCell<>(session.asScala()));
+    }
+
+    public <A> Request<A> supplementRequest(Request<A> request) {
+        logger.trace("supplement request with: {} and session: {}", this.javaRequest.attrs(), session);
+        return request.withAttrs(this.javaRequest.attrs().asScala()).addAttr(RequestAttrKey.Session(), new AssignedCell<>(session.asScala()));
     }
 
     public Result supplementResponse(final Result result) {
