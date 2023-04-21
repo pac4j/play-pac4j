@@ -72,7 +72,7 @@
         <scala.version>2.13</scala.version>
         <scala.maven.version>2.13.10</scala.maven.version>
         <junit.version>4.13.2</junit.version>
-        <mockito.version>5.3.0</mockito.version>
+        <mockito.version>5.3.1</mockito.version>
         <pmdVersion>6.55.0</pmdVersion>
     </properties>
 
