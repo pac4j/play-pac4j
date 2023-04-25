@@ -68,7 +68,7 @@
         <guice.version>5.1.0</guice.version>
         <shiro.version>1.11.0</shiro.version>
         <ehcache.version>2.10.9.2</ehcache.version>
-        <scalatest.version>3.3.0-SNAP3</scalatest.version>
+        <scalatest.version>3.3.0-SNAP4</scalatest.version>
         <scala.version>2.13</scala.version>
         <scala.maven.version>2.13.10</scala.maven.version>
         <junit.version>4.13.2</junit.version>
