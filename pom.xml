@@ -65,7 +65,7 @@
         <pac4j.version>6.0.0-RC6</pac4j.version>
         <play.version>2.8.19</play.version>
         <java.version>17</java.version>
-        <guice.version>5.1.0</guice.version>
+        <guice.version>7.0.0</guice.version>
         <shiro.version>1.11.0</shiro.version>
         <ehcache.version>2.10.9.2</ehcache.version>
         <scalatest.version>3.3.0-SNAP4</scalatest.version>
