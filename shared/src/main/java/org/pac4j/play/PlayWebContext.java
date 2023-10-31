@@ -1,7 +1,5 @@
 package org.pac4j.play;
 
-import java.util.*;
-
 import org.pac4j.core.context.Cookie;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
@@ -20,6 +18,7 @@ import play.mvc.Result;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.*;
 
 /**
  * <p>This class is the web context for Play (used both for Java and Scala).</p>
@@ -235,6 +234,11 @@ public class PlayWebContext implements WebContext {
             }
         }
         return requestContent;
+    }
+
+    @Override
+    public Optional<String> getQueryString() {
+        return Optional.ofNullable(CommonHelper.substringAfter(javaRequest.uri(), "?"));
     }
 
     public Http.Session getNativeSession() {
