@@ -7,10 +7,10 @@ env:
 on:
   push:
     branches:
-      - master
+      - 12.0.x-PLAY2.8
   pull_request:
     branches:
-      - master
+      - 12.0.x-PLAY2.8
 
 permissions:
   contents: read
