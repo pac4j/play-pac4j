@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.pac4j</groupId>
         <artifactId>play-pac4j-parent</artifactId>
-        <version>12.0.0-PLAY2.9-SNAPSHOT</version>
+        <version>12.0.0-PLAY3.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>play-pac4j_3</artifactId>
@@ -15,13 +15,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.typesafe.play</groupId>
+            <groupId>org.playframework</groupId>
             <artifactId>play_${scala.version}</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.typesafe.play</groupId>
+            <groupId>org.playframework</groupId>
             <artifactId>play-cache_${scala.version}</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
@@ -34,7 +34,7 @@
 
         <!-- tests -->
         <dependency>
-            <groupId>com.typesafe.play</groupId>
+            <groupId>org.playframework</groupId>
             <artifactId>play-test_${scala.version}</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>

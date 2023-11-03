@@ -1,7 +1,7 @@
 package org.pac4j.play.filters
 
-import akka.actor.ActorSystem
-import akka.stream.{ActorMaterializer, Materializer}
+import org.apache.pekko.actor.ActorSystem
+import org.apache.pekko.stream.{ActorMaterializer, Materializer}
 import com.typesafe.config.ConfigFactory
 import org.junit.Test
 import org.junit.runner.RunWith

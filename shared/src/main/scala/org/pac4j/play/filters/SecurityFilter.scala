@@ -1,6 +1,6 @@
 package org.pac4j.play.filters
 
-import akka.stream.Materializer
+import org.apache.pekko.stream.Materializer
 import org.pac4j.core.adapter.FrameworkAdapter
 import org.pac4j.core.config.Config
 import org.pac4j.core.util.CommonHelper
@@ -14,7 +14,7 @@ import play.api.{Configuration, Logger}
 import play.mvc
 
 import javax.inject.{Inject, Singleton}
-import scala.compat.java8.FutureConverters.CompletionStageOps
+import scala.jdk.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 
@@ -107,7 +107,7 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
     val futureResult: Future[Result] =
       securityAction
         .call(parameters, rule.clients, rule.authorizers, rule.matchers)
-        .toScala
+        .asScala
         .flatMap[Result](calculateResult)
 
     futureResult.andThen { case Failure(ex) => log.error("Exception during authentication procedure", ex) }

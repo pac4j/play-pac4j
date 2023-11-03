@@ -9,7 +9,7 @@ import org.pac4j.core.profile.{ProfileManager, UserProfile}
 import org.pac4j.play.context.PlayFrameworkParameters
 import play.api.mvc.RequestHeader
 
-import ScalaCompat.Converters._
+import scala.jdk.CollectionConverters._
 
 /**
   * This is a helper which can be used to access the current user profile from a twirl template.
