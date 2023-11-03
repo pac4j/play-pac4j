@@ -38,8 +38,8 @@ trait Security[P<:UserProfile] extends BaseController {
 case class SecureAction[P <: UserProfile, ContentType, R[X]>:AuthenticatedRequest[P, X]<:Request[X]](
   clients: String, authorizers: String, matchers: String, parser: BodyParser[ContentType], config: Config
 )(implicit implicitExecutionContext: ExecutionContext) extends ActionBuilder[R, ContentType] {
-  import ScalaCompat.Converters._
-  import scala.compat.java8.FutureConverters._
+  import scala.jdk.CollectionConverters._
+  import scala.jdk.FutureConverters._
   import scala.concurrent.Future
   import org.pac4j.play.scala.SecureAction._
 
@@ -70,7 +70,7 @@ case class SecureAction[P <: UserProfile, ContentType, R[X]>:AuthenticatedReques
   def invokeBlock[A](request: Request[A], block: R[A] => Future[Result]): Future[Result] = {
     val secureAction = new org.pac4j.play.java.SecureAction(config)
     val parameters = new PlayFrameworkParameters(request)
-    secureAction.call(parameters, clients, authorizers, matchers).toScala.flatMap[play.api.mvc.Result] {
+    secureAction.call(parameters, clients, authorizers, matchers).asScala.flatMap[play.api.mvc.Result] {
       case holder: PlayWebContextResultHolder =>
         val webContext = holder.getPlayWebContext
         val sessionStore = config.getSessionStoreFactory.newSessionStore(parameters)

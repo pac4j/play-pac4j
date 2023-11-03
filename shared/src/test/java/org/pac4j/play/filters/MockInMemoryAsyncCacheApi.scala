@@ -1,6 +1,6 @@
 package org.pac4j.play.filters
 
-import akka.Done
+import org.apache.pekko.Done
 import play.api
 
 import scala.collection.mutable
