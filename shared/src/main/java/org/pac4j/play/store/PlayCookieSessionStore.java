@@ -1,10 +1,13 @@
 package org.pac4j.play.store;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.Pac4jConstants;
-import org.pac4j.core.util.serializer.JavaSerializer;
+import org.pac4j.core.util.serializer.JsonSerializer;
+import org.pac4j.core.util.serializer.Serializer;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +28,17 @@ import java.util.zip.GZIPOutputStream;
  * @since 6.1.0
  */
 @Singleton
+@Getter
+@Setter
 public class PlayCookieSessionStore implements SessionStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PlayCookieSessionStore.class);
 
     private String sessionName = "pac4j";
+
     private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
 
-    public static final JavaSerializer JAVA_SERIALIZER = new JavaSerializer();
+    private Serializer serializer = new JsonSerializer();
 
     public PlayCookieSessionStore() {}
 
@@ -71,7 +77,7 @@ public class PlayCookieSessionStore implements SessionStore {
         Map<String, Object> values = null;
         if (sessionValue != null) {
             final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            values = (Map<String, Object>) JAVA_SERIALIZER.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            values = (Map<String, Object>) serializer.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
         }
         if (values != null) {
             return values;
@@ -106,7 +112,7 @@ public class PlayCookieSessionStore implements SessionStore {
     protected void putSessionValues(final WebContext context, final Map<String, Object> values) {
         String serialized = null;
         if (values != null) {
-            final byte[] javaSerBytes = JAVA_SERIALIZER.serializeToBytes(values);
+            final byte[] javaSerBytes = serializer.serializeToBytes(values);
             serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
         }
         if (serialized != null) {
@@ -174,13 +180,5 @@ public class PlayCookieSessionStore implements SessionStore {
         }
 
         return resultBao.toByteArray();
-    }
-
-    public String getSessionName() {
-        return sessionName;
-    }
-
-    public void setSessionName(final String sessionName) {
-        this.sessionName = sessionName;
     }
 }
