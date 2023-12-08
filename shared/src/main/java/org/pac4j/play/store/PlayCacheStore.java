@@ -7,7 +7,8 @@ import lombok.ToString;
 import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.store.AbstractStore;
 import org.pac4j.core.util.CommonHelper;
-import org.pac4j.core.util.serializer.JavaSerializer;
+import org.pac4j.core.util.serializer.JsonSerializer;
+import org.pac4j.core.util.serializer.Serializer;
 import play.cache.SyncCacheApi;
 
 import javax.inject.Inject;
@@ -22,13 +23,15 @@ import java.util.Optional;
 @ToString
 public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
 
-    public static final JavaSerializer JAVA_SERIALIZER = new JavaSerializer();
-
     private final SyncCacheApi cache;
     private final Provider<SyncCacheApi> cacheProvider;
     @Getter
     @Setter
     private int timeout;
+
+    @Getter
+    @Setter
+    private Serializer serializer = new JsonSerializer();
 
     @Inject
     public PlayCacheStore(final SyncCacheApi cacheApi) {
@@ -68,7 +71,7 @@ public class PlayCacheStore<K, O> extends AbstractStore<K, O> {
         if (objKey instanceof String) {
             return (String) objKey;
         } else {
-            return JAVA_SERIALIZER.serializeToString(objKey);
+            return serializer.serializeToString(objKey);
         }
     }
 
