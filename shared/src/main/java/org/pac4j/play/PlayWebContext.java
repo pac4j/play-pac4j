@@ -236,11 +236,6 @@ public class PlayWebContext implements WebContext {
         return requestContent;
     }
 
-    @Override
-    public Optional<String> getQueryString() {
-        return Optional.ofNullable(CommonHelper.substringAfter(javaRequest.uri(), "?"));
-    }
-
     public Http.Session getNativeSession() {
         return session;
     }
