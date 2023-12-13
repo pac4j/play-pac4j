@@ -7,7 +7,9 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 
 | JDK  | Play version | pac4j version | play-pac4j version | Modules (Java & Scala)                          | Usage of Lombok | Status           |
 |------|--------------|---------------|--------------------|-------------------------------------------------|-----------------|------------------|
-| 17   | 2.8          | 6.x           | 12.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | Yes             | In development   |
+| 17   | 3.0          | 6.x           | 12.0.x-PLAY3.0     | play-pac4j_2.13 play-pac4j_3                    | Yes             | Production ready |
+| 17   | 2.9          | 6.x           | 12.0.x-PLAY2.9     | play-pac4j_2.13 play-pac4j_3                    | Yes             | Production ready |
+| 17   | 2.8          | 6.x           | 12.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | Yes             | Production ready |
 | 11   | 2.8          | 5.x           | 11.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | No              | Production ready |
