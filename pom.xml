@@ -58,7 +58,7 @@
         <guice.version>6.0.0</guice.version>
         <shiro.version>1.13.0</shiro.version>
         <ehcache.version>2.10.9.2</ehcache.version>
-        <scalatest.version>3.2.18</scalatest.version>
+        <scalatest.version>3.2.19</scalatest.version>
         <scala.version>2.13</scala.version>
         <scala.maven.version>2.13.12</scala.maven.version>
         <junit.version>4.13.2</junit.version>
