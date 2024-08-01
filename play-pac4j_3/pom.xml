@@ -13,35 +13,41 @@
     <name>pac4j implementation for Play framework (Scala 3)</name>
     <description>Security library for Play framework based on pac4j using Scala 3</description>
 
+    <properties>
+        <scala.major.version>3</scala.major.version>
+        <scala.version>3.3.3</scala.version>
+        <scala.maven.version>3.3.3</scala.maven.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.playframework</groupId>
-            <artifactId>play_${scala.version}</artifactId>
+            <artifactId>play_${scala.major.version}</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.playframework</groupId>
-            <artifactId>play-cache_${scala.version}</artifactId>
+            <artifactId>play-cache_${scala.major.version}</artifactId>
             <version>${play.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala3-library_3</artifactId>
-            <version>3.4.2</version>
+            <version>${scala.version}</version>
         </dependency>
 
         <!-- tests -->
         <dependency>
             <groupId>org.playframework</groupId>
-            <artifactId>play-test_${scala.version}</artifactId>
+            <artifactId>play-test_${scala.major.version}</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.version}</artifactId>
+            <artifactId>scalatest_${scala.major.version}</artifactId>
             <version>${scalatest.version}</version>
             <scope>test</scope>
         </dependency>

@@ -46,7 +46,7 @@ class SecurityFilterTests extends ScalaFutures with Results {
   def testThatSecurityFilterBlocksUnauthorizedRequests(): Unit = {
     implicit val ec = scala.concurrent.ExecutionContext.global
     implicit val as = ActorSystem("text-actor-system")
-    implicit val mat = ActorMaterializer()
+    implicit val mat: ActorMaterializer = ActorMaterializer()
 
     val securityFilter = prepareSecurityFilter(
       """
