@@ -53,7 +53,7 @@
 
     <properties>
         <pac4j.version>6.1.0</pac4j.version>
-        <play.version>3.0.5</play.version>
+        <play.version>3.0.6</play.version>
         <java.version>17</java.version>
         <guice.version>6.0.0</guice.version>
         <shiro.version>1.13.0</shiro.version>
