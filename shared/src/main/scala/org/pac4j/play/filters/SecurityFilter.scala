@@ -123,7 +123,7 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
   private def findRule(request: RequestHeader): Option[Rule] = {
     val pathNormalized = getNormalizedPath(request)
-    rules.find(rule => rule.pathRegex.matches(pathNormalized))
+    rules.find(rule => rule.compiledRegex.matches(pathNormalized))
   }
 
   private def getNormalizedPath(request: RequestHeader): String = {
@@ -140,8 +140,8 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 }
 
 object SecurityFilter {
-  private[filters] case class Rule(path: String, data: List[RuleData]) {
-    val pathRegex = path.r
+  private[filters] case class Rule(pathRegex: String, data: List[RuleData]) {
+    val compiledRegex = pathRegex.r
 
     def mergeData(other: Rule) = this.copy(data = this.data ++ other.data)
   }
@@ -155,7 +155,7 @@ object SecurityFilter {
       // coalesce adjacent rules with the exact same path
       .foldLeft(List.empty[Rule]) {
         case (Nil, rule) => List(rule)
-        case (head :: tail, rule) if head.path == rule.path => head.mergeData(rule) :: tail
+        case (head :: tail, rule) if head.pathRegex == rule.pathRegex => head.mergeData(rule) :: tail
         case (list, rule) => rule :: list
       }
       .reverse
