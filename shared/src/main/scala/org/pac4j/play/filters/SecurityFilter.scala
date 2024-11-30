@@ -140,7 +140,7 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 }
 
 object SecurityFilter {
-  private[filters] case class Rule(path: String, data: Seq[RuleData]) {
+  private[filters] case class Rule(path: String, data: List[RuleData]) {
     val pathRegex = path.r
 
     def mergeData(other: Rule) = this.copy(data = this.data ++ other.data)

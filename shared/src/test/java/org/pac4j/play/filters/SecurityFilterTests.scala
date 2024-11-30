@@ -35,10 +35,10 @@ class SecurityFilterTests extends ScalaFutures with Results {
     val config: Configuration = new Configuration(ConfigFactory.load("config/security_filter.conf"))
 
     SecurityFilter.loadRules(config) shouldBe Seq(
-      Rule("/path_anonymous", Seq(RuleData("AnonymousClient", null, null))),
-      Rule("/path_secure_1", Seq(RuleData("client1,client2", null, null))),
-      Rule("/path_secure_3", Seq(RuleData(null, "authorizer1,authorizer2", null))),
-      Rule("/path_secure_4", Seq(RuleData("client1,client2", "authorizer1,authorizer2", "matcher1,matcher2")))
+      Rule("/path_anonymous", List(RuleData("AnonymousClient", null, null))),
+      Rule("/path_secure_1", List(RuleData("client1,client2", null, null))),
+      Rule("/path_secure_3", List(RuleData(null, "authorizer1,authorizer2", null))),
+      Rule("/path_secure_4", List(RuleData("client1,client2", "authorizer1,authorizer2", "matcher1,matcher2")))
     )
   }
 
@@ -89,12 +89,23 @@ class SecurityFilterTests extends ScalaFutures with Results {
         |    "/path_secure" = {
         |      "clients" = "AnonymousClient"
         |      "authorizers" = "none"
+        |      "matchers" = "put"
+        |    }
+        |  },
+        |  {
+        |    "/path_secure" = {
+        |      "clients" = "AnonymousClient"
+        |      "authorizers" = "none"
         |      "matchers" = "get"
         |    }
         |  }, {
         |    "/path_secure" = {
         |      clients = "client1"
         |      "matchers" = "post"
+        |    }
+        |  }, {
+        |    "/path_secure" = {
+        |      "clients" = "AnonymousClient"
         |    }
         |  }, {
         |    "/path_secure/deeper" = {
