@@ -17,6 +17,7 @@ import javax.inject.{Inject, Singleton}
 import scala.jdk.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
+import scala.util.matching.Regex
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
@@ -115,7 +116,7 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
   private def findRule(request: RequestHeader): Option[Rule] = {
     val pathNormalized = getNormalizedPath(request)
-    rules.find(rule => pathNormalized.matches(rule.pathRegex))
+    rules.find(rule => rule.pathRegex.matches(pathNormalized))
   }
 
   private def getNormalizedPath(request: RequestHeader): String = {
@@ -132,7 +133,9 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 }
 
 object SecurityFilter {
-  private[filters] case class Rule(pathRegex: String, data: Option[RuleData])
+  private[filters] case class Rule(path: String, data: Option[RuleData]) {
+    val pathRegex = path.r
+  }
   private[filters] case class RuleData(clients: String, authorizers: String, matchers: String)
 
   private[filters]
