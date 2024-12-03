@@ -14,7 +14,7 @@ import play.api.{Configuration, Logger}
 import play.mvc
 
 import javax.inject.{Inject, Singleton}
-import scala.compat.java8.FutureConverters.CompletionStageOps
+import scala.jdk.FutureConverters.CompletionStageOps
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
 import scala.util.matching.Regex
