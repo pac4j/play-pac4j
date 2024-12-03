@@ -17,6 +17,7 @@ import javax.inject.{Inject, Singleton}
 import scala.jdk.FutureConverters._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Failure
+import scala.util.matching.Regex
 
 /**
   * Filter on all requests to apply security by the Pac4J framework.
@@ -67,18 +68,23 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
   override def apply(nextFilter: RequestHeader => Future[play.api.mvc.Result])
                     (request: RequestHeader): Future[play.api.mvc.Result] = {
-    findRule(request).flatMap(_.data) match {
-      case Some(rule) =>
+    findRule(request).map(_.data) match {
+      case Some(rule :: remainingRules) =>
         log.debug(s"Authentication needed for ${request.uri}")
-        proceedRuleLogic(nextFilter, request, rule)
+        proceedRuleLogic(nextFilter, request, rule, remainingRules)
 
-      case None =>
+      case _ =>
         log.debug(s"No authentication needed for ${request.uri}")
         nextFilter(request)
     }
   }
 
-  private def proceedRuleLogic(nextFilter: RequestHeader => Future[Result], request: RequestHeader, rule: RuleData): Future[Result] = {
+  private def proceedRuleLogic(
+    nextFilter: RequestHeader => Future[Result],
+    request: RequestHeader,
+    rule: RuleData,
+    remainingRules: Seq[RuleData]
+  ): Future[Result] = {
 
     FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config)
 
@@ -86,36 +92,38 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
     val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
     val securityAction = new SecureAction(config)
 
-    def calculateResult(secureActionResult: mvc.Result): Future[Result] = {
-      if (secureActionResult.isInstanceOf[PlayWebContextResultHolder]) {
-        val newCtx = secureActionResult.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
-        val newRequest = newCtx.supplementRequest(request.asJava).asScala
-        nextFilter(newRequest)
-      } else {
-        // When the user is not authenticated, the result is one of the following:
-        // - forbidden
-        // - redirect to IDP
-        // - unauthorized
-        // Or the future results in an exception
-        Future {
-          log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${secureActionResult.status}.")
-          secureActionResult.asScala
-        }
-      }
-    }
-
-    val futureResult: Future[Result] =
+    def checkSecurity(request: RequestHeader, rule: RuleData, remainingRules: Seq[RuleData]): Future[Result] =
       securityAction
         .call(parameters, rule.clients, rule.authorizers, rule.matchers)
         .asScala
-        .flatMap[Result](calculateResult)
+        .flatMap { secureActionResult =>
+          if (secureActionResult.isInstanceOf[PlayWebContextResultHolder]) {
+            val newCtx = secureActionResult.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
+            val newRequest = newCtx.supplementRequest(request.asJava).asScala
 
-    futureResult.andThen { case Failure(ex) => log.error("Exception during authentication procedure", ex) }
+            remainingRules match {
+              case Nil => nextFilter(newRequest)
+              case head :: tail => checkSecurity(newRequest, head, tail)
+            }
+          } else {
+            // When the user is not authenticated, the result is one of the following:
+            // - forbidden
+            // - redirect to IDP
+            // - unauthorized
+            // Or the future results in an exception
+            Future.successful {
+              log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${secureActionResult.status}.")
+              secureActionResult.asScala
+            }
+          }
+        }
+
+    checkSecurity(request, rule, remainingRules).andThen { case Failure(ex) => log.error("Exception during authentication procedure", ex) }
   }
 
   private def findRule(request: RequestHeader): Option[Rule] = {
     val pathNormalized = getNormalizedPath(request)
-    rules.find(rule => pathNormalized.matches(rule.pathRegex))
+    rules.find(rule => rule.compiledRegex.matches(pathNormalized))
   }
 
   private def getNormalizedPath(request: RequestHeader): String = {
@@ -132,13 +140,25 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 }
 
 object SecurityFilter {
-  private[filters] case class Rule(pathRegex: String, data: Option[RuleData])
+  private[filters] case class Rule(pathRegex: String, data: List[RuleData]) {
+    val compiledRegex = pathRegex.r
+
+    def mergeData(other: Rule) = this.copy(data = this.data ++ other.data)
+  }
   private[filters] case class RuleData(clients: String, authorizers: String, matchers: String)
 
   private[filters]
   def loadRules(configuration: Configuration): Seq[Rule] = {
     val ruleConfigs = configuration.getOptional[Seq[Configuration]]("pac4j.security.rules").getOrElse(Seq())
-    ruleConfigs.map(convertConfToRule)
+    ruleConfigs
+      .map(convertConfToRule)
+      // coalesce adjacent rules with the exact same path
+      .foldLeft(List.empty[Rule]) {
+        case (Nil, rule) => List(rule)
+        case (head :: tail, rule) if head.pathRegex == rule.pathRegex => head.mergeData(rule) :: tail
+        case (list, rule) => rule :: list
+      }
+      .reverse
   }
 
   private def convertConfToRule(conf: Configuration): Rule = {
@@ -158,6 +178,6 @@ object SecurityFilter {
         }
       }
 
-    Rule(path.replace("\"", ""), ruleData)
+    Rule(path.replace("\"", ""), ruleData.toList)
   }
 }
