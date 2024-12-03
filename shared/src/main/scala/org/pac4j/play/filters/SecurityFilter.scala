@@ -94,8 +94,8 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
     def checkSecurity(request: RequestHeader, rule: RuleData, remainingRules: Seq[RuleData]): Future[Result] =
       securityAction
-        .call(parameters, rule.clients, rule.authorizers, rule.matchers)
-        .asScala
+        .call(parameters, rule.clients, rule.authorizers, rule.matchers) 
+        .toScala
         .flatMap { secureActionResult =>
           if (secureActionResult.isInstanceOf[PlayWebContextResultHolder]) {
             val newCtx = secureActionResult.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
@@ -123,7 +123,7 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
   private def findRule(request: RequestHeader): Option[Rule] = {
     val pathNormalized = getNormalizedPath(request)
-    rules.find(rule => rule.compiledRegex.matches(pathNormalized))
+    rules.find(rule => rule.compiledRegex.pattern.matcher(pathNormalized).matches)
   }
 
   private def getNormalizedPath(request: RequestHeader): String = {
