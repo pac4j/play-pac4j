@@ -15,7 +15,7 @@
 
     <properties>
         <scala.major.version>3</scala.major.version>
-        <scala.version>3.3.4</scala.version>
+        <scala.version>3.7.0</scala.version>
         <scala.maven.version>3.3.3</scala.maven.version>
     </properties>
 
