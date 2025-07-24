@@ -36,13 +36,14 @@ public class PlayCookieSessionStore implements SessionStore {
 
     private String sessionName = "pac4j";
 
-    private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
+    private DataEncrypter dataEncrypter;
 
     private Serializer serializer = new JsonSerializer();
 
-    public PlayCookieSessionStore() {}
-
     public PlayCookieSessionStore(final DataEncrypter dataEncrypter) {
+        if (dataEncrypter == null) {
+            throw new IllegalArgumentException("DataEncrypter must not be null");
+        }
         this.dataEncrypter = dataEncrypter;
     }
 
