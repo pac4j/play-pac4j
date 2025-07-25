@@ -36,7 +36,7 @@ public class PlayCookieSessionStore implements SessionStore {
 
     private String sessionName = "pac4j";
 
-    private DataEncrypter dataEncrypter = new ShiroAesDataEncrypter();
+    private DataEncrypter dataEncrypter = new JdkAesDataEncrypter();
 
     private Serializer serializer = new JsonSerializer();
 
