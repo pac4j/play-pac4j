@@ -12,7 +12,7 @@
     <artifactId>play-pac4j-parent</artifactId>
     <packaging>pom</packaging>
     <name>pac4j parent for Play</name>
-    <version>12.0.3-PLAY3.0-SNAPSHOT</version>
+    <version>13.0.0-PLAY3.0-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -75,7 +75,6 @@
         <play.version>3.0.8</play.version>
         <java.version>17</java.version>
         <guice.version>6.0.0</guice.version>
-        <shiro.version>1.13.0</shiro.version>
         <ehcache.version>2.10.9.2</ehcache.version>
         <scalatest.version>3.2.19</scalatest.version>
         <scala.version>2.13</scala.version>
@@ -107,12 +106,6 @@
             <groupId>com.google.inject</groupId>
             <artifactId>guice</artifactId>
             <version>${guice.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.shiro</groupId>
-            <artifactId>shiro-core</artifactId>
-            <version>${shiro.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>net.sf.ehcache</groupId>

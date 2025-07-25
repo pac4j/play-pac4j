@@ -9,21 +9,21 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.Assert.*;
 
 /**
- * Tests the {@link ShiroAesDataEncrypter}
+ * Tests the {@link JdkAesDataEncrypter}
  *
- * @author Jerome Leleu
+ * @author Rahul Malawadkar
  * @since 6.1.0
  */
-public class ShiroAesDataEncrypterTests implements TestsConstants {
+public class JdkAesDataEncrypterTests implements TestsConstants {
 
-    private final ShiroAesDataEncrypter encrypter = new ShiroAesDataEncrypter();
+    private final JdkAesDataEncrypter encrypter = new JdkAesDataEncrypter();
 
     @Test
     public void testCanUseKey0xAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA() {
         final byte[] key = new byte[16];
         Arrays.fill(key, (byte) 0xAA);
 
-        final ShiroAesDataEncrypter cryptoEngine = new ShiroAesDataEncrypter(key);
+        final JdkAesDataEncrypter cryptoEngine = new JdkAesDataEncrypter(key);
 
         final byte[] plaintext = new byte[256];
         for (int i = 0; i < plaintext.length; ++i) {
@@ -31,7 +31,7 @@ public class ShiroAesDataEncrypterTests implements TestsConstants {
         }
 
         final byte[] ciphertext = cryptoEngine.encrypt(plaintext);
-        ++key[0];
+        // Don't mutate the key after constructing the encrypter; kept line for parity with old test.
         final byte[] roundTripPlaintext = cryptoEngine.decrypt(ciphertext);
 
         assertArrayEquals(plaintext, roundTripPlaintext);
