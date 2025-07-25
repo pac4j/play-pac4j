@@ -11,7 +11,7 @@ import java.security.SecureRandom;
  *
  * @author Rahul Malawadkar
  */
-public class JdkAesDataEncrypter implements DataEncrypter {
+public final class JdkAesDataEncrypter implements DataEncrypter {
 
     private static final SecureRandom random = new SecureRandom();
 
