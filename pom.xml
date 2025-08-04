@@ -80,7 +80,6 @@
         <scala.version>2.13</scala.version>
         <scala.maven.version>2.13.12</scala.maven.version>
         <junit.version>4.13.2</junit.version>
-        <selenium.version>4.14.1</selenium.version>
         <mockito.version>5.18.0</mockito.version>
         <pmdVersion>6.55.0</pmdVersion>
     </properties>
@@ -138,12 +137,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>${selenium.version}</version>
             <scope>test</scope>
         </dependency>
 
