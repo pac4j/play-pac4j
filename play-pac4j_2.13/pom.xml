@@ -13,6 +13,10 @@
     <name>pac4j implementation for Play framework (Scala 2.13)</name>
     <description>Security library for Play framework based on pac4j using Scala 2.13</description>
 
+    <properties>
+        <selenium.version>4.33.0</selenium.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.playframework</groupId>
@@ -47,8 +51,8 @@
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-remote-driver</artifactId>
-            <version>4.10.0</version>
+            <artifactId>selenium-api</artifactId>
+            <version>${selenium.version}</version>
             <scope>test</scope>
         </dependency>
 
