@@ -38,17 +38,17 @@
             <artifactId>play-test_${scala.version}</artifactId>
             <version>${play.version}</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.fluentlenium</groupId>
+                    <artifactId>fluentlenium-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_${scala.version}</artifactId>
             <version>${scalatest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-api</artifactId>
-            <version>4.33.0</version>
             <scope>test</scope>
         </dependency>
 
