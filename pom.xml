@@ -60,7 +60,7 @@
     </repositories>
 
     <properties>
-        <pac4j.version>6.2.0</pac4j.version>
+        <pac4j.version>6.2.1</pac4j.version>
         <play.version>3.0.8</play.version>
         <java.version>17</java.version>
         <guice.version>6.0.0</guice.version>
