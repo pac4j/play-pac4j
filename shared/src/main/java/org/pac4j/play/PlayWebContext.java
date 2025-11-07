@@ -47,10 +47,13 @@ public class PlayWebContext implements WebContext {
 
     protected Http.Session session;
 
+    protected Http.Session initialSession;
+
     public PlayWebContext(final Http.RequestHeader javaRequest) {
         CommonHelper.assertNotNull("request", javaRequest);
         this.javaRequest = javaRequest;
         this.session = javaRequest.session();
+        this.initialSession = this.session;
     }
 
     public PlayWebContext(final RequestHeader scalaRequest) {
@@ -202,6 +205,17 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
+        // Check if the cookie already exists in the request with the same value
+        final Optional<Http.Cookie> existingCookie = javaRequest.cookies().get(cookie.getName());
+        if (existingCookie.isPresent()) {
+            final Http.Cookie existing = existingCookie.get();
+            // If the cookie value hasn't changed, don't add it to response
+            if (existing.value().equals(cookie.getValue())) {
+                logger.trace("Skip adding response cookie {} as it already exists with same value", cookie.getName());
+                return;
+            }
+        }
+
         final Http.CookieBuilder cookieBuilder =
                 Http.Cookie.builder(cookie.getName(), cookie.getValue())
                         .withPath(cookie.getPath())
@@ -244,6 +258,20 @@ public class PlayWebContext implements WebContext {
         this.session = session;
     }
 
+    public boolean hasResponseModifications() {
+        return !responseCookies.isEmpty() || !responseHeaders.isEmpty() || responseContentType != null || hasSessionChanged();
+    }
+
+    protected boolean hasSessionChanged() {
+        if (session == null && initialSession == null) {
+            return false;
+        }
+        if (session == null || initialSession == null) {
+            return true;
+        }
+        return !session.equals(initialSession);
+    }
+
     public Http.Request supplementRequest(final Http.Request request) {
         logger.trace("supplement request with: {} and session: {}", this.javaRequest.attrs(), session);
         return request.withAttrs(this.javaRequest.attrs()).addAttr(RequestAttrKey.Session().asJava(), new AssignedCell<>(session.asScala()));
@@ -278,8 +306,10 @@ public class PlayWebContext implements WebContext {
             r = r.as(responseContentType);
             responseContentType = null;
         }
-        logger.trace("supplement response with session: {}", session);
-        r = r.withSession(session);
+        if (hasSessionChanged()) {
+            logger.trace("supplement response with session: {}", session);
+            r = r.withSession(session);
+        }
         return r;
     }
 

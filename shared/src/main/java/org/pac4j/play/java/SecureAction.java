@@ -97,8 +97,14 @@ public class SecureAction extends Action<Result> {
 	                return CompletableFuture.completedFuture(new PlayWebContextResultHolder(playWebContext));
 	            } else {
 	                return delegate.call(playWebContext.supplementRequest((Http.Request)
-                        playWebContext.getNativeJavaRequest())).thenApply(result -> playWebContext.supplementResponse(result));
-
+                        playWebContext.getNativeJavaRequest())).thenApply(result -> {
+                            // Only supplement the response if there are cookies or headers to add
+                            // This avoids reissuing session cookies on every request
+                            if (playWebContext.hasResponseModifications()) {
+                                return playWebContext.supplementResponse(result);
+                            }
+                            return result;
+                        });
 	            }
             }, clients, authorizers, matchers, parameters);
     }
