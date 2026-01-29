@@ -308,7 +308,10 @@ public class PlayWebContext implements WebContext {
         }
         if (hasSessionChanged()) {
             logger.trace("supplement response with session: {}", session);
-            r = r.withSession(session);
+            Map<String, String> originalSession = result.session().data();
+            Map<String, String> merged = new HashMap<>(session.data());
+            originalSession.forEach(merged::putIfAbsent);
+            r = r.withSession(new Http.Session(merged));
         }
         return r;
     }
