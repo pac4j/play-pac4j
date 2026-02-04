@@ -312,8 +312,15 @@ public class PlayWebContext implements WebContext {
             if (session == null || resultSession == null) {
                 r = r.withSession(session != null ? session : resultSession);
             } else {
-                Map<String, String> merged = new HashMap<>(session.data());
-                resultSession.data().forEach(merged::putIfAbsent);
+                Map<String, String> merged = new HashMap<>(resultSession.data());
+                Map<String, String> initialData = initialSession != null ? initialSession.data() : Map.of();
+                // Only add/modify keys that pac4j added or modified, not ones that
+                // were already present in the initial session or are unchanged.
+                session.data().forEach((k, v) -> {
+                    if (!initialData.containsKey(k) || !Objects.equals(initialData.get(k), v)) {
+                        merged.putIfAbsent(k, v);
+                    }
+                });
                 r = r.withSession(new Http.Session(merged));
             }
         }
