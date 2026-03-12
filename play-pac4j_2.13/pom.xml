@@ -14,7 +14,7 @@
     <description>Security library for Play framework based on pac4j using Scala 2.13</description>
 
     <properties>
-        <selenium.version>4.14.0</selenium.version>
+        <selenium.version>4.41.0</selenium.version>
     </properties>
 
     <dependencies>
