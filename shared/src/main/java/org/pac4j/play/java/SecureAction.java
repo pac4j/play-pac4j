@@ -76,19 +76,9 @@ public class SecureAction extends Action<Result> {
 
         FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config);
 
-        final HttpActionAdapter actionAdapterWrapper = (action, webCtx) -> CompletableFuture.completedFuture(config.getHttpActionAdapter().adapt(action, webCtx));
+        val actionAdapterWrapper = (HttpActionAdapter) (action, webCtx) -> CompletableFuture.completedFuture(config.getHttpActionAdapter().adapt(action, webCtx));
 
-        val configSecurity = new Config()
-                .withClients(config.getClients())
-                .withAuthorizers(config.getAuthorizers())
-                .withMatchers(config.getMatchers())
-                .withSecurityLogic(config.getSecurityLogic())
-                .withCallbackLogic(config.getCallbackLogic())
-                .withLogoutLogic(config.getLogoutLogic())
-                .withWebContextFactory(config.getWebContextFactory())
-                .withSessionStoreFactory(config.getSessionStoreFactory())
-                .withProfileManagerFactory(config.getProfileManagerFactory())
-                .withHttpActionAdapter(actionAdapterWrapper);
+        val configSecurity = config.withHttpActionAdapter(actionAdapterWrapper);
 
         return (CompletionStage<Result>) configSecurity.getSecurityLogic().perform(configSecurity, (webCtx, session, profiles) -> {
                 val playWebContext = (PlayWebContext) webCtx;
