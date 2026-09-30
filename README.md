@@ -2,6 +2,17 @@
   <img src="https://pac4j.github.io/pac4j/img/logo-play.png" width="300" />
 </p>
 
+<p align="center">
+  <a href="https://central.sonatype.com/artifact/org.pac4j/play-pac4j_3"><img src="https://img.shields.io/maven-central/v/org.pac4j/play-pac4j_3?label=Maven%20Central" alt="Maven Central" /></a>
+  <a href="https://github.com/pac4j/play-pac4j/actions/workflows/ci.yml"><img src="https://github.com/pac4j/play-pac4j/actions/workflows/ci.yml/badge.svg" alt="Build status" /></a>
+  <img src="https://img.shields.io/badge/Java-17%2B-blue" alt="Java 17+" />
+  <img src="https://img.shields.io/badge/Play-3.0-blue" alt="Play 3.0" />
+  <a href="https://www.apache.org/licenses/LICENSE-2.0"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2 license" /></a>
+</p>
+
+> `play-pac4j` is the Play framework implementation of **[pac4j](https://github.com/pac4j/pac4j)**, the security engine for Java.
+> If it is useful to you, please ⭐ **[star pac4j on GitHub](https://github.com/pac4j/pac4j)**: it helps other developers discover it!
+
 The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
 It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
