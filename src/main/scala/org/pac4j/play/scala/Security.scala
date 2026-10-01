@@ -79,7 +79,7 @@ case class SecureAction[P <: UserProfile, ContentType, R[X]>:AuthenticatedReques
         logger.debug("profiles: {}", profiles)
         val sProfiles = profiles.asScala.toList.asInstanceOf[List[P]]
         val sRequest = webContext.supplementRequest(request)
-        block(AuthenticatedRequest(sProfiles, sRequest))
+        block(AuthenticatedRequest(sProfiles, sRequest)).map(result => webContext.supplementResponse(result))
       case r =>
         Future successful {
           r.asScala

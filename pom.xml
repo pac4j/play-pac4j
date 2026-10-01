@@ -64,7 +64,8 @@
         <pac4j.version>6.5.9</pac4j.version>
         <play.version>3.0.12</play.version>
         <java.version>17</java.version>
-        <guice.version>7.0.0</guice.version>
+        <!-- Keep aligned with Play 3.0's Guice dependency and javax.inject support. -->
+        <guice.version>6.0.0</guice.version>
         <ehcache.version>2.10.9.2</ehcache.version>
         <scalatest.version>3.2.20</scalatest.version>
         <scala.version>3.9.0</scala.version>

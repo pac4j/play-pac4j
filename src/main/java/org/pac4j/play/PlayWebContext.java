@@ -130,17 +130,30 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public String getServerName() {
-        String[] split = javaRequest.host().split(":");
-        return split[0];
+        final String host = javaRequest.host();
+        final int separator = getPortSeparator(host);
+        return separator >= 0 ? host.substring(0, separator) : host;
     }
 
     @Override
     public int getServerPort() {
-        String defaultPort = javaRequest.secure() ? "443" : "80";
+        final String host = javaRequest.host();
+        final int separator = getPortSeparator(host);
+        if (separator >= 0) {
+            return Integer.parseInt(host.substring(separator + 1));
+        }
+        return javaRequest.secure() ? 443 : 80;
+    }
 
-        String[] split = javaRequest.host().split(":");
-        String portStr = split.length > 1 ? split[1] : defaultPort;
-        return Integer.parseInt(portStr);
+    private int getPortSeparator(final String host) {
+        if (host.startsWith("[")) {
+            final int closingBracket = host.indexOf(']');
+            if (closingBracket < 0) {
+                throw new IllegalArgumentException("Invalid IPv6 host: " + host);
+            }
+            return host.indexOf(':', closingBracket + 1);
+        }
+        return host.indexOf(':');
     }
 
     @Override
@@ -193,6 +206,7 @@ public class PlayWebContext implements WebContext {
             }
             cookie.setPath(httpCookie.path());
             cookie.setSecure(httpCookie.secure());
+            httpCookie.sameSite().ifPresent(policy -> cookie.setSameSitePolicy(policy.value()));
             cookies.add(cookie);
         });
         return cookies;
@@ -205,23 +219,16 @@ public class PlayWebContext implements WebContext {
 
     @Override
     public void addResponseCookie(final Cookie cookie) {
-        // Check if the cookie already exists in the request with the same value
-        final Optional<Http.Cookie> existingCookie = javaRequest.cookies().get(cookie.getName());
-        if (existingCookie.isPresent()) {
-            final Http.Cookie existing = existingCookie.get();
-            // If the cookie value hasn't changed, don't add it to response
-            if (existing.value().equals(cookie.getValue())) {
-                logger.trace("Skip adding response cookie {} as it already exists with same value", cookie.getName());
-                return;
-            }
-        }
-
         final Http.CookieBuilder cookieBuilder =
                 Http.Cookie.builder(cookie.getName(), cookie.getValue())
                         .withPath(cookie.getPath())
                         .withDomain(cookie.getDomain())
                         .withSecure(cookie.isSecure())
                         .withHttpOnly(cookie.isHttpOnly());
+        if (CommonHelper.isNotBlank(cookie.getSameSitePolicy())) {
+            cookieBuilder.withSameSite(Http.Cookie.SameSite.parse(cookie.getSameSitePolicy())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid SameSite policy: " + cookie.getSameSitePolicy())));
+        }
         // in Play, maxAge: Cookie duration in seconds (null for a transient cookie [value by default], 0 or less for one that expires now)
         // in pac4j, maxAge == -1 -> session cookie, 0 -> expires now, > 0, expires in x seconds
         final int maxAge = cookie.getMaxAge();
@@ -314,11 +321,16 @@ public class PlayWebContext implements WebContext {
             } else {
                 Map<String, String> merged = new HashMap<>(resultSession.data());
                 Map<String, String> initialData = initialSession != null ? initialSession.data() : Map.of();
-                // Only add/modify keys that pac4j added or modified, not ones that
-                // were already present in the initial session or are unchanged.
+                // Apply pac4j's changes only where the downstream response still
+                // has the initial value. Explicit controller/later-rule changes win.
+                initialData.forEach((k, v) -> {
+                    if (!session.data().containsKey(k) && Objects.equals(merged.get(k), v)) {
+                        merged.remove(k);
+                    }
+                });
                 session.data().forEach((k, v) -> {
-                    if (!initialData.containsKey(k) || !Objects.equals(initialData.get(k), v)) {
-                        merged.putIfAbsent(k, v);
+                    if (!Objects.equals(initialData.get(k), v) && Objects.equals(merged.get(k), initialData.get(k))) {
+                        merged.put(k, v);
                     }
                 });
                 r = r.withSession(new Http.Session(merged));

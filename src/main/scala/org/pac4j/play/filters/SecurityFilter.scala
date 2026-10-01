@@ -88,22 +88,24 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
 
     FrameworkAdapter.INSTANCE.applyDefaultSettingsIfUndefined(config)
 
-    val parameters = new PlayFrameworkParameters(request)
-    val webContext = config.getWebContextFactory().newContext(parameters).asInstanceOf[PlayWebContext]
     val securityAction = new SecureAction(config)
 
-    def checkSecurity(request: RequestHeader, rule: RuleData, remainingRules: Seq[RuleData]): Future[Result] =
+    def supplementResponse(result: Result, contexts: List[PlayWebContext]): Result =
+      contexts.reverse.foldLeft(result)((response, context) => context.supplementResponse(response))
+
+    def checkSecurity(request: RequestHeader, rule: RuleData, remainingRules: Seq[RuleData], contexts: List[PlayWebContext]): Future[Result] =
       securityAction
-        .call(parameters, rule.clients, rule.authorizers, rule.matchers)
+        .call(new PlayFrameworkParameters(request), rule.clients, rule.authorizers, rule.matchers)
         .asScala
         .flatMap { secureActionResult =>
           if (secureActionResult.isInstanceOf[PlayWebContextResultHolder]) {
             val newCtx = secureActionResult.asInstanceOf[PlayWebContextResultHolder].getPlayWebContext
             val newRequest = newCtx.supplementRequest(request.asJava).asScala
+            val newContexts = newCtx :: contexts
 
             remainingRules match {
-              case Nil => nextFilter(newRequest)
-              case head :: tail => checkSecurity(newRequest, head, tail)
+              case Nil => nextFilter(newRequest).map(result => supplementResponse(result, newContexts))
+              case head :: tail => checkSecurity(newRequest, head, tail, newContexts)
             }
           } else {
             // When the user is not authenticated, the result is one of the following:
@@ -113,12 +115,19 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
             // Or the future results in an exception
             Future.successful {
               log.info(s"Authentication failed for ${request.uri} with clients ${rule.clients} and authorizers ${rule.authorizers} and matchers ${rule.matchers}. Authentication response code ${secureActionResult.status}.")
-              secureActionResult.asScala
+              val deniedResponse = secureActionResult.asScala
+              val supplemented = supplementResponse(deniedResponse, contexts)
+              // The denying rule has already been adapted. Its response changes
+              // take precedence over those accumulated by earlier rules.
+              supplemented.copy(
+                header = supplemented.header.copy(headers = supplemented.header.headers ++ deniedResponse.header.headers),
+                body = if (deniedResponse.body.contentType.isDefined) deniedResponse.body else supplemented.body
+              ).withCookies(deniedResponse.newCookies*)
             }
           }
         }
 
-    checkSecurity(request, rule, remainingRules).andThen { case Failure(ex) => log.error("Exception during authentication procedure", ex) }
+    checkSecurity(request, rule, remainingRules, Nil).andThen { case Failure(ex) => log.error("Exception during authentication procedure", ex) }
   }
 
   private def findRule(request: RequestHeader): Option[Rule] = {

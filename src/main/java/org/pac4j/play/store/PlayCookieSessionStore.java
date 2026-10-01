@@ -4,19 +4,26 @@ import lombok.Getter;
 import lombok.Setter;
 import org.pac4j.core.context.WebContext;
 import org.pac4j.core.context.session.SessionStore;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.profile.CommonProfile;
 import org.pac4j.core.util.Pac4jConstants;
+import org.pac4j.core.util.CommonHelper;
 import org.pac4j.core.util.serializer.JsonSerializer;
 import org.pac4j.core.util.serializer.Serializer;
 import org.pac4j.play.PlayWebContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import play.mvc.Http;
+import play.api.libs.crypto.CookieSigner;
 
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -36,14 +43,48 @@ public class PlayCookieSessionStore implements SessionStore {
 
     private String sessionName = "pac4j";
 
-    private DataEncrypter dataEncrypter = new JdkAesDataEncrypter();
+    private DataEncrypter dataEncrypter;
 
     private Serializer serializer = new JsonSerializer();
 
+    /**
+     * For manual configuration via {@code setDataEncrypter(DataEncrypter)}.
+     * The encrypter must use a persistent key shared by all application nodes.
+     */
     public PlayCookieSessionStore() {}
 
+    /**
+     * Derive a stable encryption key from Play's application secret, using a
+     * dedicated signing message so the encryption and cookie-signing keys differ.
+     *
+     * @param cookieSigner Play's configured cookie signer
+     */
+    @Inject
+    public PlayCookieSessionStore(final CookieSigner cookieSigner) {
+        this(deriveDataEncrypter(cookieSigner));
+    }
+
+    private static DataEncrypter deriveDataEncrypter(final CookieSigner cookieSigner) {
+        CommonHelper.assertNotNull("cookieSigner", cookieSigner);
+        try {
+            final byte[] keyMaterial = cookieSigner.sign("play-pac4j-cookie-session-encryption").getBytes(StandardCharsets.UTF_8);
+            final byte[] digest = MessageDigest.getInstance("SHA-256").digest(keyMaterial);
+            return new JdkAesDataEncrypter(Arrays.copyOf(digest, 16));
+        } catch (final NoSuchAlgorithmException e) {
+            throw new TechnicalException("SHA-256 is required for cookie session encryption", e);
+        }
+    }
+
     public PlayCookieSessionStore(final DataEncrypter dataEncrypter) {
+        CommonHelper.assertNotNull("dataEncrypter", dataEncrypter);
         this.dataEncrypter = dataEncrypter;
+    }
+
+    private DataEncrypter configuredDataEncrypter() {
+        if (dataEncrypter == null) {
+            throw new TechnicalException("Inject PlayCookieSessionStore or configure a DataEncrypter with a persistent shared key");
+        }
+        return dataEncrypter;
     }
 
     @Override
@@ -76,8 +117,22 @@ public class PlayCookieSessionStore implements SessionStore {
         final String sessionValue = session.get(sessionName).orElse(null);
         Map<String, Object> values = null;
         if (sessionValue != null) {
-            final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
-            values = (Map<String, Object>) serializer.deserializeFromBytes(uncompressBytes(dataEncrypter.decrypt(inputBytes)));
+            final DataEncrypter encrypter = configuredDataEncrypter();
+            CommonHelper.assertNotNull("serializer", serializer);
+            try {
+                final byte[] inputBytes = Base64.getDecoder().decode(sessionValue);
+                final byte[] uncompressed = uncompressBytes(encrypter.decrypt(inputBytes));
+                if (uncompressed != null) {
+                    values = (Map<String, Object>) serializer.deserializeFromBytes(uncompressed);
+                }
+            } catch (final RuntimeException e) {
+                // A cookie encrypted with an old key, or malformed data, must not
+                // prevent the user from creating a new session.
+                LOGGER.debug("Unable to decode session cookie; discarding it", e);
+            }
+            if (values == null) {
+                putSessionValues(context, null);
+            }
         }
         if (values != null) {
             return values;
@@ -113,7 +168,7 @@ public class PlayCookieSessionStore implements SessionStore {
         String serialized = null;
         if (values != null) {
             final byte[] javaSerBytes = serializer.serializeToBytes(values);
-            serialized = Base64.getEncoder().encodeToString(dataEncrypter.encrypt(compressBytes(javaSerBytes)));
+            serialized = Base64.getEncoder().encodeToString(configuredDataEncrypter().encrypt(compressBytes(javaSerBytes)));
         }
         if (serialized != null) {
             LOGGER.trace("serialized token size = {}", serialized.length());

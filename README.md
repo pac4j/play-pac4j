@@ -61,6 +61,8 @@ Version 14 targets Play 3 and Scala 3.9 LTS, with both Java and Scala APIs. Java
 ### - the [callback configuration](https://github.com/pac4j/play-pac4j/wiki/Callback-configuration), only for web applications
 ### - the [logout configuration](https://github.com/pac4j/play-pac4j/wiki/Logout-configuration)
 
+When using `PlayCookieSessionStore`, inject it through Play to derive its encryption key from `play.http.secret.key`. Keep this secret stable and shared across application nodes. If you construct the store manually, provide a `DataEncrypter` with a persistent shared key through its constructor or `setDataEncrypter`. Cookies encrypted with an old key or containing unreadable data are discarded, allowing a new session to be created.
+
 ### 3) [Apply security](https://github.com/pac4j/play-pac4j/wiki/Apply-security)
 
 ### 4) [Get the authenticated user profiles](https://github.com/pac4j/play-pac4j/wiki/Get-the-authenticated-user-profiles)
