@@ -28,7 +28,7 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 | 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | No              | Production ready |
 
-Version 14 targets Play 3 and Scala 3 only, with both Java and Scala APIs. Java applications must also configure their Play build to use Scala 3.
+Version 14 targets Play 3 and Scala 3.9 LTS, with both Java and Scala APIs. Java applications must also configure their Play build to use Scala 3.9 or newer.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 

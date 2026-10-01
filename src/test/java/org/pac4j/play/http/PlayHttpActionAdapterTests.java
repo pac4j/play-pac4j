@@ -8,9 +8,9 @@ import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.exception.http.*;
 import org.pac4j.core.http.adapter.HttpActionAdapter;
 
-import org.pac4j.core.util.TestsConstants;
+import org.pac4j.test.util.TestsConstants;
 
-import org.pac4j.core.util.TestsHelper;
+import org.pac4j.test.util.TestsHelper;
 import org.pac4j.play.PlayWebContext;
 
 import play.mvc.Http;

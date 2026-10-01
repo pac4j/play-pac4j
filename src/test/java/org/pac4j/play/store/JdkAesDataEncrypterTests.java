@@ -1,7 +1,7 @@
 package org.pac4j.play.store;
 
 import org.junit.Test;
-import org.pac4j.core.util.TestsConstants;
+import org.pac4j.test.util.TestsConstants;
 
 import java.util.Arrays;
 import java.nio.charset.StandardCharsets;

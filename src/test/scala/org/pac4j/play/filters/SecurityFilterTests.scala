@@ -7,10 +7,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.BlockJUnit4ClassRunner
 import org.pac4j.core.client.direct.AnonymousClient
-import org.pac4j.core.client.{Clients, MockDirectClient}
+import org.pac4j.core.client.{Clients, DirectClient}
 import org.pac4j.core.config.Config
 import org.pac4j.core.context.FrameworkParameters
 import org.pac4j.core.context.session.{SessionStore, SessionStoreFactory}
+import org.pac4j.core.credentials.authenticator.Authenticator
 import org.pac4j.core.engine.DefaultSecurityLogic
 import org.pac4j.play.filters.SecurityFilter.{Rule, RuleData}
 import org.pac4j.play.http.PlayHttpActionAdapter
@@ -133,7 +134,14 @@ class SecurityFilterTests extends ScalaFutures with Results {
     val pac4jConfig = new Config
     pac4jConfig.setSecurityLogic(DefaultSecurityLogic.INSTANCE)
     pac4jConfig.setHttpActionAdapter(PlayHttpActionAdapter.INSTANCE)
-    pac4jConfig.setClients(new Clients(new MockDirectClient("client1"), AnonymousClient.INSTANCE))
+    val directClient = new DirectClient {
+      override protected def internalInit(forceReinit: Boolean): Unit = {
+        setCredentialsExtractorIfUndefined(_ => java.util.Optional.empty())
+        setAuthenticatorIfUndefined(Authenticator.NEVER_VALIDATE)
+      }
+    }
+    directClient.setName("client1")
+    pac4jConfig.setClients(new Clients(directClient, AnonymousClient.INSTANCE))
 
     val playSessionStore = new PlayCacheSessionStore(new DefaultSyncCacheApi(new DefaultAsyncCacheApi(new MockInMemoryAsyncCacheApi())))
     pac4jConfig.setSessionStoreFactory(new SessionStoreFactory {
