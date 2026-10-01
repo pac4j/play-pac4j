@@ -9,10 +9,11 @@
     </parent>
 
     <groupId>org.pac4j</groupId>
-    <artifactId>play-pac4j-parent</artifactId>
-    <packaging>pom</packaging>
-    <name>pac4j parent for Play</name>
-    <version>13.0.4-PLAY3.0-SNAPSHOT</version>
+    <artifactId>play-pac4j_3</artifactId>
+    <packaging>jar</packaging>
+    <name>pac4j implementation for Play framework (Scala 3)</name>
+    <description>Security library for Play framework based on pac4j using Scala 3</description>
+    <version>14.0.0-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
@@ -61,24 +62,35 @@
 
     <properties>
         <pac4j.version>6.4.3</pac4j.version>
-        <play.version>3.0.11</play.version>
+        <play.version>3.0.12</play.version>
         <java.version>17</java.version>
         <guice.version>7.0.0</guice.version>
         <ehcache.version>2.10.9.2</ehcache.version>
         <scalatest.version>3.2.20</scalatest.version>
-        <scala.version>2.13</scala.version>
-        <scala.maven.version>2.13.12</scala.maven.version>
+        <scala.version>3.3.8</scala.version>
         <junit.version>4.13.2</junit.version>
         <junit.jupiter.version>6.1.3</junit.jupiter.version>
         <mockito.version>5.24.0</mockito.version>
     </properties>
 
-    <modules>
-        <module>play-pac4j_2.13</module>
-        <module>play-pac4j_3</module>
-    </modules>
-
     <dependencies>
+        <dependency>
+            <groupId>org.playframework</groupId>
+            <artifactId>play_3</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.playframework</groupId>
+            <artifactId>play-cache_3</artifactId>
+            <version>${play.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala3-library_3</artifactId>
+            <version>${scala.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
@@ -111,6 +123,18 @@
 
         <!-- tests -->
         <dependency>
+            <groupId>org.playframework</groupId>
+            <artifactId>play-test_3</artifactId>
+            <version>${play.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_3</artifactId>
+            <version>${scalatest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.pac4j</groupId>
             <artifactId>pac4j-core</artifactId>
             <version>${pac4j.version}</version>
@@ -130,6 +154,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <version>${mockito.version}</version>
@@ -139,15 +169,6 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.codehaus.mojo</groupId>
-                    <artifactId>build-helper-maven-plugin</artifactId>
-                    <version>3.6.2</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
         <plugins>
             <plugin>
                 <groupId>org.sonatype.central</groupId>
@@ -213,6 +234,7 @@
                 <executions>
                     <execution>
                         <goals>
+                            <goal>add-source</goal>
                             <goal>compile</goal>
                             <goal>testCompile</goal>
                         </goals>
@@ -226,7 +248,7 @@
                     <includes>
                         <include>**/*.scala</include>
                     </includes>
-                    <scalaVersion>${scala.maven.version}</scalaVersion>
+                    <scalaVersion>${scala.version}</scalaVersion>
                 </configuration>
             </plugin>
             <plugin>
@@ -278,6 +300,7 @@
                         <include>**/*Tests.scala</include>
                     </includes>
                     <trimStackTrace>false</trimStackTrace>
+                    <failIfNoTests>true</failIfNoTests>
                 </configuration>
             </plugin>
         </plugins>

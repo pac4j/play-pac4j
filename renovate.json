@@ -2,12 +2,5 @@
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "extends": [
         "local>pac4j/renovate-config"
-    ],
-    "packageRules": [
-        {
-            "matchPackageNames": ["org.scala-lang:scala-library"],
-            "matchPaths": ["play-pac4j_2.13/**"],
-            "allowedVersions": "<3.0.0"
-        }
     ]
 }

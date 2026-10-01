@@ -13,17 +13,22 @@
 > `play-pac4j` is the Play framework implementation of **[pac4j](https://github.com/pac4j/pac4j)**, the security engine for Java.
 > If it is useful to you, please ⭐ **[star pac4j on GitHub](https://github.com/pac4j/pac4j)**: it helps other developers discover it!
 
-The `play-pac4j` project is an **easy and powerful security library for Play framework v2 web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
+The `play-pac4j` project is an **easy and powerful security library for Play Framework web applications and web services** which supports authentication and authorization, but also logout and advanced features like CSRF protection. It can work with Deadbolt.
 It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. It's available under the Apache 2 license.
 
 | JDK  | Play version | pac4j version | play-pac4j version | Modules (Java & Scala)                          | Usage of Lombok | Status           |
 |------|--------------|---------------|--------------------|-------------------------------------------------|-----------------|------------------|
+| 17   | 3.0          | 6.x           | 14.0.0-SNAPSHOT    | play-pac4j_3                                  | Yes             | In development   |
+| 17   | 3.0          | 6.x           | 13.0.x-PLAY3.0     | play-pac4j_2.13 play-pac4j_3                    | Yes             | Production ready |
 | 17   | 3.0          | 6.x           | 12.0.x-PLAY3.0     | play-pac4j_2.13 play-pac4j_3                    | Yes             | Production ready |
 | 17   | 2.9          | 6.x           | 12.0.x-PLAY2.9     | play-pac4j_2.13 play-pac4j_3                    | Yes             | Production ready |
 | 17   | 2.8          | 6.x           | 12.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | Yes             | Production ready |
+| 11   | 2.8          | 5.x           | 11.1.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 11   | 2.8          | 5.x           | 11.0.x-PLAY2.8     | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | No              | Production ready |
+
+Version 14 targets Play 3 and Scala 3 only, with both Java and Scala APIs. Java applications must also configure their Play build to use Scala 3.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
@@ -68,7 +73,7 @@ Two demo webapps: [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-jav
 
 ## Versions
 
-The latest released version is the [![Maven Central](https://img.shields.io/maven-central/v/org.pac4j/play-pac4j-parent.svg)](https://repo1.maven.org/maven2/org/pac4j/play-pac4j-parent).
+The latest released version is the [![Maven Central](https://img.shields.io/maven-central/v/org.pac4j/play-pac4j_3.svg)](https://repo1.maven.org/maven2/org/pac4j/play-pac4j_3).
 The [next version](https://github.com/pac4j/play-pac4j/wiki/Next-version) is under development.
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
