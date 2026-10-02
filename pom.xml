@@ -13,7 +13,7 @@
     <packaging>jar</packaging>
     <name>pac4j implementation for Play framework (Scala 3)</name>
     <description>Security library for Play framework based on pac4j using Scala 3</description>
-    <version>14.0.0</version>
+    <version>14.0.1-SNAPSHOT</version>
     <url>https://github.com/pac4j/play-pac4j</url>
 
     <licenses>
