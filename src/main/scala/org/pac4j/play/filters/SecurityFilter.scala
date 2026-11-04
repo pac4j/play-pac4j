@@ -3,7 +3,6 @@ package org.pac4j.play.filters
 import org.apache.pekko.stream.Materializer
 import org.pac4j.core.adapter.FrameworkAdapter
 import org.pac4j.core.config.Config
-import org.pac4j.core.util.CommonHelper
 import org.pac4j.play.PlayWebContext
 import org.pac4j.play.context.PlayFrameworkParameters
 import org.pac4j.play.filters.SecurityFilter._
@@ -24,7 +23,7 @@ import scala.util.matching.Regex
   *
   * Rules for the security filter can be supplied in application.conf. An example is shown below. It
   * consists of a list of filter rules, where the key is a regular expression that will be used to
-  * match the path + query string.
+  * match the whole path of the request (the query string is ignored).
   *
   * For each regex key, there are three subkeys: `clients`, `authorizers` and `matchers`. Here you can define the
   * correct values, like you would supply to the `SecureAction` method in controllers.
@@ -135,14 +134,9 @@ class SecurityFilter @Inject()(configuration: Configuration, config: Config)
     rules.find(rule => rule.compiledRegex.matches(pathNormalized))
   }
 
-  private def getNormalizedPath(request: RequestHeader): String = {
-    val pathPart = removeMultipleSlashed(request.path)
-    val queryPart =
-      if (CommonHelper.isBlank(request.rawQueryString)) ""
-      else s"?${request.rawQueryString}"
-
-    pathPart + queryPart
-  }
+  // Only the path is matched (not the query string)
+  private def getNormalizedPath(request: RequestHeader): String =
+    removeMultipleSlashed(request.path)
 
   private def removeMultipleSlashed(path: String): String =
     path.replaceAll("(/){2,}", "$1")

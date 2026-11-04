@@ -21,11 +21,11 @@ private class MockInMemoryAsyncCacheApi() extends api.cache.AsyncCacheApi {
     Done
   }
 
-  override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit evidence$1: ClassTag[A]): Future[A] = Future.successful {
+  override def getOrElseUpdate[A](key: String, expiration: Duration)(orElse: => Future[A])(implicit classTag: ClassTag[A]): Future[A] = Future.successful {
     map.getOrElseUpdate(key, Await.result(orElse, 2.seconds)).asInstanceOf[A]
   }
 
-  override def get[T](key: String)(implicit evidence$2: ClassTag[T]): Future[Option[T]] = Future.successful {
+  override def get[T](key: String)(implicit classTag: ClassTag[T]): Future[Option[T]] = Future.successful {
     map.get(key).map(_.asInstanceOf[T])
   }
 

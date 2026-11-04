@@ -31,7 +31,7 @@ trait Security[P<:UserProfile] extends BaseController {
   protected def profiles[A](implicit request: AuthenticatedRequest[A]): List[P] = request.profiles
 
   protected def Secure: SecureAction[P,AnyContent,AuthenticatedRequest] =
-    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, controllerComponents.parser, config)(controllerComponents.executionContext)
+    SecureAction[P,AnyContent,AuthenticatedRequest](clients = null, authorizers = null, matchers = null, controllerComponents.parser, config)(using controllerComponents.executionContext)
 }
 
 

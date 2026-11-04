@@ -1,7 +1,7 @@
 package org.pac4j.play.filters
 
 import org.apache.pekko.actor.ActorSystem
-import org.apache.pekko.stream.{ActorMaterializer, Materializer}
+import org.apache.pekko.stream.Materializer
 import com.typesafe.config.ConfigFactory
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,7 +47,7 @@ class SecurityFilterTests extends ScalaFutures with Results {
   def testThatSecurityFilterBlocksUnauthorizedRequests(): Unit = {
     implicit val ec = scala.concurrent.ExecutionContext.global
     implicit val as = ActorSystem("text-actor-system")
-    implicit val mat: ActorMaterializer = ActorMaterializer()
+    implicit val mat: Materializer = Materializer(as)
 
     val securityFilter = prepareSecurityFilter(
       """
@@ -81,7 +81,7 @@ class SecurityFilterTests extends ScalaFutures with Results {
   def testThatSecurityFilterBlocksUnauthorizedRequestsWithMatchers(): Unit = {
     implicit val ec = scala.concurrent.ExecutionContext.global
     implicit val as = ActorSystem("text-actor-system")
-    implicit val mat: ActorMaterializer = ActorMaterializer()
+    implicit val mat: Materializer = Materializer(as)
 
     val securityFilter = prepareSecurityFilter(
       """
@@ -121,6 +121,87 @@ class SecurityFilterTests extends ScalaFutures with Results {
     status(tryFilterApply(securityFilter, "/path_secure", POST)) shouldBe 401
     status(tryFilterApply(securityFilter, "/path_secure/deeper", GET)) shouldBe 401
     status(tryFilterApply(securityFilter, "/path_secure/deeper", POST)) shouldBe 401
+  }
+
+  @Test
+  def testThatQueryStringDoesNotBypassExactRule(): Unit = {
+    implicit val ec = scala.concurrent.ExecutionContext.global
+    implicit val as = ActorSystem("text-actor-system")
+    implicit val mat: Materializer = Materializer(as)
+
+    val securityFilter = prepareSecurityFilter(
+      """
+        |pac4j.security.rules = [
+        |  {
+        |    "/path_secure" = {
+        |      clients = "client1"
+        |    }
+        |  }
+        |]
+      """.stripMargin
+    )
+
+    status(tryFilterApply(securityFilter, "/path_secure", POST)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/path_secure?x=1", POST)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/path_secure?", POST)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/path_secure?x=1&x=2&y", POST)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/path_secure?x=%2Fpath_secure", POST)) shouldBe 401
+    status(tryFilterApply(securityFilter, "//path_secure?x=1", POST)) shouldBe 401
+  }
+
+  @Test
+  def testThatQueryStringDoesNotFallBackToLessRestrictiveRule(): Unit = {
+    implicit val ec = scala.concurrent.ExecutionContext.global
+    implicit val as = ActorSystem("text-actor-system")
+    implicit val mat: Materializer = Materializer(as)
+
+    val securityFilter = prepareSecurityFilter(
+      """
+        |pac4j.security.rules = [
+        |  {
+        |    "/admin" = {
+        |      clients = "client1"
+        |    }
+        |  }, {
+        |    ".*" = {
+        |      clients = "AnonymousClient"
+        |    }
+        |  }
+        |]
+      """.stripMargin
+    )
+
+    status(tryFilterApply(securityFilter, "/admin", GET)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/admin?x=1", GET)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/other?x=1", GET)) shouldBe 200
+  }
+
+  @Test
+  def testThatQueryStringDoesNotTriggerExemptionRule(): Unit = {
+    implicit val ec = scala.concurrent.ExecutionContext.global
+    implicit val as = ActorSystem("text-actor-system")
+    implicit val mat: Materializer = Materializer(as)
+
+    val securityFilter = prepareSecurityFilter(
+      """
+        |pac4j.security.rules = [
+        |  {
+        |    ".*[.](css|js)" = {
+        |      clients = "AnonymousClient"
+        |    }
+        |  }, {
+        |    ".*" = {
+        |      clients = "client1"
+        |    }
+        |  }
+        |]
+      """.stripMargin
+    )
+
+    status(tryFilterApply(securityFilter, "/assets/main.css", GET)) shouldBe 200
+    status(tryFilterApply(securityFilter, "/assets/main.css?v=2", GET)) shouldBe 200
+    status(tryFilterApply(securityFilter, "/admin", GET)) shouldBe 401
+    status(tryFilterApply(securityFilter, "/admin?x=.css", GET)) shouldBe 401
   }
 
   private def tryFilterApply(securityFilter: SecurityFilter, path: String, method: String): Future[Result] = {
