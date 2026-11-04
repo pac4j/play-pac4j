@@ -28,16 +28,16 @@ It's based on the **[pac4j security engine](https://github.com/pac4j/pac4j)**. I
 | 11   | 2.8          | 4.x           | 10.x               | play-pac4j_2.12 play-pac4j_2.13                 | No              | Production ready |
 | 8    | 2.7          | 4.x           | 9.x                | play-pac4j_2.11 play-pac4j_2.12 play-pac4j_2.13 | No              | Production ready |
 
-**Version 14.0.0** is released as a single artifact, `org.pac4j:play-pac4j_3:14.0.0`, containing both Java and Scala APIs. It requires JDK 17 or later and targets Play 3.0, using Play 3.0.12, pac4j 6.5.9 and Scala 3.9.0 LTS.
+**Version 14.0.1** is released as a single artifact, `org.pac4j:play-pac4j_3:14.0.1`, containing both Java and Scala APIs. It requires JDK 17 or later and targets Play 3.0, using Play 3.0.12, pac4j 6.6.1 and Scala 3.10.0.
 
 In `build.sbt`, for both Java and Scala applications:
 
 ```scala
-scalaVersion := "3.9.0"
-libraryDependencies += "org.pac4j" %% "play-pac4j" % "14.0.0"
+scalaVersion := "3.10.0"
+libraryDependencies += "org.pac4j" %% "play-pac4j" % "14.0.1"
 ```
 
-Add the pac4j modules required by your authentication mechanisms at version `6.5.9`. See the [dependencies](https://github.com/pac4j/play-pac4j/wiki/Dependencies) and the [v14 migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-guide) when upgrading from a previous release.
+Add the pac4j modules required by your authentication mechanisms at version `6.6.1`. See the [dependencies](https://github.com/pac4j/play-pac4j/wiki/Dependencies) and the [v14 migration guide](https://github.com/pac4j/play-pac4j/wiki/Migration-guide) when upgrading from a previous release.
 
 [**Main concepts and components:**](http://www.pac4j.org/docs/main-concepts-and-components.html)
 
@@ -84,7 +84,7 @@ Two demo webapps: [play-pac4j-java-demo](https://github.com/pac4j/play-pac4j-jav
 
 ## Versions
 
-The latest released version is **[14.0.0](https://central.sonatype.com/artifact/org.pac4j/play-pac4j_3/14.0.0)**.
+The latest released version is **[14.0.1](https://central.sonatype.com/artifact/org.pac4j/play-pac4j_3/14.0.1)**.
 See [development builds](https://github.com/pac4j/play-pac4j/wiki/Next-version) for snapshot usage.
 
 See the [release notes](https://github.com/pac4j/play-pac4j/wiki/Release-notes).
